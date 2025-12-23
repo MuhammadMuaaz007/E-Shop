@@ -1,9 +1,4 @@
-###E-Shop | MERN Stack E-Commerce Website
-
-
-
-
-
+E-Shop | MERN Stack E-Commerce Website
 
 
 
