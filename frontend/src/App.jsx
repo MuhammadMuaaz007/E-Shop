@@ -1,0 +1,186 @@
+import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  LoginPage,
+  SignupPage,
+  ActivationPage,
+  HomePage,
+  ProductsPage,
+  BestSellingPage,
+  FAQPage,
+  EventsPage,
+  ProductDetailsPage,
+  OrderSuccessPage,
+  PaymentPage,
+  CheckoutPage,
+  ProfilePage,
+  ShopCreatePage,
+  SellerActivationPage,
+  ShopLoginPage,
+} from "./routes/Routes.js";
+import { ToastContainer } from "react-toastify";
+import { useEffect } from "react";
+import Store from "./redux/store";
+import { loadSeller, loadUser } from "./redux/actions/user";
+import ScrollToTop from "./ScrollToTop.jsx";
+import ProtectedRoute from "./routes/ProtectedRoute.jsx";
+// import { useSelector } from "react-redux";
+
+import SellerProtectedRoute from "./routes/SellerProtectedRoute.jsx";
+import {
+  ShopDashboardPage,
+  ShopCreateProduct,
+  ShopAllProducts,
+  ShopCreateEvent,
+  ShopAllEvents,
+  ShopAllCoupons,
+} from "./routes/ShopRoutes.js";
+import ShopHomePage from "./pages/shop/ShopHomePage.jsx";
+
+const App = () => {
+  useEffect(() => {
+    Store.dispatch(loadUser());
+    Store.dispatch(loadSeller());
+  }, []);
+
+  return (
+    <>
+      <BrowserRouter>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<HomePage />}></Route>
+          <Route path="/login" element={<LoginPage />}></Route>
+          <Route path="/sign-up" element={<SignupPage />}></Route>
+          <Route
+            path="/activate/:activation_token"
+            element={<ActivationPage />}
+          />
+          <Route
+            path="/seller/activate/:activation_token"
+            element={<SellerActivationPage />}
+          />
+          <Route path="/products" element={<ProductsPage />} />
+
+          <Route
+            path="/product/:name"
+            element={
+              <ProtectedRoute>
+                <ProductDetailsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/best-selling" element={<BestSellingPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute>
+                <CheckoutPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute>
+                <PaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/order/success/:id"
+            element={
+              <ProtectedRoute>
+                <OrderSuccessPage />
+              </ProtectedRoute>
+            }
+          />
+          {/*Shop Routes */}
+          <Route path="/shop-create" element={<ShopCreatePage />} />
+          <Route path="/shop-login" element={<ShopLoginPage />} />
+          <Route
+            path="/shop/:id"
+            element={
+              <SellerProtectedRoute>
+                <ShopHomePage />
+              </SellerProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <SellerProtectedRoute>
+                <ShopDashboardPage />
+              </SellerProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard-create-product"
+            element={
+              <SellerProtectedRoute>
+                <ShopCreateProduct />
+              </SellerProtectedRoute>
+            }
+          />
+             <Route
+            path="/dashboard-create-event"
+            element={
+              <SellerProtectedRoute>
+                <ShopCreateEvent />
+              </SellerProtectedRoute>
+            }
+          />
+              <Route
+            path="/dashboard-events"
+            element={
+              <SellerProtectedRoute>
+                <ShopAllEvents />
+              </SellerProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard-products"
+            element={
+              <SellerProtectedRoute>
+                <ShopAllProducts />
+              </SellerProtectedRoute>
+            }
+          />
+             <Route
+            path="/dashboard-coupons"
+            element={
+              <SellerProtectedRoute>
+                <ShopAllCoupons />
+              </SellerProtectedRoute>
+            }
+          />
+        </Routes>
+        <ToastContainer
+          position="bottom-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
+      </BrowserRouter>
+    </>
+  );
+};
+
+export default App;

@@ -1,0 +1,33 @@
+frontend
+
+Prefix	Min Width	Screen Size
+sm:	640px	Small devices (like large phones)
+md:	768px	Medium devices (tablets)
+lg:	1024px	Large devices (laptops)
+xl:	1280px	Extra large (desktops)
+2xl:	1536px	Very large screens
+
+Common justify-* Classes
+Class         	    Meaning	                      Equivalent CSS
+justify-start	      Align items to left/start	    justify-content: flex-start;
+justify-center	    Align items to center	        justify-content: center;
+justify-end	        Align items to right/end	    justify-content: flex-end;
+justify-between	    Space between items	          justify-content: space-between;
+justify-around	    Space around items	          justify-content: space-around;
+justify-evenly	    Space evenly between items	  justify-content: space-evenly;
+
+
+Utility             	Purpose
+appearance-none	      Removes browser default UI styling
+focus:outline-none    Removes default focus ring
+
+shadow-sm = a very subtle shadow below the element.
+It’s often used for:
+Small cards
+Buttons
+Navbar or input hover effects
+
+
+
+
+backend

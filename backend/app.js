@@ -1,0 +1,36 @@
+const express = require("express");
+const app = express();
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+const ErrorHandler = require("./middleware/error");
+const cors = require("cors");
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+app.use("/", express.static("uploads"));
+app.use(bodyParser.urlencoded({ extended: true }));
+const path = require("path");
+if (process.env.NODE_ENV !== "PRODUCTION") {
+  require("dotenv").config({ path: path.join(__dirname, "config", ".env") });
+}
+
+const user = require("./controller/user");
+const shop = require("./controller/shop");
+const product = require("./controller/product");
+const event = require("./controller/event");
+const coupon = require("./controller/couponCode");
+
+app.use("/api/v2/user", user);
+app.use("/api/v2/shop", shop);
+app.use("/api/v2/product", product);
+app.use("/api/v2/event", event);
+app.use("/api/v2/coupon", coupon);
+app.use(ErrorHandler);
+
+module.exports = app;

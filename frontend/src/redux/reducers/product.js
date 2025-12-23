@@ -1,0 +1,78 @@
+import { createSlice } from "@reduxjs/toolkit";
+
+export const productReducer = createSlice({
+  name: "product",
+  initialState: {
+    error: null,
+    createSuccess: false,
+     products: [],
+  },
+  reducers: {
+    productCreateRequest: (state) => {
+      state.isLoading = true;
+    },
+    productCreateSuccess: (state, action) => {
+      state.isLoading = false;
+      state.products = action.payload;
+      state.createSuccess = true;
+    },
+    productCreateFail: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+      state.createSuccess = false;
+    },
+    resetCreateProduct: (state) => {
+      state.createSuccess = false;
+    },
+
+    // get all products of shop
+    getAllProductsShopRequest: (state) => {
+      state.isLoading = true;
+    },
+    getAllProductsShopSuccess: (state, action) => {
+      state.isLoading = false;
+      state.products = action.payload;
+      state.success = true;
+    },
+    getAllProductsShopFail: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+      state.success = false;
+    },
+    // delete shop product
+    deleteProductRequest: (state) => {
+      state.isLoading = true;
+    },
+    deleteProductSuccess: (state, action) => {
+      state.isLoading = false;
+      state.products = state.products.filter(
+        (product) => product._id !== action.payload
+      );
+      state.success = true;
+    },
+
+    deleteProductFail: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+      state.success = false;
+    },
+    clearErrors: (state) => {
+      state.error = null;
+    },
+  },
+});
+export const {
+  productCreateRequest,
+  productCreateSuccess,
+  productCreateFail,
+  clearErrors,
+  getAllProductsShopRequest,
+  getAllProductsShopSuccess,
+  getAllProductsShopFail,
+  deleteProductRequest,
+  deleteProductSuccess,
+  deleteProductFail,
+  resetCreateProduct,
+} = productReducer.actions;
+
+export default productReducer.reducer;
