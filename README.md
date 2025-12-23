@@ -1,4 +1,4 @@
-E-Shop | MERN Stack E-Commerce Website
+###E-Shop | MERN Stack E-Commerce Website###
 
 
 
@@ -9,8 +9,8 @@ E-Shop | MERN Stack E-Commerce Website
 
 E-Shop is a modern, full-stack e-commerce platform built with the MERN stack (MongoDB, Express.js, React.js, Node.js). It provides a seamless online shopping experience for users and a robust admin panel for managing products, orders, and users. The project demonstrates a real-world web application with secure authentication, responsive design, and scalable architecture.
 
-Features
-User Features:
+##Features##
+#User Features:#
 
 Authentication & Profiles: Secure signup, login, and profile management using JWT.
 
