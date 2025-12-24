@@ -25,11 +25,10 @@ const ProductCard = ({ data }) => {
         className="w-full h-[380px] bg-white rounded-2xl relative p-4 shadow-md cursor-pointer 
         hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300"
       >
-
         {/* Product Image */}
         <Link to={`/product/${product_name}`}>
           <img
-            src={data.image_Url[0].url}
+            src={data?.images?.[0]?.url}
             alt=""
             className="w-full h-[160px] object-contain rounded-xl drop-shadow-sm 
             transition-transform duration-300 hover:scale-105"
@@ -58,7 +57,15 @@ const ProductCard = ({ data }) => {
           <div className="py-2 flex items-center justify-between">
             <div className="flex gap-2 items-center">
               <h5 className={`${styles.productDiscountPrice}`}>
-                {data.price === 0 ? data.price : data.discount_price}$
+                <h5 className={styles.productDiscountPrice}>
+                  {data.discountPrice}$
+                </h5>
+
+                {data.originalPrice && (
+                  <h4 className={`${styles.price} line-through text-gray-400`}>
+                    {data.originalPrice}$
+                  </h4>
+                )}
               </h5>
 
               {data.price && (
@@ -69,7 +76,7 @@ const ProductCard = ({ data }) => {
             </div>
 
             <span className="font-[400] text-[15px] text-green-600">
-              {data.total_sell} sold
+              {data.sold_out} sold
             </span>
           </div>
         </Link>

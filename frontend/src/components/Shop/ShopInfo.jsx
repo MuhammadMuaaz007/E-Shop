@@ -1,10 +1,13 @@
-import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Link, useParams } from "react-router-dom";
 import Loader from "../Layout/Loader.jsx";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { server } from "../../server.js";
 import { useNavigate } from "react-router-dom";
+import { getAllProductsShop } from "../../redux/actions/product.js";
+import { useEffect } from "react";
+import { useState } from "react";
 
 const InfoCard = ({ title, value }) => (
   <div className="px-4 py-2 border-b border-gray-200">
@@ -16,8 +19,29 @@ const InfoCard = ({ title, value }) => (
 );
 
 const ShopInfo = ({ isOwner }) => {
-  const { seller, isLoading } = useSelector((state) => state.seller);
   const navigate = useNavigate();
+  // const { seller } = useSelector((state) => state.seller);
+  const [data, setData] = useState(null);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const { id } = useParams();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllProductsShop(id));
+    setIsLoading(true);
+    axios
+      .get(`${server}/shop/get-shop-info/${id}`)
+      .then((res) => {
+        console.log(res.data.shop);
+        setData(res.data.shop);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsLoading(false);
+      });
+  }, [dispatch, id]);
 
   const logoutHandler = async () => {
     try {
@@ -36,23 +60,24 @@ const ShopInfo = ({ isOwner }) => {
 
   if (isLoading) return <Loader />;
 
-  if (!seller)
+  if (!data?._id && !isLoading) {
     return <p className="text-center py-10 text-gray-500">Seller not found</p>;
+  }
 
   return (
     <div className="w-full sm:max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
       {/* Shop Avatar */}
       <div className="flex justify-center mt-6">
         <img
-          src={seller?.avatar?.url || "/default-avatar.png"}
-          alt={seller.name}
+          src={data?.avatar?.url || "/default-avatar.png"}
+          alt={data.name}
           className="w-28 h-28 sm:w-36 sm:h-36 object-cover rounded-full border-4 border-gray-200"
         />
       </div>
 
       {/* Shop Name & Description */}
       <div className="text-center px-4 sm:px-6 py-4">
-        <h3 className="text-xl sm:text-2xl font-semibold">{seller.name}</h3>
+        <h3 className="text-xl sm:text-2xl font-semibold">{data.name}</h3>
         <p className="text-gray-500 mt-2 text-sm sm:text-base">
           Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque quaerat
           repellat quam eum perferendis, repellendus ex rerum.
@@ -61,11 +86,11 @@ const ShopInfo = ({ isOwner }) => {
 
       {/* Info Cards */}
       <div className="divide-y divide-gray-200">
-        <InfoCard title="Address" value={seller.address} />
-        <InfoCard title="Phone Number" value={seller.phoneNumber} />
-        <InfoCard title="Total Products" value={seller.totalProducts || 10} />
-        <InfoCard title="Shop Ratings" value={`${seller.ratings || 4}/5`} />
-        <InfoCard title="Joined On" value={seller?.createdAt?.slice(0, 10)} />
+        <InfoCard title="Address" value={data.address} />
+        <InfoCard title="Phone Number" value={data.phoneNumber} />
+        <InfoCard title="Total Products" value={data.totalProducts || 10} />
+        <InfoCard title="Shop Ratings" value={`${data.ratings || 4}/5`} />
+        <InfoCard title="Joined On" value={data?.createdAt?.slice(0, 10)} />
       </div>
 
       {/* Owner Actions */}

@@ -111,4 +111,20 @@ router.delete(
   })
 );
 
+router.get(
+  "/get-all-products",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const allProducts = await Product.find();
+
+      res.status(201).json({
+        success: true,
+        allProducts,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error, 400));
+    }
+  })
+);
+
 module.exports = router;

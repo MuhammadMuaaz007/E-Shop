@@ -5,7 +5,8 @@ export const productReducer = createSlice({
   initialState: {
     error: null,
     createSuccess: false,
-     products: [],
+    products: [],
+    allProducts: [],
   },
   reducers: {
     productCreateRequest: (state) => {
@@ -56,6 +57,18 @@ export const productReducer = createSlice({
       state.error = action.payload;
       state.success = false;
     },
+
+    getAllProductsRequest: (state) => {
+      state.isLoading = true;
+    },
+    getAllProductsSuccess: (state, action) => {
+      state.isLoading = false;
+      state.allProducts = action.payload;
+    },
+    getAllProductsFailed: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    },
     clearErrors: (state) => {
       state.error = null;
     },
@@ -73,6 +86,9 @@ export const {
   deleteProductSuccess,
   deleteProductFail,
   resetCreateProduct,
+  getAllProductsRequest,
+  getAllProductsSuccess,
+  getAllProductsFailed,
 } = productReducer.actions;
 
 export default productReducer.reducer;

@@ -1,11 +1,22 @@
 import React, { useState } from "react";
-import { productData } from "../../static/data";
 import ProductCard from "../ProductCard/ProductCard";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { getAllProductsShop } from "../../redux/actions/product";
 
 const ShopProfileData = ({ isOwner }) => {
   const [active, setActive] = useState(1);
+  const { products } = useSelector((state) => state.product);
+  console.log(products);
+  // const { events } = useSelector((state) => state.events);
 
+  // const products=[{}]
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getAllProductsShop(id));
+  }, [dispatch, id]);
   const tabs = [
     { id: 1, label: "Shop Products" },
     { id: 2, label: "Running Events" },
@@ -15,7 +26,6 @@ const ShopProfileData = ({ isOwner }) => {
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between border-b border-gray-200 pb-2 flex-wrap gap-2">
-        
         {/* Tabs */}
         <div className="flex flex-wrap gap-4">
           {tabs.map((tab) => (
@@ -46,8 +56,8 @@ const ShopProfileData = ({ isOwner }) => {
       <div className="mt-6">
         {active === 1 && (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {productData && productData.length > 0 ? (
-              productData.map((item, index) => (
+            {products && products.length > 0 ? (
+              products.map((item, index) => (
                 <ProductCard data={item} key={index} />
               ))
             ) : (
@@ -65,9 +75,7 @@ const ShopProfileData = ({ isOwner }) => {
         )}
 
         {active === 3 && (
-          <div className="text-center text-gray-500 py-10">
-            No reviews yet.
-          </div>
+          <div className="text-center text-gray-500 py-10">No reviews yet.</div>
         )}
       </div>
     </div>

@@ -161,45 +161,47 @@ const AllCoupons = () => {
       {couponLoading ? (
         <p className="text-center py-10 text-gray-500">Loading...</p>
       ) : coupons.length > 0 ? (
-        <table className="min-w-full border border-gray-200 shadow-md rounded-lg overflow-hidden">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2">#</th>
-              <th className="px-4 py-2">Coupon ID</th>
-              <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Discount</th>
-              <th className="px-4 py-2">Min</th>
-              <th className="px-4 py-2">Max</th>
-              <th className="px-4 py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {coupons.map((coupon, i) => (
-              <tr key={coupon._id}>
-                <td className="px-4 py-3">{i + 1}</td>
-                <td className="px-4 py-3">{coupon._id}</td>
-                <td className="px-4 py-3">{coupon.name}</td>
-                <td className="px-4 py-3">{coupon.value}</td>
-                <td className="px-4 py-3">{coupon.minAmount}</td>
-                <td className="px-4 py-3">{coupon.maxAmount}</td>
-                <td className="px-4 py-3 flex gap-2">
-                  <button
-                    onClick={() => editHandler(coupon)}
-                    className="px-3 py-1 bg-blue-600 text-white rounded"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteHandler(coupon._id)}
-                    className="px-3 py-1 bg-red-600 text-white rounded"
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="overflow-x-auto p-4">
+          <table className="min-w-full border border-gray-200 shadow-md rounded-lg overflow-hidden">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2">#</th>
+                <th className="px-4 py-2">Coupon ID</th>
+                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Discount</th>
+                <th className="px-4 py-2">Min</th>
+                <th className="px-4 py-2">Max</th>
+                <th className="px-4 py-2">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {coupons.map((coupon, i) => (
+                <tr key={coupon._id}>
+                  <td className="px-4 py-3">{i + 1}</td>
+                  <td className="px-4 py-3">{coupon._id}</td>
+                  <td className="px-4 py-3">{coupon.name}</td>
+                  <td className="px-4 py-3">{coupon.value}</td>
+                  <td className="px-4 py-3">{coupon.minAmount}</td>
+                  <td className="px-4 py-3">{coupon.maxAmount}</td>
+                  <td className="px-4 py-3 flex gap-2">
+                    <button
+                      onClick={() => editHandler(coupon)}
+                      className="px-3 py-1 bg-blue-600 text-white rounded"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteHandler(coupon._id)}
+                      className="px-3 py-1 bg-red-600 text-white rounded"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <p className="text-center py-10 text-gray-500">No coupons found</p>
       )}

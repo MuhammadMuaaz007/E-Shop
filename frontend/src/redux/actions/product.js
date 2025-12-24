@@ -4,9 +4,12 @@ import {
   deleteProductFail,
   deleteProductRequest,
   deleteProductSuccess,
+  getAllProductsFailed,
+  getAllProductsRequest,
   getAllProductsShopFail,
   getAllProductsShopRequest,
   getAllProductsShopSuccess,
+  getAllProductsSuccess,
   productCreateFail,
   productCreateRequest,
   productCreateSuccess,
@@ -60,3 +63,14 @@ export const deleteProduct = (id) => async (dispatch) => {
   }
 };
 
+// get all products
+export const getAllProducts = () => async (dispatch) => {
+  try {
+    dispatch(getAllProductsRequest());
+
+    const { data } = await axios.get(`${server}/product/get-all-products`);
+    dispatch(getAllProductsSuccess(data.allProducts));
+  } catch (error) {
+    dispatch(getAllProductsFailed(error.response.data.message));
+  }
+};

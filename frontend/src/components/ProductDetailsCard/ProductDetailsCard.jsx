@@ -25,14 +25,14 @@ const ProductDetailsCard = ({ setOpen, data }) => {
           {/* Left Column */}
           <div className="md:w-1/2 flex flex-col items-center mb-6 md:mb-0">
             <img
-              src={data.image_Url[0].url}
+              src={data?.images?.[0]?.url}
               alt="product"
               className="w-full h-[350px] object-contain rounded-2xl mb-4"
             />
             <div className="w-full flex items-center justify-between bg-gray-50 p-3 rounded-lg shadow-sm">
               <div className="flex items-center space-x-3">
                 <img
-                  src={data.shop.shop_avatar.url}
+                  src={data?.shop?.avatar?.url}
                   alt="shop avatar"
                   className="h-12 w-12 rounded-full object-cover"
                 />
@@ -59,7 +59,9 @@ const ProductDetailsCard = ({ setOpen, data }) => {
                 >
                   -
                 </button>
-                <span className="font-bold text-2xl w-12 text-center">{count}</span>
+                <span className="font-bold text-2xl w-12 text-center">
+                  {count}
+                </span>
                 <button
                   onClick={increment}
                   className="bg-purple-100 text-purple-700 font-bold w-10 h-10 flex items-center justify-center rounded-lg shadow-sm hover:bg-purple-200 transition text-[25px]"
@@ -78,12 +80,18 @@ const ProductDetailsCard = ({ setOpen, data }) => {
               {/* Price Info */}
               <div className="flex flex-col text-right">
                 <span className="text-xl font-semibold text-gray-900">
-                  ${data.discount_price}
+                  ${data.discountPrice}
                 </span>
-                {data.price > data.discount_price && (
-                  <span className="line-through text-gray-400">${data.price}</span>
+
+                {data.originalPrice > data.discountPrice && (
+                  <span className="line-through text-gray-400">
+                    ${data.originalPrice}
+                  </span>
                 )}
-                <span className="text-green-600 font-medium">({data.total_sell} sold)</span>
+
+                <span className="text-green-600 font-medium">
+                  ({data.sold_out} sold)
+                </span>
               </div>
             </div>
 
