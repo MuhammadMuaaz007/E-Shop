@@ -12,7 +12,6 @@ const ProductDetails = ({ data }) => {
 
   const increment = () => setCount((prev) => prev + 1);
   const decrement = () => setCount((prev) => (prev > 1 ? prev - 1 : 1));
-
   const handleMessageSubmit = () => {
     navigate("/inbox?conversation=5728nsdfiewvureyanfajkt");
   };
@@ -28,7 +27,7 @@ const ProductDetails = ({ data }) => {
                 {/* Fixed-height main image wrapper */}
                 <div className="rounded-xl bg-white p-6 shadow-md flex items-center justify-center w-full h-[380px] max-w-[450px] overflow-hidden">
                   <img
-                    src={data.image_Url[select].url}
+                    src={data.images[select].url}
                     alt={data.name}
                     className="h-full w-full object-contain transition-transform duration-300 hover:scale-105"
                   />
@@ -36,7 +35,7 @@ const ProductDetails = ({ data }) => {
 
                 {/* Thumbnail images */}
                 <div className="flex gap-4 w-full items-center justify-start mt-6 flex-wrap">
-                  {data.image_Url.map((img, idx) => (
+                  {data.images.map((img, idx) => (
                     <div
                       key={idx}
                       onClick={() => setSelect(idx)}
@@ -76,7 +75,7 @@ const ProductDetails = ({ data }) => {
                       )}
                     </div>
                     <span className="text-purple-600 font-medium">
-                      ({data.total_sell} sold)
+                      ({data.sold_out} sold)
                     </span>
                   </div>
 
@@ -124,9 +123,10 @@ const ProductDetails = ({ data }) => {
                 {/* Shop Info */}
                 <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-between bg-white p-3 rounded-lg shadow-sm mt-7 mb-2 gap-4">
                   {/* LEFT SIDE */}
+                  <Link to={`/shop/${data.shop._id}`} >
                   <div className="flex items-center space-x-2">
                     <img
-                      src={data.shop.shop_avatar.url}
+                      src={data.shop.avatar.url}
                       alt="shop avatar"
                       className="h-12 w-12 rounded-full"
                     />
@@ -139,6 +139,7 @@ const ProductDetails = ({ data }) => {
                       </div>
                     </div>
                   </div>
+                  </Link>
 
                   {/* RIGHT SIDE (BUTTON) */}
                   <button
@@ -223,26 +224,28 @@ const ProductDetailInfo = ({ data }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-6">
           {/* LEFT COLUMN */}
           <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <img
-                src={data.shop.shop_avatar.url}
-                alt="shop avatar"
-                className="h-16 w-16 rounded-full border shadow-sm "
-              />
+            <Link to={`/shop/${data.shop._id}`} >
+              <div className="flex items-center gap-4">
+                <img
+                  src={data.shop.avatar.url}
+                  alt="shop avatar"
+                  className="h-16 w-16 rounded-full border shadow-sm "
+                />
 
-              <div>
-                <h3 className="text-xl font-semibold cursor-pointer hover:text-purple-600 transition">
-                  {data.shop.name}
-                </h3>
+                <div>
+                  <h3 className="text-xl font-semibold cursor-pointer hover:text-purple-600 transition">
+                    {data.shop.name}
+                  </h3>
 
-                <div className="flex items-center gap-2 bg-green-100 px-3 py-[4px] rounded-lg w-fit text-sm">
-                  ⭐⭐⭐⭐⭐
-                  <span className="text-green-800">{data.shop.ratings}</span>
+                  <div className="flex items-center gap-2 bg-green-100 px-3 py-[4px] rounded-lg w-fit text-sm">
+                    ⭐⭐⭐⭐⭐
+                    <span className="text-green-800">{data.shop.ratings}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Link>
 
-            <p className="text-gray-700 leading-7 text-[16px]">
+            <p className="text-gray-700 leading-7 text-[16px] mt-3">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
               reprehenderit explicabo doloremque perspiciatis molestiae, ratione
               maiores corporis amet!

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { AiOutlineMessage, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { Link } from "react-router-dom";
 
 const ProductDetailsCard = ({ setOpen, data }) => {
+
   const [count, setCount] = useState(1);
   const [wishlist, setWishlist] = useState(false);
 
@@ -23,6 +25,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
 
         <div className="md:flex md:space-x-6">
           {/* Left Column */}
+          
           <div className="md:w-1/2 flex flex-col items-center mb-6 md:mb-0">
             <img
               src={data?.images?.[0]?.url}
@@ -30,6 +33,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
               className="w-full h-[350px] object-contain rounded-2xl mb-4"
             />
             <div className="w-full flex items-center justify-between bg-gray-50 p-3 rounded-lg shadow-sm">
+              <Link to={`/shop/${data.shop._id}`} className="flex items-center space-x-3">
               <div className="flex items-center space-x-3">
                 <img
                   src={data?.shop?.avatar?.url}
@@ -38,6 +42,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
                 />
                 <h3 className="text-lg font-semibold">{data.shop.name}</h3>
               </div>
+              </Link>
               <div className="flex items-center bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded">
                 ⭐ {data.shop.ratings}
               </div>

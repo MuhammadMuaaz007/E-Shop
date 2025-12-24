@@ -18,7 +18,6 @@ const ProductCard = ({ data }) => {
 
   const d = data.name;
   const product_name = d.replace(/\s+/g, "-");
-
   return (
     <>
       <div
@@ -26,7 +25,7 @@ const ProductCard = ({ data }) => {
         hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300"
       >
         {/* Product Image */}
-        <Link to={`/product/${product_name}`}>
+        <Link to={`/product/${data._id}`}>
           <img
             src={data?.images?.[0]?.url}
             alt=""
@@ -36,7 +35,7 @@ const ProductCard = ({ data }) => {
         </Link>
 
         {/* Shop Name */}
-        <Link to="/">
+        <Link to={`/shop/${data.shop._id}`}>
           <h5 className={`${styles.shop_name} mt-2 `}>{data.shop.name}</h5>
         </Link>
         {/* Product Name */}
@@ -57,14 +56,14 @@ const ProductCard = ({ data }) => {
           <div className="py-2 flex items-center justify-between">
             <div className="flex gap-2 items-center">
               <h5 className={`${styles.productDiscountPrice}`}>
-                <h5 className={styles.productDiscountPrice}>
+                <span className={styles.productDiscountPrice}>
                   {data.discountPrice}$
-                </h5>
+                </span>
 
                 {data.originalPrice && (
-                  <h4 className={`${styles.price} line-through text-gray-400`}>
+                  <span className={`${styles.price} line-through text-gray-400`}>
                     {data.originalPrice}$
-                  </h4>
+                  </span>
                 )}
               </h5>
 
@@ -127,6 +126,7 @@ const ProductCard = ({ data }) => {
       </div>
 
       {open && <ProductDetailsCard setOpen={setOpen} data={data} />}
+     
     </>
   );
 };

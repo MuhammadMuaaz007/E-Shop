@@ -2,25 +2,43 @@ import React, { useEffect, useState } from "react";
 import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import ProductDetails from "../components/Products/ProductDetails";
+import SuggestedProducts from "../components/Products/SuggestedProducts";
 import { useParams } from "react-router-dom";
-import { productData } from "../static/data";
-import SuggestedProducts from "../components/Products/SuggestedProducts.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllProducts } from "../redux/actions/product";
 
 const ProductDetailsPage = () => {
-  const { name } = useParams();
-  const [data, setData] = useState(null);
-  const ProductName = name.replace(/-/g, " ");
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const { allProducts } = useSelector((state) => state.product);
+  const [product, setProduct] = useState(null);
+
+  // Fetch all products from Redux/API
   useEffect(() => {
-    const data = productData.find((i) => i.name === ProductName);
-    setData(data);
-  }, [name, ProductName]);
+    if (!allProducts || allProducts.length === 0) {
+      dispatch(getAllProducts());
+    }
+  }, [dispatch, allProducts]);
+
+  // Find the product by ID
+  useEffect(() => {
+    if (allProducts && allProducts.length > 0) {
+      const selectedProduct = allProducts.find((p) => p._id === id);
+      setProduct(selectedProduct);
+    }
+  }, [allProducts, id]);
+
   return (
     <div>
       <Header />
-      <ProductDetails data={data} />
-   {
-    data && <SuggestedProducts data={data} />
-   }
+      {product ? (
+        <>
+          <ProductDetails data={product} />
+          <SuggestedProducts data={product} allProducts={allProducts} />
+        </>
+      ) : (
+        <p className="text-center text-gray-500 mt-10">Product not found!</p>
+      )}
       <Footer />
     </div>
   );

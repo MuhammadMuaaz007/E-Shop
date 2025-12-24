@@ -12,7 +12,6 @@ const ProductsPage = () => {
   const categoryData = searchParams.get("category");
   const [data, setData] = useState([]);
   const { allProducts } = useSelector((state) => state.product);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -21,13 +20,13 @@ const ProductsPage = () => {
   useEffect(() => {
     // setData(allProducts);
     const allProd = allProducts ? [...allProducts] : [];
+
     if (categoryData === null) {
       const d = allProd && allProd.sort((a, b) => a.sold_out - b.sold_out); //Lowest sales to highest sales
       setData(d);
     } else {
       const d = allProd && allProd.filter((i) => i.category === categoryData);
       setData(d);
-      console.log(d);
     }
     window.scrollTo(0, 0);
   }, [allProducts]);
