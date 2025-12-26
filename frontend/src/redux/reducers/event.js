@@ -38,6 +38,19 @@ export const eventReducer = createSlice({
       state.error = action.payload;
       state.success = false;
     },
+    getAllEventsRequest: (state) => {
+      state.isLoading = true;
+    },
+    getAllEventsSuccess: (state, action) => {
+      state.isLoading = false;
+      state.events = action.payload;
+      state.success = true;
+    },
+    getAllEventsFail: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+      state.success = false;
+    },
     // delete shop event
     deleteEventRequest: (state) => {
       state.isLoading = true;
@@ -72,6 +85,9 @@ export const {
   deleteEventSuccess,
   deleteEventFail,
   resetCreateEvent,
+  getAllEventsRequest,
+  getAllEventsSuccess,
+  getAllEventsFail,
 } = eventReducer.actions;
 
 export default eventReducer.reducer;

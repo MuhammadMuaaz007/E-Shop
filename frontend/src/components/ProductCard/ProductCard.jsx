@@ -18,6 +18,15 @@ const ProductCard = ({ data }) => {
 
   const d = data.name;
   const product_name = d.replace(/\s+/g, "-");
+
+  // Helper function to format numbers
+  const formatNumber = (num) => {
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k"; // 1500 -> 1.5k, 1000 -> 1k
+    }
+    return num;
+  };
+
   return (
     <>
       <div
@@ -53,29 +62,26 @@ const ProductCard = ({ data }) => {
           </div>
 
           {/* Price & Sold */}
+          {/* Price & Sold */}
           <div className="py-2 flex items-center justify-between">
             <div className="flex gap-2 items-center">
               <h5 className={`${styles.productDiscountPrice}`}>
                 <span className={styles.productDiscountPrice}>
-                  {data.discountPrice}$
+                  {formatNumber(data.discountPrice)}$
                 </span>
 
                 {data.originalPrice && (
-                  <span className={`${styles.price} line-through text-gray-400`}>
-                    {data.originalPrice}$
+                  <span
+                    className={`${styles.price} line-through text-gray-400`}
+                  >
+                    {formatNumber(data.originalPrice)}$
                   </span>
                 )}
               </h5>
-
-              {data.price && (
-                <h4 className={`${styles.price} line-through text-gray-400`}>
-                  {data.price}$
-                </h4>
-              )}
             </div>
 
             <span className="font-[400] text-[15px] text-green-600">
-              {data.sold_out} sold
+              {formatNumber(data.sold_out)} sold
             </span>
           </div>
         </Link>
@@ -126,7 +132,6 @@ const ProductCard = ({ data }) => {
       </div>
 
       {open && <ProductDetailsCard setOpen={setOpen} data={data} />}
-     
     </>
   );
 };

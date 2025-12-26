@@ -63,16 +63,18 @@ const ProductDetails = ({ data }) => {
                   <p className="text-gray-600 mb-2">{data.description}</p>
 
                   {/* Price Info */}
+                  {/* Price Info */}
                   <div className="flex justify-between text-right mt-2">
                     <div className="flex gap-2">
                       <span className="text-4xl font-semibold text-purple-600">
-                        ${data.discount_price}
+                        ${data.discountPrice} {/* use camelCase */}
                       </span>
-                      {data.price > data.discount_price && (
-                        <span className="line-through text-gray-400">
-                          ${data.price}
-                        </span>
-                      )}
+                      {data.originalPrice &&
+                        data.originalPrice > data.discountPrice && (
+                          <span className="line-through text-gray-400">
+                            ${data.originalPrice}
+                          </span>
+                        )}
                     </div>
                     <span className="text-purple-600 font-medium">
                       ({data.sold_out} sold)
@@ -123,22 +125,22 @@ const ProductDetails = ({ data }) => {
                 {/* Shop Info */}
                 <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-between bg-white p-3 rounded-lg shadow-sm mt-7 mb-2 gap-4">
                   {/* LEFT SIDE */}
-                  <Link to={`/shop/${data.shop._id}`} >
-                  <div className="flex items-center space-x-2">
-                    <img
-                      src={data.shop.avatar.url}
-                      alt="shop avatar"
-                      className="h-12 w-12 rounded-full"
-                    />
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-lg font-semibold cursor-pointer hover:text-purple-600 transition">
-                        {data.shop.name}
-                      </h3>
-                      <div className="flex items-center bg-green-100 text-sm font-medium px-3 py-1 rounded">
-                        ⭐⭐⭐⭐⭐ {data.shop.ratings}
+                  <Link to={`/shop/${data.shop._id}`}>
+                    <div className="flex items-center space-x-2">
+                      <img
+                        src={data.shop.avatar.url}
+                        alt="shop avatar"
+                        className="h-12 w-12 rounded-full"
+                      />
+                      <div className="flex flex-col gap-1">
+                        <h3 className="text-lg font-semibold cursor-pointer hover:text-purple-600 transition">
+                          {data.shop.name}
+                        </h3>
+                        <div className="flex items-center bg-green-100 text-sm font-medium px-3 py-1 rounded">
+                          ⭐⭐⭐⭐⭐ {data.shop.ratings}
+                        </div>
                       </div>
                     </div>
-                  </div>
                   </Link>
 
                   {/* RIGHT SIDE (BUTTON) */}
@@ -224,7 +226,7 @@ const ProductDetailInfo = ({ data }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-6">
           {/* LEFT COLUMN */}
           <div className="space-y-4">
-            <Link to={`/shop/${data.shop._id}`} >
+            <Link to={`/shop/${data.shop._id}`}>
               <div className="flex items-center gap-4">
                 <img
                   src={data.shop.avatar.url}

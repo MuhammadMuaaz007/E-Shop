@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 const AllEvents = () => {
   const dispatch = useDispatch();
   const { events } = useSelector((state) => state.event);
-  console.log("Events:", events);
   const { seller } = useSelector((state) => state.seller);
 
   useEffect(() => {

@@ -1,18 +1,11 @@
 import { useEffect, useState } from "react";
 
-const CountDown = () => {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+const CountDown = ({ endDate }) => {
+  console.log("End Date passed to CountDown:", endDate);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  function calculateTimeLeft() {
-    const difference = +new Date("2025-11-30") - +new Date();
+  const calculateTimeLeft = () => {
+    if (!endDate) return {};
+    const difference = new Date(endDate) - new Date();
     let timeLeft = {};
 
     if (difference > 0) {
@@ -25,24 +18,40 @@ const CountDown = () => {
     }
 
     return timeLeft;
-  }
+  };
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  console.log(
+    "End Date:",
+    endDate,
+    "Difference:",
+    new Date(endDate) - new Date()
+  );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [endDate]);
 
   return (
     <div className="flex gap-3 justify-center md:justify-start">
       {Object.keys(timeLeft).length ? (
-        <>
-          {Object.entries(timeLeft).map(([label, value]) => (
-            <div
-              key={label}
-              className="bg-white shadow-md  rounded-lg px-4 py-2 text-center"
-            >
-              <p className="text-xl font-bold text-purple-600">{value}</p>
-              <p className="text-sm text-gray-500 capitalize">{label}</p>
-            </div>
-          ))}
-        </>
+        Object.entries(timeLeft).map(([label, value]) => (
+          <div
+            key={label}
+            className="bg-white shadow-md rounded-lg px-4 py-2 text-center"
+          >
+            <p className="text-xl font-bold text-purple-600">{value}</p>
+            <p className="text-sm text-gray-500 capitalize">{label}</p>
+          </div>
+        ))
       ) : (
-        <span className="text-red-500 font-semibold">Time’s up! You are late.</span>
+        <span className="text-red-500 font-semibold">
+          Time’s up! You are late.
+        </span>
       )}
     </div>
   );

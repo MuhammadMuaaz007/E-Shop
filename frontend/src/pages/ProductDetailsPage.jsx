@@ -3,6 +3,7 @@ import Header from "../components/Layout/Header";
 import Footer from "../components/Layout/Footer";
 import ProductDetails from "../components/Products/ProductDetails";
 import SuggestedProducts from "../components/Products/SuggestedProducts";
+import Loader from "../components/Layout/Loader"; // import your Loader component
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllProducts } from "../redux/actions/product";
@@ -10,7 +11,7 @@ import { getAllProducts } from "../redux/actions/product";
 const ProductDetailsPage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { allProducts } = useSelector((state) => state.product);
+  const { allProducts, isLoading } = useSelector((state) => state.product);
   const [product, setProduct] = useState(null);
 
   // Fetch all products from Redux/API
@@ -31,7 +32,9 @@ const ProductDetailsPage = () => {
   return (
     <div>
       <Header />
-      {product ? (
+      {isLoading ? (
+        <Loader /> // Show loader while fetching products
+      ) : product ? (
         <>
           <ProductDetails data={product} />
           <SuggestedProducts data={product} allProducts={allProducts} />
