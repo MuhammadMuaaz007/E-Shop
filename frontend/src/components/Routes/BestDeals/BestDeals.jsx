@@ -1,17 +1,29 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { productData } from "../../../static/data";
+// import { productData } from "../../../static/data";
 import styles from "../../../styles/styles";
 import ProductCard from "../../ProductCard/ProductCard.jsx";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllProducts } from "../../../redux/actions/product.js";
 const BestDeals = () => {
   const [data, setData] = useState([]);
+  const { allProducts } = useSelector((state) => state.product);
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    const d =
-      productData && productData.sort((a, b) => b.total_sell - a.total_sell);
-    const firstFive = d.slice(0, 5);
-    setData(firstFive);
-  }, []);
-   
+    dispatch(getAllProducts());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (allProducts && allProducts.length > 0) {
+      const sortedProducts = [...allProducts].sort(
+        (a, b) => b.sold_out - a.sold_out
+      );
+      const firstFive = sortedProducts.slice(0, 5);
+      setData(firstFive);
+    }
+  }, [allProducts]);
+
   return (
     <div className={`${styles.section} my-12`}>
       <div className={`${styles.heading}`}>
