@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { server } from "../../server";
 import { getAllProductsShop } from "../../redux/actions/product";
+import Loader from "../../components/Layout/Loader";
 
 const AllCoupons = () => {
   const dispatch = useDispatch();
@@ -44,15 +45,12 @@ const AllCoupons = () => {
         setCoupons(res.data.couponCodes);
         setCouponLoading(false);
       })
-      .catch(() => {
-        setCouponLoading(false);
-      });
+      .catch(() => setCouponLoading(false));
   }, [seller]);
 
   /* ================= CREATE ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const res = await axios.post(
         `${server}/coupon/create-coupon-code`,
@@ -68,17 +66,9 @@ const AllCoupons = () => {
       );
 
       toast.success("Coupon created successfully");
-      setOpen(false);
-
-      // Add new coupon instantly
       setCoupons((prev) => [...prev, res.data.couponCode]);
-
-      // Reset form
-      setName("");
-      setValue("");
-      setMinAmount("");
-      setMaxAmount("");
-      setSelectedProducts("");
+      setOpen(false);
+      resetForm();
     } catch (error) {
       toast.error(error.response.data.message);
     }
@@ -97,7 +87,6 @@ const AllCoupons = () => {
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
-
     try {
       const res = await axios.put(
         `${server}/coupon/update-coupon/${editCouponId}`,
@@ -112,20 +101,11 @@ const AllCoupons = () => {
       );
 
       toast.success("Coupon updated successfully");
-      setEditOpen(false);
-
-      // Update the coupon in state instantly
       setCoupons((prev) =>
         prev.map((c) => (c._id === editCouponId ? res.data.coupon : c))
       );
-
-      // Reset form
-      setName("");
-      setValue("");
-      setMinAmount("");
-      setMaxAmount("");
-      setSelectedProducts("");
-      setEditCouponId("");
+      setEditOpen(false);
+      resetForm();
     } catch (error) {
       toast.error(error.response.data.message);
     }
@@ -134,14 +114,25 @@ const AllCoupons = () => {
   /* ================= DELETE ================= */
   const deleteHandler = (id) => {
     if (!window.confirm("Are you sure you want to delete this coupon?")) return;
+
     axios
-      .delete(`${server}/coupon/delete-coupon/${id}`, { withCredentials: true })
+      .delete(`${server}/coupon/delete-coupon/${id}`, {
+        withCredentials: true,
+      })
       .then(() => {
         toast.success("Coupon deleted successfully");
-        // Update state instantly
         setCoupons((prev) => prev.filter((c) => c._id !== id));
       })
       .catch((error) => toast.error(error.response.data.message));
+  };
+
+  const resetForm = () => {
+    setName("");
+    setValue("");
+    setMinAmount("");
+    setMaxAmount("");
+    setSelectedProducts("");
+    setEditCouponId("");
   };
 
   return (
@@ -159,66 +150,67 @@ const AllCoupons = () => {
       </div>
 
       {couponLoading ? (
-        <p className="text-center py-10 text-gray-500">Loading...</p>
-      ) : coupons.length > 0 ? (
-        <div className="overflow-x-auto p-4">
-          <table className="min-w-full border border-gray-200 shadow-md rounded-lg overflow-hidden">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-2">#</th>
-                <th className="px-4 py-2">Coupon ID</th>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Discount</th>
-                <th className="px-4 py-2">Min</th>
-                <th className="px-4 py-2">Max</th>
-                <th className="px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {coupons.map((coupon, i) => (
-                <tr key={coupon._id}>
-                  <td className="px-4 py-3">{i + 1}</td>
-                  <td className="px-4 py-3">{coupon._id}</td>
-                  <td className="px-4 py-3">{coupon.name}</td>
-                  <td className="px-4 py-3">{coupon.value}</td>
-                  <td className="px-4 py-3">{coupon.minAmount}</td>
-                  <td className="px-4 py-3">{coupon.maxAmount}</td>
-                  <td className="px-4 py-3 flex gap-2">
-                    <button
-                      onClick={() => editHandler(coupon)}
-                      className="px-3 py-1 bg-blue-600 text-white rounded"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteHandler(coupon._id)}
-                      className="px-3 py-1 bg-red-600 text-white rounded"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="flex justify-center items-center h-[50vh]">
+          <Loader />
         </div>
+      ) : coupons.length > 0 ? (
+        <table className="min-w-full border border-gray-200 shadow-md rounded-lg overflow-hidden">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-2">#</th>
+              <th className="px-4 py-2">Coupon ID</th>
+              <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Discount</th>
+              <th className="px-4 py-2">Min</th>
+              <th className="px-4 py-2">Max</th>
+              <th className="px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {coupons.map((coupon, i) => (
+              <tr key={coupon._id}>
+                <td className="px-4 py-3">{i + 1}</td>
+                <td className="px-4 py-3">{coupon._id}</td>
+                <td className="px-4 py-3">{coupon.name}</td>
+                <td className="px-4 py-3">{coupon.value}</td>
+                <td className="px-4 py-3">{coupon.minAmount}</td>
+                <td className="px-4 py-3">{coupon.maxAmount}</td>
+                <td className="px-4 py-3 flex gap-2">
+                  <button
+                    onClick={() => editHandler(coupon)}
+                    className="px-3 py-1 bg-blue-600 text-white rounded"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteHandler(coupon._id)}
+                    className="px-3 py-1 bg-red-600 text-white rounded"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       ) : (
         <p className="text-center py-10 text-gray-500">No coupons found</p>
       )}
 
       {(open || editOpen) && (
         <div className="fixed inset-0 bg-black/60 z-[20000] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg md:w-[50%] max-h-[80vh] overflow-y-auto rounded-md shadow-lg p-6 relative">
+          <div className="bg-white w-full max-w-lg rounded-md p-6 relative">
             <RxCross1
               size={28}
-              className="absolute top-4 right-4 cursor-pointer text-gray-600 hover:text-gray-800"
+              className="absolute top-4 right-4 cursor-pointer"
               onClick={() => {
                 setOpen(false);
                 setEditOpen(false);
+                resetForm();
               }}
             />
 
-            <h3 className="text-2xl md:text-3xl font-semibold text-center mb-6">
+            <h3 className="text-2xl font-semibold text-center mb-6">
               {editOpen ? "Edit Coupon Code" : "Create Coupon Code"}
             </h3>
 
@@ -227,43 +219,38 @@ const AllCoupons = () => {
               onSubmit={editOpen ? handleSubmitEdit : handleSubmit}
             >
               <input
-                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Coupon Name"
-                className="w-full px-3 py-2 border rounded"
+                className="border px-3 py-2 rounded"
                 required
               />
-
               <input
                 type="number"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder="Discount"
-                className="w-full px-3 py-2 border rounded"
+                className="border px-3 py-2 rounded"
                 required
               />
-
               <input
                 type="number"
                 value={minAmount}
                 onChange={(e) => setMinAmount(e.target.value)}
                 placeholder="Min Amount"
-                className="w-full px-3 py-2 border rounded"
+                className="border px-3 py-2 rounded"
               />
-
               <input
                 type="number"
                 value={maxAmount}
                 onChange={(e) => setMaxAmount(e.target.value)}
                 placeholder="Max Amount"
-                className="w-full px-3 py-2 border rounded"
+                className="border px-3 py-2 rounded"
               />
-
               <select
                 value={selectedProducts}
                 onChange={(e) => setSelectedProducts(e.target.value)}
-                className="w-full px-3 py-2 border rounded"
+                className="border px-3 py-2 rounded"
               >
                 <option value="">Choose product</option>
                 {products?.map((p) => (
@@ -273,7 +260,7 @@ const AllCoupons = () => {
                 ))}
               </select>
 
-              <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-500 transition">
+              <button className="bg-blue-600 text-white py-2 rounded">
                 {editOpen ? "Update" : "Create"}
               </button>
             </form>

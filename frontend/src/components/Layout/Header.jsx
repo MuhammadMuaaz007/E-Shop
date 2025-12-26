@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { productData, categoriesData } from "../../static/data";
+import {  categoriesData } from "../../static/data";
 import { useState, useEffect } from "react";
 import {
   AiOutlineHeart,
@@ -32,7 +32,7 @@ import { logoutUser } from "../../redux/reducers/user";
 
 const Header = ({ activeHeading }) => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
-  const allProducts = productData;
+  const { allProducts } = useSelector((state) => state.product);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [active, setActive] = useState(false);
@@ -42,6 +42,7 @@ const Header = ({ activeHeading }) => {
   const [openWishlist, setOpenWishlist] = useState(false);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
+  
   const handleSearchChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
@@ -51,7 +52,7 @@ const Header = ({ activeHeading }) => {
       return;
     }
 
-    const filteredProducts = allProducts.filter((product) =>
+    const filteredProducts =allProducts && allProducts.filter((product) =>
       product.name.toLowerCase().includes(term.toLowerCase())
     );
 
@@ -116,12 +117,12 @@ const Header = ({ activeHeading }) => {
             {searchData.length > 0 && (
               <div className="absolute min-h-[30vh] bg-slate-50 shadow-sm mt-2 p-4 z-10 ">
                 {searchData.map((i, index) => {
-                  const product_name = i.name.replace(/\s+/g, "-");
+                  
                   return (
-                    <Link to={`/product/${product_name}`} key={index}>
+                    <Link to={`/product/${i._id}`} key={index}>
                       <div className="w-full flex items-start py-1">
                         <img
-                          src={i.image_Url?.[0]?.url}
+                          src={i.images?.[0]?.url}
                           alt=""
                           className="w-[40px] h-[40px] mr-[10px] rounded-lg"
                         />

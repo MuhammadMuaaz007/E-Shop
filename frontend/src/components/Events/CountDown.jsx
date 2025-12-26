@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 const CountDown = ({ endDate }) => {
-  console.log("End Date passed to CountDown:", endDate);
 
   const calculateTimeLeft = () => {
     if (!endDate) return {};
@@ -21,12 +20,6 @@ const CountDown = ({ endDate }) => {
   };
 
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-  console.log(
-    "End Date:",
-    endDate,
-    "Difference:",
-    new Date(endDate) - new Date()
-  );
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -34,7 +27,7 @@ const CountDown = ({ endDate }) => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [endDate]);
+  });
 
   return (
     <div className="flex gap-3 justify-center md:justify-start">

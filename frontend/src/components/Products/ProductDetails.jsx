@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AiFillHeart, AiOutlineHeart, AiOutlineMessage } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 // import styles from "../../styles/styles";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 
 const ProductDetails = ({ data }) => {
   const [count, setCount] = useState(1);
@@ -166,8 +166,34 @@ const ProductDetails = ({ data }) => {
 
 export default ProductDetails;
 
+import { useSelector, useDispatch } from "react-redux";
+import { getAllProductsShop } from "../../redux/actions/product";
+import { Link } from "react-router-dom";
+
 const ProductDetailInfo = ({ data }) => {
   const [active, setActive] = useState(1);
+  const dispatch = useDispatch();
+
+  // Get all products from Redux
+  const { products } = useSelector((state) => state.product);
+
+  useEffect(() => {
+    if (data?.shop?._id) {
+      dispatch(getAllProductsShop(data.shop._id));
+    }
+  }, [dispatch, data?.shop?._id]);
+
+  // Count total products for this shop
+  const totalProducts = products?.length || 0;
+
+  // Format shop creation date
+  const shopCreatedDate = data.shop?.createdAt
+    ? new Date(data.shop.createdAt).toLocaleDateString("en-US", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
 
   const tabs = [
     { id: 1, label: "Product Details" },
@@ -259,18 +285,20 @@ const ProductDetailInfo = ({ data }) => {
             <h5 className="font-semibold">
               Joined on:{" "}
               <span className="font-medium text-gray-700">
-                28 November, 2025
+                {shopCreatedDate}
               </span>
             </h5>
 
             <h5 className="font-semibold">
               Total Products:{" "}
-              <span className="font-medium text-gray-700">287</span>
+              <span className="font-medium text-gray-700">{totalProducts}</span>
             </h5>
 
             <h5 className="font-semibold">
               Total Reviews:{" "}
-              <span className="font-medium text-gray-700">401</span>
+              <span className="font-medium text-gray-700">
+                {data.shop.totalReviews}
+              </span>
             </h5>
 
             <Link to={`/shop/${data.shop._id}`}>

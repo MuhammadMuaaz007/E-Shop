@@ -10,7 +10,7 @@ const ShopLoginPage = () => {
     if (isSeller == true) {
       navigate(`/dashboard`); // replace ensures the login URL is
     }
-  }, [isSeller, isLoading]);
+  }, [isSeller, isLoading, navigate]);
   return (
     <div>
       <ShopLogin />

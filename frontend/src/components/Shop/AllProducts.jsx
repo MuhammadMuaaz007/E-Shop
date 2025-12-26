@@ -3,13 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllProductsShop, deleteProduct } from "../../redux/actions/product";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import Loader from "../../components/Layout/Loader";
 
 const AllProducts = () => {
   const dispatch = useDispatch();
-  const { products } = useSelector((state) => state.product);
+  const { products, isLoading } = useSelector((state) => state.product);
   const { seller } = useSelector((state) => state.seller);
-  // console.log(products);
-
 
   useEffect(() => {
     if (seller?._id) {
@@ -26,13 +25,15 @@ const AllProducts = () => {
 
   return (
     <div className="overflow-x-auto p-4">
-      {products && products.length > 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center h-[60vh]">
+          <Loader />
+        </div>
+      ) : products && products.length > 0 ? (
         <table className="min-w-full border border-gray-200 shadow-md rounded-lg overflow-hidden">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-2 text-left text-gray-600 font-medium">
-                #
-              </th>
+              <th className="px-4 py-2 text-left text-gray-600 font-medium">#</th>
               <th className="px-4 py-2 text-left text-gray-600 font-medium">
                 Product ID
               </th>
@@ -53,6 +54,7 @@ const AllProducts = () => {
               </th>
             </tr>
           </thead>
+
           <tbody className="bg-white divide-y divide-gray-200">
             {products.map((product, index) => (
               <tr
@@ -60,18 +62,23 @@ const AllProducts = () => {
                 className="hover:bg-gray-50 transition-colors"
               >
                 <td className="px-4 py-3">{index + 1}</td>
+
                 <td className="px-4 py-3 font-mono text-sm break-all">
                   {product._id}
                 </td>
+
                 <td className="px-4 py-3 flex items-center gap-2">
-                  {product.images[0] && (
+                  {product.images?.[0] && (
                     <img
                       src={product.images[0].url}
                       alt={product.name}
-                      className="w-12 h-12 flex-shrink-0 object-cover rounded"
+                      className="w-12 h-12 object-cover rounded"
                     />
                   )}
-                  <span className="truncate max-w-[200px]" title={product.name}>
+                  <span
+                    className="truncate max-w-[200px]"
+                    title={product.name}
+                  >
                     {product.name}
                   </span>
                 </td>
@@ -79,6 +86,7 @@ const AllProducts = () => {
                 <td className="px-4 py-3">${product.discountPrice}</td>
                 <td className="px-4 py-3">{product.stock}</td>
                 <td className="px-4 py-3">{product.sold_out}</td>
+
                 <td className="px-4 py-3 flex justify-center gap-2">
                   <Link
                     to={`/product/${product._id}`}

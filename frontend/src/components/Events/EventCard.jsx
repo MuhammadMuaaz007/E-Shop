@@ -5,7 +5,6 @@ import CountDown from "./CountDown";
 
 const EventCard = ({ data }) => {
   const [open, setOpen] = useState(false);
-  console.log("EventCard Data:", data);
 
   return (
     <div

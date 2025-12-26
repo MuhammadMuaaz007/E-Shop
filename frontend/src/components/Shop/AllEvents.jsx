@@ -3,10 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllEventsShop, deleteEvent } from "../../redux/actions/event";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import Loader from "../../components/Layout/Loader";
 
 const AllEvents = () => {
   const dispatch = useDispatch();
-  const { events } = useSelector((state) => state.event);
+  const { events, isLoading } = useSelector((state) => state.event);
   const { seller } = useSelector((state) => state.seller);
 
   useEffect(() => {
@@ -24,15 +25,17 @@ const AllEvents = () => {
 
   return (
     <div className="overflow-x-auto p-4">
-      {events && events.length > 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center h-[60vh]">
+          <Loader />
+        </div>
+      ) : events && events.length > 0 ? (
         <table className="min-w-full border border-gray-200 shadow-md rounded-lg overflow-hidden">
           <thead className="bg-gray-100">
             <tr>
+              <th className="px-4 py-2 text-left text-gray-600 font-medium">#</th>
               <th className="px-4 py-2 text-left text-gray-600 font-medium">
-                #
-              </th>
-              <th className="px-4 py-2 text-left text-gray-600 font-medium">
-                Product ID
+                Event ID
               </th>
               <th className="px-4 py-2 text-left text-gray-600 font-medium">
                 Name
@@ -51,6 +54,7 @@ const AllEvents = () => {
               </th>
             </tr>
           </thead>
+
           <tbody className="bg-white divide-y divide-gray-200">
             {events.map((event, index) => (
               <tr
@@ -58,18 +62,23 @@ const AllEvents = () => {
                 className="hover:bg-gray-50 transition-colors"
               >
                 <td className="px-4 py-3">{index + 1}</td>
+
                 <td className="px-4 py-3 font-mono text-sm break-all">
                   {event._id}
                 </td>
+
                 <td className="px-4 py-3 flex items-center gap-2">
-                  {event.images[0] && (
+                  {event.images?.[0] && (
                     <img
                       src={event.images[0].url}
                       alt={event.name}
-                      className="w-12 h-12 flex-shrink-0 object-cover rounded"
+                      className="w-12 h-12 object-cover rounded"
                     />
                   )}
-                  <span className="truncate max-w-[200px]" title={event.name}>
+                  <span
+                    className="truncate max-w-[200px]"
+                    title={event.name}
+                  >
                     {event.name}
                   </span>
                 </td>
@@ -77,6 +86,7 @@ const AllEvents = () => {
                 <td className="px-4 py-3">${event.discountPrice}</td>
                 <td className="px-4 py-3">{event.stock}</td>
                 <td className="px-4 py-3">{event.sold_out}</td>
+
                 <td className="px-4 py-3 flex justify-center gap-2">
                   <Link
                     to={`/product/${event._id}`}
