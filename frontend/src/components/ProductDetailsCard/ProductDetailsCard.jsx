@@ -2,16 +2,34 @@ import React, { useState } from "react";
 import { RxCross1 } from "react-icons/rx";
 import { AiOutlineMessage, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { addToCartAction } from "../../redux/actions/cart";
 
 const ProductDetailsCard = ({ setOpen, data }) => {
-
   const [count, setCount] = useState(1);
   const [wishlist, setWishlist] = useState(false);
-
+  const { cart } = useSelector((state) => state.cart);
   const increment = () => setCount((prev) => prev + 1);
   const decrement = () => setCount((prev) => (prev > 1 ? prev - 1 : 1));
-
+  const dispatch = useDispatch();
   const handleMessageSubmit = () => alert("Messaging feature coming soon!");
+  
+  const addToCartHandler = (id) => {
+    const isItemExist = cart && cart.find((i) => i._id === id);
+    if (isItemExist) {
+      toast.error("Item already in cart!");
+    } else {
+      if (count > data.stock) {
+        toast.error(`Only ${data.stock} items in stock`);
+        return;
+      }
+      const cartData = { ...data, qty: count };
+      dispatch(addToCartAction(cartData));
+      toast.success("Item added successfully");
+    }
+  };
 
   return (
     <div className="fixed w-full h-screen top-0 left-0 flex items-center justify-center z-50 bg-black/30">
@@ -25,7 +43,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
 
         <div className="md:flex md:space-x-6">
           {/* Left Column */}
-          
+
           <div className="md:w-1/2 flex flex-col items-center mb-6 md:mb-0">
             <img
               src={data?.images?.[0]?.url}
@@ -33,15 +51,18 @@ const ProductDetailsCard = ({ setOpen, data }) => {
               className="w-full h-[350px] object-contain rounded-2xl mb-4"
             />
             <div className="w-full flex items-center justify-between bg-gray-50 p-3 rounded-lg shadow-sm">
-              <Link to={`/shop/${data.shop._id}`} className="flex items-center space-x-3">
-              <div className="flex items-center space-x-3">
-                <img
-                  src={data?.shop?.avatar?.url}
-                  alt="shop avatar"
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-                <h3 className="text-lg font-semibold">{data.shop.name}</h3>
-              </div>
+              <Link
+                to={`/shop/${data.shop._id}`}
+                className="flex items-center space-x-3"
+              >
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={data?.shop?.avatar?.url}
+                    alt="shop avatar"
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                  <h3 className="text-lg font-semibold">{data.shop.name}</h3>
+                </div>
               </Link>
               <div className="flex items-center bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded">
                 ⭐ {data.shop.ratings}
@@ -110,7 +131,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
                 Send Message
               </button>
               <button
-                onClick={() => alert(`Added ${count} items to cart`)}
+                onClick={() => addToCartHandler(data._id)}
                 className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
               >
                 Add to Cart

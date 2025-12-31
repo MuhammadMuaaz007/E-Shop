@@ -11,11 +11,24 @@ import {
 } from "react-icons/ai";
 
 import ProductDetailsCard from "../ProductDetailsCard/ProductDetailsCard";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCartAction } from "../../redux/actions/cart";
+import { toast } from "react-toastify";
 
 const ProductCard = ({ data }) => {
   const [click, setClick] = useState(false);
+  const dispatch = useDispatch();
+  const { cart } = useSelector((state) => state.cart);
   const [open, setOpen] = useState(false);
-
+  const addToCartHandler = (id) => {
+    const isItemExist = cart && cart.find((i) => i._id === id);
+    if (isItemExist) {
+      toast.error("Item already in cart!");
+    } else {
+      dispatch(addToCartAction(data));
+      toast.success("Item added successfully");
+    }
+  };
   const d = data.name;
   const product_name = d.replace(/\s+/g, "-");
 
@@ -124,7 +137,7 @@ const ProductCard = ({ data }) => {
             size={23}
             className="cursor-pointer absolute right-3 top-24 rounded-full h-[32px] w-[32px] p-1 
             bg-white shadow-md hover:bg-green-100 transition duration-300"
-            onClick={() => console.log("Add to cart")}
+            onClick={() => addToCartHandler(data)}
             color="#444"
             title="Add to cart"
           />

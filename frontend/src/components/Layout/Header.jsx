@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import {  categoriesData } from "../../static/data";
-import { useState, useEffect } from "react";
+import { categoriesData } from "../../static/data";
+import { useState, useEffect, } from "react";
 import {
   AiOutlineHeart,
   AiOutlineSearch,
@@ -41,8 +41,9 @@ const Header = ({ activeHeading }) => {
   const [openCart, setOpenCart] = useState(false);
   const [openWishlist, setOpenWishlist] = useState(false);
   const [open, setOpen] = useState(false);
+  const { cart } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
-  
+
   const handleSearchChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
@@ -52,9 +53,11 @@ const Header = ({ activeHeading }) => {
       return;
     }
 
-    const filteredProducts =allProducts && allProducts.filter((product) =>
-      product.name.toLowerCase().includes(term.toLowerCase())
-    );
+    const filteredProducts =
+      allProducts &&
+      allProducts.filter((product) =>
+        product.name.toLowerCase().includes(term.toLowerCase())
+      );
 
     setSearchData(filteredProducts);
   };
@@ -117,7 +120,6 @@ const Header = ({ activeHeading }) => {
             {searchData.length > 0 && (
               <div className="absolute min-h-[30vh] bg-slate-50 shadow-sm mt-2 p-4 z-10 ">
                 {searchData.map((i, index) => {
-                  
                   return (
                     <Link to={`/product/${i._id}`} key={index}>
                       <div className="w-full flex items-start py-1">
@@ -207,7 +209,7 @@ const Header = ({ activeHeading }) => {
               >
                 <AiOutlineShoppingCart size={30} className="text-white" />
                 <span className="absolute -top-1 -right-1 rounded-full bg-[#3bc177] w-4 h-4 text-white text-[12px] flex items-center justify-center">
-                  2
+                  {cart && cart.length ? cart.length : 0}
                 </span>
               </div>
               {/* 👤 Avatar / Profile */}
@@ -271,7 +273,7 @@ const Header = ({ activeHeading }) => {
         <div className="relative cursor-pointer p-2 rounded-md hover:bg-gray-200">
           <AiOutlineShoppingCart size={28} className="text-black" />
           <span className="absolute top-1 right-1 rounded-full bg-[#3bc177] w-4 h-4 text-white text-[12px] flex items-center justify-center">
-            2
+            {cart && cart.length ? cart.length : 0}
           </span>
         </div>
         {open && (
