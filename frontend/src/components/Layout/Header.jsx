@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { categoriesData } from "../../static/data";
-import { useState, useEffect, } from "react";
+import { useState, useEffect } from "react";
 import {
   AiOutlineHeart,
   AiOutlineSearch,
@@ -42,6 +42,7 @@ const Header = ({ activeHeading }) => {
   const [openWishlist, setOpenWishlist] = useState(false);
   const [open, setOpen] = useState(false);
   const { cart } = useSelector((state) => state.cart);
+  const { wishlist } = useSelector((state) => state.wishlist);
   const dispatch = useDispatch();
 
   const handleSearchChange = (e) => {
@@ -199,7 +200,7 @@ const Header = ({ activeHeading }) => {
               >
                 <AiOutlineHeart size={30} className="text-white" />
                 <span className="absolute -top-1 -right-1 rounded-full bg-[#3bc177] w-4 h-4 text-white text-[12px] flex items-center justify-center">
-                  0
+                  {wishlist && wishlist.length ? wishlist.length : 0}
                 </span>
               </div>
               {/* 🛒 Cart */}

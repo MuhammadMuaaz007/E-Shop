@@ -91,7 +91,7 @@ const SingleCart = ({ data, removeFromCartHandler, quantityChangeHandler }) => {
   const totalPrice = data.discountPrice * value;
 
   const increment = (data) => {
-    if (value >= data.stock) {
+    if (value > data.stock) {
       toast.error(`Only ${data.stock} items in stock`);
       return;
     } else {

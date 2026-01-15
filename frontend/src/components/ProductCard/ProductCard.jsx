@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "../../styles/styles";
 import {
@@ -14,21 +14,18 @@ import ProductDetailsCard from "../ProductDetailsCard/ProductDetailsCard";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCartAction } from "../../redux/actions/cart";
 import { toast } from "react-toastify";
+import {
+  addToWishlistAction,
+  removeFromWishlistAction,
+} from "../../redux/actions/wishlist";
 
 const ProductCard = ({ data }) => {
   const [click, setClick] = useState(false);
   const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.cart);
+  const { wishlist } = useSelector((state) => state.wishlist);
   const [open, setOpen] = useState(false);
-  const addToCartHandler = (id) => {
-    const isItemExist = cart && cart.find((i) => i._id === id);
-    if (isItemExist) {
-      toast.error("Item already in cart!");
-    } else {
-      dispatch(addToCartAction(data));
-      toast.success("Item added successfully");
-    }
-  };
+
   const d = data.name;
   const product_name = d.replace(/\s+/g, "-");
 
@@ -39,6 +36,32 @@ const ProductCard = ({ data }) => {
     }
     return num;
   };
+  const removeFromWishlistHandler = () => {
+    setClick(!click);
+    dispatch(removeFromWishlistAction(data));
+  };
+  const addToWishlistHandler = () => {
+    setClick(!click);
+    dispatch(addToWishlistAction(data));
+  };
+
+  const addToCartHandler = (id) => {
+    const isItemExist = cart && cart.find((i) => i._id === id);
+    if (isItemExist) {
+      toast.error("Item already in cart!");
+    } else {
+      dispatch(addToCartAction(data));
+      toast.success("Item added successfully");
+    }
+  };
+
+  useEffect(() => {
+    if (wishlist && wishlist.find((i) => i._id === data._id)) {
+      setClick(true);
+    } else {
+      setClick(false);
+    }
+  }, [wishlist, data._id]);
 
   return (
     <>
@@ -107,7 +130,7 @@ const ProductCard = ({ data }) => {
               size={23}
               className="cursor-pointer absolute right-3 top-4 rounded-full h-[32px] w-[32px] p-1 
               bg-white shadow-md hover:bg-red-100 transition duration-300"
-              onClick={() => setClick(!click)}
+              onClick={() => removeFromWishlistHandler()}
               color="red"
               title="Remove from wishlist"
             />
@@ -116,7 +139,7 @@ const ProductCard = ({ data }) => {
               size={23}
               className="cursor-pointer absolute right-3 top-4 rounded-full h-[32px] w-[32px] p-1 
               bg-white shadow-md hover:bg-red-100 transition duration-300"
-              onClick={() => setClick(!click)}
+              onClick={() => addToWishlistHandler()}
               color="#555"
               title="Add to wishlist"
             />
