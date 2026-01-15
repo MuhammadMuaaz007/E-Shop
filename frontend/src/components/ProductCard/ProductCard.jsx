@@ -64,7 +64,6 @@ const ProductCard = ({ data }) => {
     toast.success("Item added to cart");
   };
 
-  // 👉 Sync wishlist state
   useEffect(() => {
     setClick(wishlist?.some((i) => i._id === data._id));
   }, [wishlist, data._id]);

@@ -1,30 +1,84 @@
 import { useEffect, useState } from "react";
 import { AiFillHeart, AiOutlineHeart, AiOutlineMessage } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
-// import styles from "../../styles/styles";
-// import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+
+import {
+  addToWishlistAction,
+  removeFromWishlistAction,
+} from "../../redux/actions/wishlist";
+import { addToCartAction } from "../../redux/actions/cart";
 
 const ProductDetails = ({ data }) => {
   const [count, setCount] = useState(1);
   const [select, setSelect] = useState(0);
-  const [wishlist, setWishlist] = useState(false);
-  const navigate = useNavigate();
+  const [click, setClick] = useState(false);
 
-  const increment = () => setCount((prev) => prev + 1);
+  const { cart } = useSelector((state) => state.cart);
+  const { wishlist } = useSelector((state) => state.wishlist);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const increment = () => {
+    if (count < data.stock) {
+      setCount((prev) => prev + 1);
+    } else {
+      toast.info(`Only ${data.stock} items in stock`);
+    }
+  };
+
   const decrement = () => setCount((prev) => (prev > 1 ? prev - 1 : 1));
+
   const handleMessageSubmit = () => {
     navigate("/inbox?conversation=5728nsdfiewvureyanfajkt");
   };
 
+  const addToWishlistHandler = () => {
+    dispatch(addToWishlistAction(data));
+    toast.success("Added to wishlist");
+  };
+
+  const removeFromWishlistHandler = () => {
+    dispatch(removeFromWishlistAction(data));
+    toast.info("Removed from wishlist");
+  };
+
+  const addToCartHandler = (id) => {
+    const isItemExist = cart?.some((i) => i._id === id);
+
+    if (isItemExist) {
+      toast.error("Item already in cart");
+      return;
+    }
+
+    dispatch(addToCartAction({ ...data, qty: count }));
+    toast.success("Item added to cart");
+  };
+  // Convert large numbers to 'k', 'M' format
+  const formatPrice = (num) => {
+  
+    if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+    return num;
+  };
+
+  // Sync wishlist click state
+  useEffect(() => {
+    if (wishlist?.some((i) => i._id === data._id)) {
+      setClick(true);
+    } else {
+      setClick(false);
+    }
+  }, [wishlist, data._id]);
+
   return (
     <div className="bg-gradient-to-br w-full h-full from-purple-50 to-white">
-      {data ? (
+      {data && (
         <div className="w-full px-4 sm:px-3 lg:px-5 mx-auto">
           <div className="p-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
               {/* -------------------- Product Image -------------------- */}
               <div className="py-2 flex items-center flex-col justify-center">
-                {/* Fixed-height main image wrapper */}
                 <div className="rounded-xl bg-white p-6 shadow-md flex items-center justify-center w-full h-[380px] max-w-[450px] overflow-hidden">
                   <img
                     src={data.images[select].url}
@@ -33,7 +87,6 @@ const ProductDetails = ({ data }) => {
                   />
                 </div>
 
-                {/* Thumbnail images */}
                 <div className="flex gap-4 w-full items-center justify-start mt-6 flex-wrap">
                   {data.images.map((img, idx) => (
                     <div
@@ -63,16 +116,15 @@ const ProductDetails = ({ data }) => {
                   <p className="text-gray-600 mb-2">{data.description}</p>
 
                   {/* Price Info */}
-                  {/* Price Info */}
                   <div className="flex justify-between text-right mt-2">
                     <div className="flex gap-2">
                       <span className="text-4xl font-semibold text-purple-600">
-                        ${data.discountPrice} {/* use camelCase */}
+                        ${formatPrice(data.discountPrice)}
                       </span>
                       {data.originalPrice &&
                         data.originalPrice > data.discountPrice && (
                           <span className="line-through text-gray-400">
-                            ${data.originalPrice}
+                            ${formatPrice(data.originalPrice)}
                           </span>
                         )}
                     </div>
@@ -86,6 +138,7 @@ const ProductDetails = ({ data }) => {
                     <div className="flex items-center">
                       <button
                         onClick={decrement}
+                        disabled={count === 1}
                         className="bg-purple-100 text-purple-700 font-bold w-10 h-10 flex items-center justify-center rounded-lg shadow-sm hover:bg-purple-200 transition text-[25px]"
                       >
                         -
@@ -102,21 +155,23 @@ const ProductDetails = ({ data }) => {
                     </div>
 
                     <div
-                      onClick={() => setWishlist(!wishlist)}
+                      onClick={() => {
+                        if (click) {
+                          removeFromWishlistHandler();
+                        } else {
+                          addToWishlistHandler();
+                        }
+                      }}
                       className="cursor-pointer text-4xl ml-4 p-1 rounded-full bg-white shadow-md hover:bg-red-500 hover:text-white transition duration-300"
                     >
-                      {wishlist ? (
-                        <AiFillHeart color="red" />
-                      ) : (
-                        <AiOutlineHeart />
-                      )}
+                      {click ? <AiFillHeart color="red" /> : <AiOutlineHeart />}
                     </div>
                   </div>
 
                   {/* Add to cart */}
                   <button
-                    onClick={() => alert(`Added ${count} items to cart`)}
-                    className="bg-gradient-to-r from-purple-800 to-blue-500 text-white py-3 rounded-lg hover:scale-102 hover:shadow-xl transition  duration-300 text-xl mt-4"
+                    onClick={() => addToCartHandler(data._id)}
+                    className="bg-gradient-to-r from-purple-800 to-blue-500 text-white py-3 rounded-lg hover:scale-102 hover:shadow-xl transition duration-300 text-xl mt-4"
                   >
                     Add to Cart
                   </button>
@@ -124,7 +179,6 @@ const ProductDetails = ({ data }) => {
 
                 {/* Shop Info */}
                 <div className="w-full flex flex-col md:flex-row items-start md:items-center justify-between bg-white p-3 rounded-lg shadow-sm mt-7 mb-2 gap-4">
-                  {/* LEFT SIDE */}
                   <Link to={`/shop/${data.shop._id}`}>
                     <div className="flex items-center space-x-2">
                       <img
@@ -143,7 +197,6 @@ const ProductDetails = ({ data }) => {
                     </div>
                   </Link>
 
-                  {/* RIGHT SIDE (BUTTON) */}
                   <button
                     onClick={handleMessageSubmit}
                     className="max-w-[300px] w-full flex bg-gradient-to-r from-purple-800 to-blue-500 text-white py-3 px-4 rounded-lg hover:scale-105 hover:shadow-xl transition items-center duration-300 justify-center mt-2 md:mt-0 mx-auto md:mx-0"
@@ -155,26 +208,24 @@ const ProductDetails = ({ data }) => {
               </div>
             </div>
           </div>
+
           <ProductDetailInfo data={data} />
           <br />
           <br />
         </div>
-      ) : null}
+      )}
     </div>
   );
 };
 
 export default ProductDetails;
 
-import { useSelector, useDispatch } from "react-redux";
 import { getAllProductsShop } from "../../redux/actions/product";
-import { Link } from "react-router-dom";
 
 const ProductDetailInfo = ({ data }) => {
   const [active, setActive] = useState(1);
   const dispatch = useDispatch();
 
-  // Get all products from Redux
   const { products } = useSelector((state) => state.product);
 
   useEffect(() => {
@@ -183,10 +234,8 @@ const ProductDetailInfo = ({ data }) => {
     }
   }, [dispatch, data?.shop?._id]);
 
-  // Count total products for this shop
   const totalProducts = products?.length || 0;
 
-  // Format shop creation date
   const shopCreatedDate = data.shop?.createdAt
     ? new Date(data.shop.createdAt).toLocaleDateString("en-US", {
         day: "2-digit",
@@ -226,12 +275,6 @@ const ProductDetailInfo = ({ data }) => {
       {/* ---------- PRODUCT DETAILS TAB ---------- */}
       {active === 1 && (
         <div className="mt-5 space-y-4">
-          <p className="text-[17px] leading-8 text-gray-700 whitespace-pre-line p-2">
-            {data.description}
-          </p>
-          <p className="text-[17px] leading-8 text-gray-700 whitespace-pre-line p-2">
-            {data.description}
-          </p>
           <p className="text-[17px] leading-8 text-gray-700 whitespace-pre-line p-2">
             {data.description}
           </p>
@@ -302,7 +345,7 @@ const ProductDetailInfo = ({ data }) => {
             </h5>
 
             <Link to={`/shop/${data.shop._id}`}>
-              <button className="mt-5 bg-gradient-to-r from-purple-800 to-blue-500 text-white px-5 py-2 rounded-lg  hover:scale-105 hover:shadow-xl transition shadow duration-300">
+              <button className="mt-5 bg-gradient-to-r from-purple-800 to-blue-500 text-white px-5 py-2 rounded-lg hover:scale-105 hover:shadow-xl transition shadow duration-300">
                 Visit Shop
               </button>
             </Link>

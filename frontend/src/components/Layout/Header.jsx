@@ -326,37 +326,35 @@ const Header = ({ activeHeading }) => {
                 </div>
 
                 {/* Search */}
-                <div>
+
+                <div className="relative w-[35%]">
                   <input
-                    type="search"
-                    placeholder="Search Products..."
+                    type="text"
+                    placeholder="Search Product..."
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    className="w-full h-10 px-3 border-2 border-purple-500 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="h-[40px] px-2 w-full border-[#7e22ce] border-[2px] rounded-md outline-none"
                   />
+                  <AiOutlineSearch
+                    size={30}
+                    className="absolute right-2 cursor-pointer top-1.5"
+                  />
+
+                  {/* Suggestions Popup */}
                   {searchData.length > 0 && (
-                    <div className="mt-2 max-h-60 overflow-y-auto bg-gray-50 shadow rounded-md">
-                      {searchData.map((i, index) => {
-                        const product_name = encodeURIComponent(
-                          i.name.replace(/\s+/g, "-")
-                        );
-                        return (
-                          <Link
-                            to={`/product/${product_name}`}
-                            key={index}
-                            onClick={() => setOpen(false)}
-                          >
-                            <div className="flex items-center p-2 hover:bg-purple-100 cursor-pointer rounded-md">
-                              <img
-                                src={i.image_Url?.[0]?.url}
-                                alt={i.name}
-                                className="w-10 h-10 rounded-md mr-3 object-cover"
-                              />
-                              <span className="text-gray-800">{i.name}</span>
-                            </div>
-                          </Link>
-                        );
-                      })}
+                    <div className="absolute left-0 top-full w-full bg-white shadow-md mt-1 z-20 rounded-md max-h-[40vh] overflow-y-auto">
+                      {searchData.map((i, index) => (
+                        <Link to={`/product/${i._id}`} key={index}>
+                          <div className="flex items-center p-2 hover:bg-purple-100 cursor-pointer rounded-md">
+                            <img
+                              src={i.images?.[0]?.url || "/placeholder.png"}
+                              alt={i.name}
+                              className="w-10 h-10 mr-2 rounded-md object-cover"
+                            />
+                            <span className="truncate">{i.name}</span>
+                          </div>
+                        </Link>
+                      ))}
                     </div>
                   )}
                 </div>
