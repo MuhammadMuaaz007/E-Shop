@@ -20,48 +20,57 @@ import {
 } from "../../redux/actions/wishlist";
 
 const ProductCard = ({ data }) => {
-  const [click, setClick] = useState(false);
   const dispatch = useDispatch();
+
   const { cart } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);
+
   const [open, setOpen] = useState(false);
+  const [click, setClick] = useState(false);
 
-  const d = data.name;
-  const product_name = d.replace(/\s+/g, "-");
+  // 👉 Create SEO-friendly slug
+  const product_slug = `${data._id}`;
 
-  // Helper function to format numbers
+  // 👉 Format numbers (1000 → 1k)
   const formatNumber = (num) => {
+    if (!num) return 0;
     if (num >= 1000) {
-      return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k"; // 1500 -> 1.5k, 1000 -> 1k
+      return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k";
     }
     return num;
   };
-  const removeFromWishlistHandler = () => {
-    setClick(!click);
-    dispatch(removeFromWishlistAction(data));
-  };
+
+  // 👉 Wishlist handlers
   const addToWishlistHandler = () => {
-    setClick(!click);
     dispatch(addToWishlistAction(data));
+    toast.success("Added to wishlist");
   };
 
+  const removeFromWishlistHandler = () => {
+    dispatch(removeFromWishlistAction(data));
+    toast.info("Removed from wishlist");
+  };
+
+  // 👉 Add to cart handler
   const addToCartHandler = (id) => {
-    const isItemExist = cart && cart.find((i) => i._id === id);
+    const isItemExist = cart?.some((i) => i._id === id);
+
     if (isItemExist) {
-      toast.error("Item already in cart!");
-    } else {
-      dispatch(addToCartAction(data));
-      toast.success("Item added successfully");
+      toast.error("Item already in cart");
+      return;
     }
+
+    dispatch(addToCartAction({ ...data, qty: 1 }));
+    toast.success("Item added to cart");
   };
 
+  // 👉 Sync wishlist state
   useEffect(() => {
-    if (wishlist && wishlist.find((i) => i._id === data._id)) {
-      setClick(true);
-    } else {
-      setClick(false);
-    }
+    setClick(wishlist?.some((i) => i._id === data._id));
   }, [wishlist, data._id]);
+
+  // 👉 Rating logic
+  const rating = Math.round(data?.ratings || 0);
 
   return (
     <>
@@ -70,10 +79,10 @@ const ProductCard = ({ data }) => {
         hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300"
       >
         {/* Product Image */}
-        <Link to={`/product/${data._id}`}>
+        <Link to={`/product/${product_slug}`}>
           <img
-            src={data?.images?.[0]?.url}
-            alt=""
+            src={data?.images?.[0]?.url || "/placeholder.png"}
+            alt={data.name}
             className="w-full h-[160px] object-contain rounded-xl drop-shadow-sm 
             transition-transform duration-300 hover:scale-105"
           />
@@ -81,39 +90,44 @@ const ProductCard = ({ data }) => {
 
         {/* Shop Name */}
         <Link to={`/shop/${data.shop._id}`}>
-          <h5 className={`${styles.shop_name} mt-2 `}>{data.shop.name}</h5>
+          <h5 className={`${styles.shop_name} mt-2`}>
+            {data.shop.name}
+          </h5>
         </Link>
+
         {/* Product Name */}
-        <Link to={`/product/${product_name}`}>
+        <Link to={`/product/${product_slug}`}>
           <h4 className="pt-1 font-[500] text-[18px] text-gray-800">
-            {data.name.length > 40 ? data.name.slice(0, 40) + "..." : data.name}
+            {data.name.length > 40
+              ? data.name.slice(0, 40) + "..."
+              : data.name}
           </h4>
 
-          {/* Stars */}
+          {/* Rating Stars */}
           <div className="flex mt-1">
-            {[1, 2, 3, 4].map((_) => (
-              <AiFillStar key={_} color="#F6BA00" size={20} className="mr-1" />
-            ))}
-            <AiOutlineStar color="#F6BA00" size={20} />
+            {[1, 2, 3, 4, 5].map((i) =>
+              i <= rating ? (
+                <AiFillStar key={i} color="#F6BA00" size={20} />
+              ) : (
+                <AiOutlineStar key={i} color="#F6BA00" size={20} />
+              )
+            )}
           </div>
 
           {/* Price & Sold */}
-          {/* Price & Sold */}
           <div className="py-2 flex items-center justify-between">
             <div className="flex gap-2 items-center">
-              <h5 className={`${styles.productDiscountPrice}`}>
-                <span className={styles.productDiscountPrice}>
-                  {formatNumber(data.discountPrice)}$
-                </span>
+              <span className={styles.productDiscountPrice}>
+                {formatNumber(data.discountPrice)}$
+              </span>
 
-                {data.originalPrice && (
-                  <span
-                    className={`${styles.price} line-through text-gray-400`}
-                  >
-                    {formatNumber(data.originalPrice)}$
-                  </span>
-                )}
-              </h5>
+              {data.originalPrice && (
+                <span
+                  className={`${styles.price} line-through text-gray-400`}
+                >
+                  {formatNumber(data.originalPrice)}$
+                </span>
+              )}
             </div>
 
             <span className="font-[400] text-[15px] text-green-600">
@@ -122,26 +136,24 @@ const ProductCard = ({ data }) => {
           </div>
         </Link>
 
-        {/* Buttons Floating */}
+        {/* Floating Buttons */}
         <div>
-          {/* Wishlist Button */}
+          {/* Wishlist */}
           {click ? (
             <AiFillHeart
               size={23}
               className="cursor-pointer absolute right-3 top-4 rounded-full h-[32px] w-[32px] p-1 
-              bg-white shadow-md hover:bg-red-100 transition duration-300"
-              onClick={() => removeFromWishlistHandler()}
+              bg-white shadow-md hover:bg-red-100 transition"
+              onClick={removeFromWishlistHandler}
               color="red"
-              title="Remove from wishlist"
             />
           ) : (
             <AiOutlineHeart
               size={23}
               className="cursor-pointer absolute right-3 top-4 rounded-full h-[32px] w-[32px] p-1 
-              bg-white shadow-md hover:bg-red-100 transition duration-300"
-              onClick={() => addToWishlistHandler()}
+              bg-white shadow-md hover:bg-red-100 transition"
+              onClick={addToWishlistHandler}
               color="#555"
-              title="Add to wishlist"
             />
           )}
 
@@ -149,24 +161,23 @@ const ProductCard = ({ data }) => {
           <AiOutlineEye
             size={23}
             className="cursor-pointer absolute right-3 top-14 rounded-full h-[32px] w-[32px] p-1 
-            bg-white shadow-md hover:bg-blue-100 transition duration-300"
-            onClick={() => setOpen(!open)}
+            bg-white shadow-md hover:bg-blue-100 transition"
+            onClick={() => setOpen(true)}
             color="#333"
-            title="Quick view"
           />
 
           {/* Add to Cart */}
           <AiOutlineShoppingCart
             size={23}
             className="cursor-pointer absolute right-3 top-24 rounded-full h-[32px] w-[32px] p-1 
-            bg-white shadow-md hover:bg-green-100 transition duration-300"
-            onClick={() => addToCartHandler(data)}
+            bg-white shadow-md hover:bg-green-100 transition"
+            onClick={() => addToCartHandler(data._id)}
             color="#444"
-            title="Add to cart"
           />
         </div>
       </div>
 
+      {/* Product Quick View */}
       {open && <ProductDetailsCard setOpen={setOpen} data={data} />}
     </>
   );
