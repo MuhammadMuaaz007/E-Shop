@@ -268,7 +268,11 @@ const AllRefundOrders = () => {
 };
 
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { loadUser, updateUserInformation } from "../../redux/actions/user";
+import {
+  loadUser,
+  updateUserAddresses,
+  updateUserInformation,
+} from "../../redux/actions/user";
 import { toast } from "react-toastify";
 import { ClearErrors } from "../../redux/reducers/user";
 import { server } from "../../server";
@@ -441,15 +445,23 @@ const Address = () => {
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [addressType, setAddressType] = useState("");
-  const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!country || !city || !addressType) {
       toast.error("Please fill all required fields!");
     } else {
-      console.log({ country, city, zipCode, address1, address2, addressType });
-      toast.success("Address added successfully! (UI only)");
+      dispatch(
+        updateUserAddresses({
+          country,
+          city,
+          address1,
+          address2,
+          addressType,
+          zipCode,
+        })
+      );
       setOpen(false);
     }
   };
@@ -461,7 +473,12 @@ const Address = () => {
   ];
 
   const addresses = [
-    { id: 1, type: "Default", location: "New Model Town 449, Lahore", phone: "+923069544314" },
+    {
+      id: 1,
+      type: "Default",
+      location: "New Model Town 449, Lahore",
+      phone: "+923069544314",
+    },
   ];
 
   return (
@@ -518,7 +535,9 @@ const Address = () => {
               <RxCross1 />
             </button>
 
-            <h2 className="text-2xl font-semibold mb-6 text-center">Add New Address</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-center">
+              Add New Address
+            </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Country */}

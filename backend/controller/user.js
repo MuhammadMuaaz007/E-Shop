@@ -290,12 +290,12 @@ router.put(
       }
 
       const existAddress = user.addresses.find(
-        (address) => address._id === req.body._id
+        (address) => address._id === addresses._id
       );
       if (existAddress) {
         Object.assign(existAddress, addresses);
       } else {
-        user.addresses.push(req.body);
+        user.addresses.push(addresses);
       }
 
       if (!user) {
