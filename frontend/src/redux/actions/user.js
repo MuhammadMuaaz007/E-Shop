@@ -4,8 +4,15 @@ import {
   LoadUserRequest,
   LoadUserSuccess,
   LoadUserFail,
-} from "../reducers/user"; 
-import { LoadSellerFail, LoadSellerRequest, LoadSellerSuccess } from "../reducers/seller";
+  UpdateUserInfoRequest,
+  UpdateUserInfoSuccess,
+  UpdateUserInfoFailed,
+} from "../reducers/user";
+import {
+  LoadSellerFail,
+  LoadSellerRequest,
+  LoadSellerSuccess,
+} from "../reducers/seller";
 
 export const loadUser = () => async (dispatch) => {
   try {
@@ -15,7 +22,7 @@ export const loadUser = () => async (dispatch) => {
     });
     dispatch(LoadUserSuccess(data.user));
   } catch (error) {
-    dispatch(LoadUserFail(error.response.data.message));
+    dispatch(LoadUserFail(error.response.data?.message));
   }
 };
 //load seller
@@ -27,6 +34,30 @@ export const loadSeller = () => async (dispatch) => {
     });
     dispatch(LoadSellerSuccess(data.seller));
   } catch (error) {
-    dispatch(LoadSellerFail(error.response.data.message));
+    dispatch(LoadSellerFail(error.response.data?.message));
   }
 };
+
+// user update information
+export const updateUserInformation =
+  ({ name, email, phoneNumber, password }) =>
+  async (dispatch) => {
+    try {
+      dispatch(UpdateUserInfoRequest());
+      const { data } = await axios.put(
+        `${server}/user/update-user-info`,
+        {
+          name,
+          email,
+          phoneNumber,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      dispatch(UpdateUserInfoSuccess(data?.user));
+    } catch (error) {
+      dispatch(UpdateUserInfoFailed(error.response.data?.message));
+    }
+  };

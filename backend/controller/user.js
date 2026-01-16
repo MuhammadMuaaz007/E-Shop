@@ -40,7 +40,7 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
     public_id: filename,
     url: `${process.env.SERVER_URL || "http://localhost:8000"}/${filename}`,
   };
-  
+
   const user = {
     name,
     email,
@@ -171,6 +171,84 @@ router.get(
     }
   })
 );
+// update user information
+router.put(
+  "/update-user-info",
+  isAuthenticated,
+  catchAsyncErrors(async (req, res, next) => {
+    const { name, email, phoneNumber, password } = req.body;
+
+    const user = await User.findById(req.user._id).select("+password");
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    if (password) {
+      const isPasswordValid = await user.comparePassword(password);
+      if (!isPasswordValid) {
+        return next(new ErrorHandler("Incorrect password", 400));
+      }
+    }
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.phoneNumber = phoneNumber || user.phoneNumber;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  })
+);
+
+// update user avatar
+router.put(
+  "/update-avatar",
+  isAuthenticated,
+  upload.single("image"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user.id);
+
+      // ❌ If no file uploaded
+      if (!req.file) {
+        return next(new ErrorHandler("Please upload an image", 400));
+      }
+
+      // ✅ Extract old avatar filename
+      if (user.avatar && user.avatar.url) {
+        const oldAvatar = user.avatar.url.split("/").pop();
+        const oldAvatarPath = path.join(process.cwd(), "uploads", oldAvatar);
+
+        // ✅ Delete old avatar
+        if (fs.existsSync(oldAvatarPath)) {
+          fs.unlinkSync(oldAvatarPath);
+        }
+      }
+
+      // ✅ Save new avatar
+      user.avatar = {
+        public_id: req.file.filename,
+        url: `${req.protocol}://${req.get("host")}/uploads/${
+          req.file.filename
+        }`,
+      };
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Avatar updated successfully",
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
 
 //logout user
 router.get(
@@ -185,6 +263,49 @@ router.get(
       res.status(200).json({
         success: true,
         message: "Logged out successfully",
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+// update user addresses
+router.put(
+  "/update-user-addresses",
+  isAuthenticated,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { addresses } = req.body;
+      const user = await User.findById(req.user.id);
+      const sameTypeAddresses = user.addresses.find(
+        (address) => address.addressType === addresses.addressType
+      );
+      if (sameTypeAddresses) {
+        return next(
+          new ErrorHandler(
+            `Address of type ${addresses.addressType} already exists`,
+            400
+          )
+        );
+      }
+
+      const existAddress = user.addresses.find(
+        (address) => address._id === req.body._id
+      );
+      if (existAddress) {
+        Object.assign(existAddress, addresses);
+      } else {
+        user.addresses.push(req.body);
+      }
+
+      if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+      }
+
+      await user.save();
+      res.status(200).json({
+        success: true,
+        user,
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));

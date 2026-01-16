@@ -13,7 +13,8 @@ app.use(
     credentials: true,
   })
 );
-app.use("/", express.static("uploads"));
+app.use("/", express.static("uploads")); // serves at root
+app.use("/uploads", express.static("uploads")); // serves at /uploads
 app.use(bodyParser.urlencoded({ extended: true }));
 const path = require("path");
 if (process.env.NODE_ENV !== "PRODUCTION") {

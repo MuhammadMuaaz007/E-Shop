@@ -1,17 +1,28 @@
 const multer = require("multer");
-const  path  = require("path");
+const path = require("path");
 
 const storage = multer.diskStorage({
-  destination: (req, res, cb) => {
+  destination: (req, file, cb) => {
     cb(null, "uploads/");
   },
+
   filename: (req, file, cb) => {
+    // ✅ get original extension (.png, .jpg, etc.)
+    const ext = path.extname(file.originalname);
+
+    // ✅ clean filename (remove spaces & special chars)
+    const cleanName = path
+      .basename(file.originalname, ext)
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]/g, "");
+
+    // ✅ unique name
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const filename = file.originalname.split(".")[0]; // to get the name of the file without extension from client user computer when they upload the file
-    cb(null, filename + "-" + uniqueSuffix + ".png");
+
+    cb(null, `${cleanName}-${uniqueSuffix}${ext}`);
   },
 });
 
 const upload = multer({ storage });
 
-module.exports = upload; // we are exporting the upload variable because we will use it in the routes to upload the images
+module.exports = upload;

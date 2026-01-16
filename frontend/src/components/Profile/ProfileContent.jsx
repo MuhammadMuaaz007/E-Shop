@@ -1,34 +1,50 @@
 import React, { useEffect, useState } from "react";
 import { AiOutlineCamera, AiOutlineDelete } from "react-icons/ai";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { RxCross1 } from "react-icons/rx";
+import { Country, State } from "country-state-city";
 import styles from "../../styles/styles";
-import { AiOutlineArrowRight } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { Button } from "@mui/material";
-
-// Data Grid
-import { DataGrid } from "@mui/x-data-grid";
-import { MdOutlineTrackChanges } from "react-icons/md";
 const ProfileContent = ({ active }) => {
-  const { user } = useSelector((state) => state.user);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [Address1, setAddress1] = useState("");
-  const [Address2, setAddress2] = useState("");
+  const { user, error } = useSelector((state) => state.user);
+  const [name, setName] = useState(user && user.name);
+  const [email, setEmail] = useState(user && user.email);
+  const [password, setPassword] = useState();
+  const [phoneNumber, setPhoneNumber] = useState(user && user.phoneNumber);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (user) {
-      setName(user.name || "");
-      setEmail(user.email || "");
-      setPhoneNumber(user.phone || "");
-      setZipCode(user.zip || "");
+    if (error) {
+      toast.error(error);
+      dispatch(ClearErrors());
     }
-  }, [user]);
-  const handleSubmit = (e) => { 
+  }, [error, dispatch]);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
+
+    dispatch(updateUserInformation({ name, email, phoneNumber, password }));
+    toast.success("Information Updated successfully!");
+
     // Handle form submission logic here
+  };
+
+  const handleImage = async (e) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("image", file);
+    try {
+      await axios.put(`${server}/user/update-avatar`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+      dispatch(loadUser());
+      toast.success("Avatar updated!");
+    } catch (error) {
+      toast.error("Error uploading avatar");
+      console.log(error);
+    }
   };
 
   return (
@@ -47,7 +63,16 @@ const ProfileContent = ({ active }) => {
                 className="h-[35px] w-[35px] bg-[#E3E9EE] rounded-full flex items-center justify-center 
                 absolute bottom-3 right-4 cursor-pointer hover:scale-110 transition-all"
               >
-                <AiOutlineCamera size={20} />
+                <input
+                  type="file"
+                  id="image"
+                  name="image"
+                  className="hidden"
+                  onChange={handleImage}
+                />
+                <label htmlFor="image">
+                  <AiOutlineCamera size={20} color="#7C7C7C" />
+                </label>
               </div>
             </div>
           </div>
@@ -82,38 +107,19 @@ const ProfileContent = ({ active }) => {
                 <div>
                   <label className="block pb-2">Phone Number</label>
                   <input
-                    type="text"
+                    type="number"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     className={`${styles.input} w-full bg-white p-2 border border-gray-300 rounded-md outline-none`}
                   />
                 </div>
-
-                {/* Zip Code */}
                 <div>
-                  <label className="block pb-2">Zip Code</label>
+                  <label className="block pb-2">Enter your password</label>
                   <input
-                    type="number"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    className={`${styles.input} w-full bg-white p-2 border border-gray-300 rounded-md outline-none`}
-                  />
-                </div>
-                <div>
-                  <label className="block pb-2">Address 1</label>
-                  <input
-                    type="text"
-                    value={Address1}
-                    onChange={(e) => setAddress1(e.target.value)}
-                    className={`${styles.input} w-full bg-white p-2 border border-gray-300 rounded-md outline-none`}
-                  />
-                </div>
-                <div>
-                  <label className="block pb-2">Address 2</label>
-                  <input
-                    type="text"
-                    value={Address2}
-                    onChange={(e) => setAddress2(e.target.value)}
+                    type="password"
+                    value={password}
+                    required
+                    onChange={(e) => setPassword(e.target.value)}
                     className={`${styles.input} w-full bg-white p-2 border border-gray-300 rounded-md outline-none`}
                   />
                 </div>
@@ -261,8 +267,12 @@ const AllRefundOrders = () => {
   );
 };
 
-
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { loadUser, updateUserInformation } from "../../redux/actions/user";
+import { toast } from "react-toastify";
+import { ClearErrors } from "../../redux/reducers/user";
+import { server } from "../../server";
+import axios from "axios";
 
 const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState("");
@@ -388,7 +398,9 @@ const PaymentMethods = () => {
   return (
     <div className="w-full px-5 md:px-10">
       <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-gray-800">Payment Methods</h1>
+        <h1 className="text-2xl font-semibold text-gray-800">
+          Payment Methods
+        </h1>
         <button className="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-md text-white font-medium mt-2 md:mt-0">
           Add New
         </button>
@@ -409,7 +421,10 @@ const PaymentMethods = () => {
               </div>
             </div>
             <div className="flex gap-3 mt-3 md:mt-0">
-              <AiOutlineDelete size={25} className="cursor-pointer text-red-500 hover:text-red-600" />
+              <AiOutlineDelete
+                size={25}
+                className="cursor-pointer text-red-500 hover:text-red-600"
+              />
             </div>
           </div>
         ))}
@@ -419,24 +434,50 @@ const PaymentMethods = () => {
 };
 
 const Address = () => {
+  const [open, setOpen] = useState(false);
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [address1, setAddress1] = useState("");
+  const [address2, setAddress2] = useState("");
+  const [addressType, setAddressType] = useState("");
+  const { user } = useSelector((state) => state.user);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!country || !city || !addressType) {
+      toast.error("Please fill all required fields!");
+    } else {
+      console.log({ country, city, zipCode, address1, address2, addressType });
+      toast.success("Address added successfully! (UI only)");
+      setOpen(false);
+    }
+  };
+
+  const addressTypeData = [
+    { name: "Default" },
+    { name: "Home" },
+    { name: "Office" },
+  ];
+
   const addresses = [
-    {
-      id: 1,
-      type: "Default",
-      location: "New Model Town 449, Lahore",
-      phone: "+923069544314",
-    },
+    { id: 1, type: "Default", location: "New Model Town 449, Lahore", phone: "+923069544314" },
   ];
 
   return (
     <div className="w-full px-5 md:px-10">
+      {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold text-gray-800">My Addresses</h1>
-        <button className="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-md text-white font-medium mt-2 md:mt-0">
+        <button
+          className="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-md text-white font-medium mt-2 md:mt-0 transition-colors"
+          onClick={() => setOpen(true)}
+        >
           Add New
         </button>
       </div>
 
+      {/* Address List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {addresses.map((a) => (
           <div
@@ -449,11 +490,139 @@ const Address = () => {
               <p className="text-gray-400">{a.phone}</p>
             </div>
             <div className="flex gap-3 mt-3 md:mt-0">
-              <AiOutlineDelete size={25} className="cursor-pointer text-red-500 hover:text-red-600" />
+              <AiOutlineDelete
+                size={25}
+                className="cursor-pointer text-red-500 hover:text-red-600"
+              />
             </div>
           </div>
         ))}
       </div>
+
+      {/* Modal */}
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setOpen(false)}
+          />
+
+          {/* Modal Content */}
+          <div className="relative bg-white w-full max-w-md mx-4 rounded-lg shadow-lg p-6 z-50">
+            {/* Close Button */}
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black text-2xl"
+            >
+              <RxCross1 />
+            </button>
+
+            <h2 className="text-2xl font-semibold mb-6 text-center">Add New Address</h2>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Country */}
+              <div>
+                <label className="block mb-2 font-medium">Country</label>
+                <select
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  className="w-full border border-gray-300 h-10 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  <option value="">Choose your country</option>
+                  {Country &&
+                    Country.getAllCountries().map((item) => (
+                      <option key={item.isoCode} value={item.isoCode}>
+                        {item.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              {/* State */}
+              <div>
+                <label className="block mb-2 font-medium">State</label>
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full border border-gray-300 h-10 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  <option value="">Choose your state</option>
+                  {State &&
+                    State.getStatesOfCountry(country).map((item) => (
+                      <option key={item.isoCode} value={item.isoCode}>
+                        {item.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              {/* Address 1 */}
+              <div>
+                <label className="block mb-2 font-medium">Address 1</label>
+                <input
+                  type="text"
+                  value={address1}
+                  onChange={(e) => setAddress1(e.target.value)}
+                  required
+                  className="w-full border border-gray-300 rounded-md h-10 px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+              </div>
+
+              {/* Address 2 */}
+              <div>
+                <label className="block mb-2 font-medium">Address 2</label>
+                <input
+                  type="text"
+                  value={address2}
+                  onChange={(e) => setAddress2(e.target.value)}
+                  required
+                  className="w-full border border-gray-300 rounded-md h-10 px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+              </div>
+
+              {/* Zip Code */}
+              <div>
+                <label className="block mb-2 font-medium">Zip Code</label>
+                <input
+                  type="number"
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                  required
+                  className="w-full border border-gray-300 rounded-md h-10 px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                />
+              </div>
+
+              {/* Address Type */}
+              <div>
+                <label className="block mb-2 font-medium">Address Type</label>
+                <select
+                  value={addressType}
+                  onChange={(e) => setAddressType(e.target.value)}
+                  className="w-full border border-gray-300 h-10 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  <option value="">Choose your address type</option>
+                  {addressTypeData.map((item) => (
+                    <option key={item.name} value={item.name}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Submit Button */}
+              <div>
+                <button
+                  type="submit"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-md transition-colors"
+                >
+                  Add Address
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -499,4 +668,3 @@ const AllOrders = () => {
     </div>
   );
 };
-
