@@ -46,6 +46,20 @@ const userSlice = createSlice({
       state.AddressLoading = false;
       state.error = action.payload;
     },
+
+    DeleteUserAddressRequest: (state) => {
+      state.AddressLoading = true;
+    },
+    DeleteUserAddressSuccess: (state, action) => {
+      state.AddressLoading = false;
+      state.user = action.payload;
+      state.deleteAddressSuccessMessage = "Address deleted successfully!";
+    },
+    DeleteUserAddressFailed: (state, action) => {
+      state.AddressLoading = false;
+      state.error = action.payload;
+    },
+
     ClearErrors: (state) => {
       state.error = null;
     },
@@ -68,6 +82,9 @@ export const {
   UpdateUserAddressRequest,
   UpdateUserAddressSuccess,
   UpdateUserAddressFailed,
+  DeleteUserAddressRequest,
+  DeleteUserAddressSuccess,
+  DeleteUserAddressFailed,
 } = userSlice.actions;
 
 export default userSlice.reducer;

@@ -10,12 +10,16 @@ import {
   UpdateUserAddressRequest,
   UpdateUserAddressSuccess,
   UpdateUserAddressFailed,
+  DeleteUserAddressRequest,
+  DeleteUserAddressSuccess,
+  DeleteUserAddressFailed,
 } from "../reducers/user";
 import {
   LoadSellerFail,
   LoadSellerRequest,
   LoadSellerSuccess,
 } from "../reducers/seller";
+import { toast } from "react-toastify";
 
 export const loadUser = () => async (dispatch) => {
   try {
@@ -85,7 +89,28 @@ export const updateUserAddresses =
         { withCredentials: true }
       );
       dispatch(UpdateUserAddressSuccess(data?.user));
+      toast.success("Address added successfully!");
     } catch (error) {
       dispatch(UpdateUserAddressFailed(error.response.data?.message));
+      toast.error(error.response?.data?.message || "Failed to add address");
     }
   };
+
+export const deleteUserAddress = (id) => async (dispatch) => {
+  try {
+    dispatch(DeleteUserAddressRequest());
+
+    const { data } = await axios.put(
+      `${server}/user/delete-user-address/${id}`,
+      {}, // PUT body empty
+      { withCredentials: true }
+    );
+
+    dispatch(DeleteUserAddressSuccess(data?.user));
+
+    toast.success("Address deleted successfully!");
+  } catch (error) {
+    dispatch(DeleteUserAddressFailed(error.response?.data?.message));
+    toast.error(error.response?.data?.message || "Failed to delete address");
+  }
+};

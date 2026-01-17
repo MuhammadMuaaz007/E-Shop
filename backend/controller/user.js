@@ -312,4 +312,33 @@ router.put(
     }
   })
 );
+
+router.put(
+  "/delete-user-address/:addressId",
+  isAuthenticated,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { addressId } = req.params;
+      const user = await User.findById(req.user.id);
+
+      if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+      }
+
+      user.addresses = user.addresses.filter(
+        (address) => address._id.toString() !== addressId
+      );
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
 module.exports = router;

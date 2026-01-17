@@ -22,9 +22,6 @@ const ProfileContent = ({ active }) => {
       toast.error(error);
       dispatch(ClearErrors());
     }
-    if (updateAddressSuccessMessage) {
-      toast.success(updateAddressSuccessMessage);
-    }
   }, [error, dispatch, updateAddressSuccessMessage]);
 
   const handleSubmit = (e) => {
@@ -275,6 +272,7 @@ const AllRefundOrders = () => {
 
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import {
+  deleteUserAddress,
   loadUser,
   updateUserAddresses,
   updateUserInformation,
@@ -454,6 +452,7 @@ const Address = () => {
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [addressType, setAddressType] = useState("");
+  const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
@@ -481,20 +480,14 @@ const Address = () => {
       setZipCode(null);
     }
   };
+  const handleDeleteAddress = (id) => {
+    dispatch(deleteUserAddress(id));
+  };
 
   const addressTypeData = [
     { name: "Default" },
     { name: "Home" },
     { name: "Office" },
-  ];
-
-  const addresses = [
-    {
-      id: 1,
-      type: "Default",
-      location: "New Model Town 449, Lahore",
-      phone: "+923069544314",
-    },
   ];
 
   return (
@@ -512,37 +505,70 @@ const Address = () => {
 
       {/* Address List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {addresses.map((a) => (
-          <div
-            key={a.id}
-            className="bg-white shadow-md rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:shadow-lg transition-all"
-          >
-            <div>
-              <h5 className="font-semibold">{a.type}</h5>
-              <p className="text-gray-500">{a.location}</p>
-              <p className="text-gray-400">{a.phone}</p>
+        {user?.addresses && user.addresses.length > 0 ? (
+          user.addresses.map((address) => (
+            <div
+              key={address._id}
+              className="bg-white shadow-md rounded-xl p-4
+                   flex flex-col md:flex-row
+                   items-start md:items-center
+                   justify-between gap-4
+                   hover:shadow-lg transition-all"
+            >
+              {/* Address Info */}
+              <div>
+                <h5 className="font-semibold text-purple-600">
+                  {address.addressType}
+                </h5>
+
+                <p className="text-gray-600">
+                  {address.address1}
+                  {address.address2 && `, ${address.address2}`}
+                </p>
+
+                <p className="text-gray-500">
+                  {address.city}, {address.country} — {address.zipCode}
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 mt-3 md:mt-0">
+                <AiOutlineDelete
+                  size={24}
+                  className="cursor-pointer text-red-500 hover:text-red-600"
+                  onClick={() => handleDeleteAddress(address._id)}
+                />
+              </div>
             </div>
-            <div className="flex gap-3 mt-3 md:mt-0">
-              <AiOutlineDelete
-                size={25}
-                className="cursor-pointer text-red-500 hover:text-red-600"
-              />
-            </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p className="text-gray-500 text-center col-span-full">
+            No addresses added yet.
+          </p>
+        )}
       </div>
 
       {/* Modal */}
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           {/* Overlay */}
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setOpen(false)}
           />
 
-          {/* Modal Content */}
-          <div className="relative bg-white w-full max-w-md mx-4 rounded-lg shadow-lg p-6 z-50">
+          {/* Modal */}
+          <div
+            className="
+        relative z-50
+        w-full max-w-md
+        bg-white rounded-xl shadow-lg
+        p-6
+
+        max-h-[90vh] overflow-y-auto
+        md:max-h-[90vh] md:overflow-y-auto
+      "
+          >
             {/* Close Button */}
             <button
               onClick={() => setOpen(false)}
@@ -562,15 +588,15 @@ const Address = () => {
                 <select
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className="w-full border border-gray-300 h-10 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="w-full border border-gray-300 h-10 rounded-md px-3
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
                 >
                   <option value="">Choose your country</option>
-                  {Country &&
-                    Country.getAllCountries().map((item) => (
-                      <option key={item.isoCode} value={item.isoCode}>
-                        {item.name}
-                      </option>
-                    ))}
+                  {Country.getAllCountries().map((item) => (
+                    <option key={item.isoCode} value={item.isoCode}>
+                      {item.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -580,15 +606,15 @@ const Address = () => {
                 <select
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full border border-gray-300 h-10 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="w-full border border-gray-300 h-10 rounded-md px-3
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
                 >
                   <option value="">Choose your state</option>
-                  {State &&
-                    State.getStatesOfCountry(country).map((item) => (
-                      <option key={item.isoCode} value={item.isoCode}>
-                        {item.name}
-                      </option>
-                    ))}
+                  {State.getStatesOfCountry(country).map((item) => (
+                    <option key={item.isoCode} value={item.isoCode}>
+                      {item.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -600,7 +626,8 @@ const Address = () => {
                   value={address1}
                   onChange={(e) => setAddress1(e.target.value)}
                   required
-                  className="w-full border border-gray-300 rounded-md h-10 px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="w-full border border-gray-300 rounded-md h-10 px-3
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
                 />
               </div>
 
@@ -612,7 +639,8 @@ const Address = () => {
                   value={address2}
                   onChange={(e) => setAddress2(e.target.value)}
                   required
-                  className="w-full border border-gray-300 rounded-md h-10 px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="w-full border border-gray-300 rounded-md h-10 px-3
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
                 />
               </div>
 
@@ -624,7 +652,8 @@ const Address = () => {
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   required
-                  className="w-full border border-gray-300 rounded-md h-10 px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="w-full border border-gray-300 rounded-md h-10 px-3
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
                 />
               </div>
 
@@ -634,7 +663,8 @@ const Address = () => {
                 <select
                   value={addressType}
                   onChange={(e) => setAddressType(e.target.value)}
-                  className="w-full border border-gray-300 h-10 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="w-full border border-gray-300 h-10 rounded-md px-3
+              focus:outline-none focus:ring-2 focus:ring-purple-400"
                 >
                   <option value="">Choose your address type</option>
                   {addressTypeData.map((item) => (
@@ -646,14 +676,13 @@ const Address = () => {
               </div>
 
               {/* Submit Button */}
-              <div>
-                <button
-                  type="submit"
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 rounded-md transition-colors"
-                >
-                  Add Address
-                </button>
-              </div>
+              <button
+                type="submit"
+                className="w-full bg-purple-600 hover:bg-purple-700
+            text-white font-medium py-2 rounded-md transition-colors"
+              >
+                Add Address
+              </button>
             </form>
           </div>
         </div>
