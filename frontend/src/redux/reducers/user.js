@@ -39,7 +39,9 @@ const userSlice = createSlice({
     UpdateUserAddressSuccess: (state, action) => {
       state.AddressLoading = false;
       state.user = action.payload;
+      state.updateAddressSuccessMessage = "Address added successfully!";
     },
+
     UpdateUserAddressFailed: (state, action) => {
       state.AddressLoading = false;
       state.error = action.payload;

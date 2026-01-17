@@ -7,7 +7,10 @@ import styles from "../../styles/styles";
 import { Link } from "react-router-dom";
 import { Button } from "@mui/material";
 const ProfileContent = ({ active }) => {
-  const { user, error } = useSelector((state) => state.user);
+  const { user, error, updateAddressSuccessMessage } = useSelector(
+    (state) => state.user
+  );
+  // console.log(user);
   const [name, setName] = useState(user && user.name);
   const [email, setEmail] = useState(user && user.email);
   const [password, setPassword] = useState();
@@ -19,7 +22,10 @@ const ProfileContent = ({ active }) => {
       toast.error(error);
       dispatch(ClearErrors());
     }
-  }, [error, dispatch]);
+    if (updateAddressSuccessMessage) {
+      toast.success(updateAddressSuccessMessage);
+    }
+  }, [error, dispatch, updateAddressSuccessMessage]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -274,7 +280,10 @@ import {
   updateUserInformation,
 } from "../../redux/actions/user";
 import { toast } from "react-toastify";
-import { ClearErrors } from "../../redux/reducers/user";
+import {
+  ClearErrors,
+  UpdateUserAddressSuccess,
+} from "../../redux/reducers/user";
 import { server } from "../../server";
 import axios from "axios";
 
@@ -441,7 +450,7 @@ const Address = () => {
   const [open, setOpen] = useState(false);
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
-  const [zipCode, setZipCode] = useState("");
+  const [zipCode, setZipCode] = useState(null);
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [addressType, setAddressType] = useState("");
@@ -462,7 +471,14 @@ const Address = () => {
           zipCode,
         })
       );
+
       setOpen(false);
+      setCountry("");
+      setCity("");
+      setAddress1("");
+      setAddress2("");
+      setAddressType("");
+      setZipCode(null);
     }
   };
 

@@ -7,6 +7,9 @@ import {
   UpdateUserInfoRequest,
   UpdateUserInfoSuccess,
   UpdateUserInfoFailed,
+  UpdateUserAddressRequest,
+  UpdateUserAddressSuccess,
+  UpdateUserAddressFailed,
 } from "../reducers/user";
 import {
   LoadSellerFail,
@@ -66,14 +69,23 @@ export const updateUserAddresses =
   ({ country, city, address1, address2, zipCode, addressType }) =>
   async (dispatch) => {
     try {
-      dispatch(UpdateUserInfoRequest());
+      dispatch(UpdateUserAddressRequest());
       const { data } = await axios.put(
         `${server}/user/update-user-addresses`,
-        { addresses: { country, city, address1, address2, zipCode, addressType } },
+        {
+          addresses: {
+            country,
+            city,
+            address1,
+            address2,
+            zipCode,
+            addressType,
+          },
+        },
         { withCredentials: true }
       );
-      dispatch(UpdateUserInfoSuccess(data?.user));
+      dispatch(UpdateUserAddressSuccess(data?.user));
     } catch (error) {
-      dispatch(UpdateUserInfoFailed(error.response.data?.message));
+      dispatch(UpdateUserAddressFailed(error.response.data?.message));
     }
   };

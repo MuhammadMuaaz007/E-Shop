@@ -217,7 +217,7 @@ const Header = ({ activeHeading }) => {
               {isAuthenticated ? (
                 <Link to="/profile">
                   <img
-                    src={user.avatar.url}
+                    src={user?.avatar?.url}
                     className="h-[40px] w-[40px] rounded-full  shadow-md object-cover mx-[15px] 
                 transition-all duration-200 hover:scale-110 hover:ring-4 hover:ring-purple-400"
                     alt="User Avatar"
@@ -303,7 +303,7 @@ const Header = ({ activeHeading }) => {
                   {isAuthenticated ? (
                     <Link to="/profile" onClick={() => setOpen(false)}>
                       <img
-                        src={user.avatar.url}
+                        src={user?.avatar?.url}
                         alt="User"
                         className="w-12 h-12 rounded-full object-cover mr-3 shadow-md"
                       />
@@ -446,7 +446,7 @@ const Header = ({ activeHeading }) => {
                       onClick={() => setOpen(false)}
                     >
                       <img
-                        src={user.avatar.url}
+                        src={user?.avatar?.url}
                         alt={user.name}
                         className="w-6 h-6 rounded-full object-cover"
                       />
