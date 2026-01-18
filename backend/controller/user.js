@@ -119,13 +119,13 @@ router.post(
         return next(
           new ErrorHandler(
             "Activation token expired. Please request a new activation email.",
-            400
-          )
+            400,
+          ),
         );
       }
       return next(new ErrorHandler("Invalid activation token", 400));
     }
-  })
+  }),
 );
 
 // login user
@@ -145,14 +145,14 @@ router.post(
       const isPasswordValid = await user.comparePassword(password);
       if (!isPasswordValid) {
         return next(
-          new ErrorHandler("Please provide the correct information", 400)
+          new ErrorHandler("Please provide the correct information", 400),
         );
       }
       sendToken(user, 200, res);
     } catch (error) {
       return next(new ErrorHandler("Invalid Email or Password", 400));
     }
-  })
+  }),
 );
 // load user
 
@@ -169,7 +169,7 @@ router.get(
     } catch (error) {
       return next(new ErrorHandler("Error fetching user data", 500));
     }
-  })
+  }),
 );
 // update user information
 router.put(
@@ -201,7 +201,7 @@ router.put(
       success: true,
       user,
     });
-  })
+  }),
 );
 
 // update user avatar
@@ -247,7 +247,7 @@ router.put(
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
-  })
+  }),
 );
 
 //logout user
@@ -267,7 +267,7 @@ router.get(
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
-  })
+  }),
 );
 // update user addresses
 router.put(
@@ -278,19 +278,19 @@ router.put(
       const { addresses } = req.body;
       const user = await User.findById(req.user.id);
       const sameTypeAddresses = user.addresses.find(
-        (address) => address.addressType === addresses.addressType
+        (address) => address.addressType === addresses.addressType,
       );
       if (sameTypeAddresses) {
         return next(
           new ErrorHandler(
             `Address of type ${addresses.addressType} already exists`,
-            400
-          )
+            400,
+          ),
         );
       }
 
       const existAddress = user.addresses.find(
-        (address) => address._id === addresses._id
+        (address) => address._id === addresses._id,
       );
       if (existAddress) {
         Object.assign(existAddress, addresses);
@@ -310,7 +310,7 @@ router.put(
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
-  })
+  }),
 );
 
 router.put(
@@ -326,7 +326,7 @@ router.put(
       }
 
       user.addresses = user.addresses.filter(
-        (address) => address._id.toString() !== addressId
+        (address) => address._id.toString() !== addressId,
       );
 
       await user.save();
@@ -338,7 +338,56 @@ router.put(
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
-  })
+  }),
+);
+
+router.put(
+  "/update-user-password",
+  isAuthenticated,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user.id).select("+password");
+      const isPasswordMatched = await user.comparePassword(
+        req.body.oldPassword,
+      );
+      if (!isPasswordMatched) {
+        return next(new ErrorHandler("Old password is incorrect", 400));
+      }
+      user.password = req.body.newPassword;
+      await user.save();
+      res.status(200).json({
+        success: true,
+        message: "Password updated successfully",
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }),
 );
 
 module.exports = router;
+
+// try {
+//   const { oldPassword, newPassword, confirmPassword } = req.body;
+//   const user = await User.findById(req.user.id).select("+password");
+//   if (!user) {
+//     return next(new ErrorHandler("User not found", 404));
+//   }
+//   const isPasswordValid = await user.comparePassword(oldPassword);
+//   if (!isPasswordValid) {
+//     return next(new ErrorHandler("Incorrect old password", 400));
+//   }
+//   if (newPassword !== confirmPassword) {
+//     return next(
+//       new ErrorHandler("New password and confirm password do not match", 400),
+//     );
+//   }
+//   user.password = newPassword;
+//   await user.save();
+//   res.status(200).json({
+//     success: true,
+//     message: "Password updated successfully",
+//   });
+// } catch (error) {
+//   return next(new ErrorHandler(error.message, 500));
+// }

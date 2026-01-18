@@ -22,8 +22,7 @@ const menuItems = [
   { id: 5, name: "Track", icon: <MdOutlineTrackChanges size={18} /> },
   { id: 6, name: "Password", icon: <RiLockPasswordLine size={18} /> },
   { id: 7, name: "Address", icon: <CiLocationOn size={18} /> },
-  { id: 8, name: "Payments", icon: <BiCreditCard size={18} /> },
-  { id: 9, name: "LogOut", icon: <AiOutlineLogout size={18} /> },
+  { id: 8, name: "LogOut", icon: <AiOutlineLogout size={18} /> },
 ];
 
 const ProfileSideBar = ({ active, setActive }) => {
@@ -80,7 +79,5 @@ const ProfileSideBar = ({ active, setActive }) => {
     </div>
   );
 };
-
-
 
 export default ProfileSideBar;

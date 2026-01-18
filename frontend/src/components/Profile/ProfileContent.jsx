@@ -6,9 +6,24 @@ import { Country, State } from "country-state-city";
 import styles from "../../styles/styles";
 import { Link } from "react-router-dom";
 import { Button } from "@mui/material";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import {
+  deleteUserAddress,
+  loadUser,
+  updateUserAddresses,
+  updateUserInformation,
+} from "../../redux/actions/user";
+import { toast } from "react-toastify";
+import {
+  ClearErrors,
+  UpdateUserAddressSuccess,
+} from "../../redux/reducers/user";
+import { server } from "../../server";
+import axios from "axios";
+
 const ProfileContent = ({ active }) => {
   const { user, error, updateAddressSuccessMessage } = useSelector(
-    (state) => state.user
+    (state) => state.user,
   );
   // console.log(user);
   const [name, setName] = useState(user && user.name);
@@ -173,13 +188,7 @@ const ProfileContent = ({ active }) => {
           <Address />
         </div>
       )}
-      {/* {active === 8 && <div>Admin Dashboard</div>} */}
-      {active === 8 && (
-        <div>
-          <PaymentMethods />
-        </div>
-      )}
-      {active === 9 && <div>Logging Out...</div>}
+      {active === 8 && <div className="text-center">Logging Out...</div>}
     </div>
   );
 };
@@ -270,21 +279,6 @@ const AllRefundOrders = () => {
   );
 };
 
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import {
-  deleteUserAddress,
-  loadUser,
-  updateUserAddresses,
-  updateUserInformation,
-} from "../../redux/actions/user";
-import { toast } from "react-toastify";
-import {
-  ClearErrors,
-  UpdateUserAddressSuccess,
-} from "../../redux/reducers/user";
-import { server } from "../../server";
-import axios from "axios";
-
 const ChangePassword = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -303,142 +297,116 @@ const ChangePassword = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      alert("New password and confirm password do not match!");
+      toast.error("New Password and Confirm Password do not match!");
     } else {
-      alert("Password changed successfully (UI only)");
+      axios
+        .put(
+          `${server}/user/update-user-password`,
+          { oldPassword, newPassword, confirmPassword },
+          { withCredentials: true },
+        )
+        .then((res) => {
+          toast.success(res.data.message);
+          setOldPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        })
+        .catch((error) => {
+          toast.error(
+            error.response?.data?.message || "Failed to update password",
+          );
+        });
     }
   };
 
   return (
-    <div className="w-full px-5 md:px-10">
-      <h1 className="text-2xl md:text-3xl font-semibold text-center text-gray-800 pb-6">
-        Change Password
-      </h1>
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col items-center w-full gap-6"
-      >
-        {/* Old Password */}
-        <div className="relative w-full md:w-[50%]">
-          <label className="block text-[18px] pb-2">Old Password</label>
-          <input
-            type={showPassword.old ? "text" : "password"}
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            className={`${styles.input} w-full bg-white p-2 border border-gray-300 rounded-md outline-none`}
-            required
-          />
-          <span
-            className="absolute right-2.5 top-[45px] cursor-pointer"
-            onClick={() => toggleShow("old")}
-          >
-            {showPassword.old ? (
-              <AiOutlineEye size={22} />
-            ) : (
-              <AiOutlineEyeInvisible size={22} />
-            )}
-          </span>
-        </div>
-
-        {/* New Password */}
-        <div className="relative w-full md:w-[50%]">
-          <label className="block pb-2 text-[18px]">New Password</label>
-          <input
-            type={showPassword.new ? "text" : "password"}
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className={`${styles.input} w-full bg-white p-2 border border-gray-300 rounded-md outline-none`}
-            required
-          />
-          <span
-            className="absolute right-2.5 top-[45px] cursor-pointer"
-            onClick={() => toggleShow("new")}
-          >
-            {showPassword.new ? (
-              <AiOutlineEye size={22} />
-            ) : (
-              <AiOutlineEyeInvisible size={22} />
-            )}
-          </span>
-        </div>
-
-        {/* Confirm Password */}
-        <div className="relative w-full md:w-[50%]">
-          <label className="block pb-2 text-[18px]">Confirm Password</label>
-          <input
-            type={showPassword.confirm ? "text" : "password"}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className={`${styles.input} w-full bg-white p-2 border border-gray-300 rounded-md outline-none`}
-            required
-          />
-          <span
-            className="absolute right-2.5 top-[45px] cursor-pointer"
-            onClick={() => toggleShow("confirm")}
-          >
-            {showPassword.confirm ? (
-              <AiOutlineEye size={22} />
-            ) : (
-              <AiOutlineEyeInvisible size={22} />
-            )}
-          </span>
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full md:w-[50%] mt-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-all"
-        >
-          Update Password
-        </button>
-      </form>
-    </div>
-  );
-};
-const PaymentMethods = () => {
-  const payments = [
-    {
-      id: 1,
-      name: "Muhammad Muaaz",
-      card: "1234 **** **** 5678",
-      expiry: "25/12/2025",
-      logo: "https://quickpay.net/images/payment-methods/visa.png",
-    },
-  ];
-
-  return (
-    <div className="w-full px-5 md:px-10">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Payment Methods
+    <div className="w-full flex justify-center px-4 md:px-10 py-10">
+      <div className="w-full md:w-[500px] bg-white rounded-2xl shadow-lg p-6 md:p-8">
+        <h1 className="text-2xl font-semibold text-center text-gray-800 mb-6">
+          🔐 Change Password
         </h1>
-        <button className="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-md text-white font-medium mt-2 md:mt-0">
-          Add New
-        </button>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {payments.map((p) => (
-          <div
-            key={p.id}
-            className="bg-white shadow-md rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 hover:shadow-lg transition-all"
-          >
-            <div className="flex items-center gap-4">
-              <img src={p.logo} alt="" className="w-12 h-12 object-contain" />
-              <div>
-                <h5 className="font-semibold">{p.name}</h5>
-                <p className="text-gray-500">{p.card}</p>
-                <p className="text-gray-400 text-sm">Expiry: {p.expiry}</p>
-              </div>
-            </div>
-            <div className="flex gap-3 mt-3 md:mt-0">
-              <AiOutlineDelete
-                size={25}
-                className="cursor-pointer text-red-500 hover:text-red-600"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          {/* Old Password */}
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Old Password
+            </label>
+            <input
+              type={showPassword.old ? "text" : "password"}
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+              required
+            />
+            <span
+              className="absolute right-3 top-9 cursor-pointer text-gray-500 hover:text-purple-600"
+              onClick={() => toggleShow("old")}
+            >
+              {showPassword.old ? (
+                <AiOutlineEye size={20} />
+              ) : (
+                <AiOutlineEyeInvisible size={20} />
+              )}
+            </span>
           </div>
-        ))}
+
+          {/* New Password */}
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              New Password
+            </label>
+            <input
+              type={showPassword.new ? "text" : "password"}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+              required
+            />
+            <span
+              className="absolute right-3 top-9 cursor-pointer text-gray-500 hover:text-purple-600"
+              onClick={() => toggleShow("new")}
+            >
+              {showPassword.new ? (
+                <AiOutlineEye size={20} />
+              ) : (
+                <AiOutlineEyeInvisible size={20} />
+              )}
+            </span>
+          </div>
+
+          {/* Confirm Password */}
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Confirm Password
+            </label>
+            <input
+              type={showPassword.confirm ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+              required
+            />
+            <span
+              className="absolute right-3 top-9 cursor-pointer text-gray-500 hover:text-purple-600"
+              onClick={() => toggleShow("confirm")}
+            >
+              {showPassword.confirm ? (
+                <AiOutlineEye size={20} />
+              ) : (
+                <AiOutlineEyeInvisible size={20} />
+              )}
+            </span>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="mt-4 py-2.5 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 active:scale-[0.98] transition-all"
+          >
+            Update Password
+          </button>
+        </form>
       </div>
     </div>
   );
@@ -468,7 +436,7 @@ const Address = () => {
           address2,
           addressType,
           zipCode,
-        })
+        }),
       );
 
       setOpen(false);
@@ -496,7 +464,7 @@ const Address = () => {
       <div className="flex flex-col md:flex-row items-center justify-between mb-4">
         <h1 className="text-2xl font-semibold text-gray-800">My Addresses</h1>
         <button
-          className="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-md text-white font-medium mt-2 md:mt-0 transition-colors"
+          className="bg-purple-800 hover:bg-purple-900 px-5 py-2 rounded-md text-white font-medium mt-2 md:mt-0 transition-colors"
           onClick={() => setOpen(true)}
         >
           Add New
@@ -732,3 +700,52 @@ const AllOrders = () => {
     </div>
   );
 };
+
+// const PaymentMethods = () => {
+//   const payments = [
+//     {
+//       id: 1,
+//       name: "Muhammad Muaaz",
+//       card: "1234 **** **** 5678",
+//       expiry: "25/12/2025",
+//       logo: "https://quickpay.net/images/payment-methods/visa.png",
+//     },
+//   ];
+
+//   return (
+//     <div className="w-full px-5 md:px-10">
+//       <div className="flex flex-col md:flex-row items-center justify-between mb-4">
+//         <h1 className="text-2xl font-semibold text-gray-800">
+//           Payment Methods
+//         </h1>
+//         <button className="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-md text-white font-medium mt-2 md:mt-0">
+//           Add New
+//         </button>
+//       </div>
+
+//       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+//         {payments.map((p) => (
+//           <div
+//             key={p.id}
+//             className="bg-white shadow-md rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 hover:shadow-lg transition-all"
+//           >
+//             <div className="flex items-center gap-4">
+//               <img src={p.logo} alt="" className="w-12 h-12 object-contain" />
+//               <div>
+//                 <h5 className="font-semibold">{p.name}</h5>
+//                 <p className="text-gray-500">{p.card}</p>
+//                 <p className="text-gray-400 text-sm">Expiry: {p.expiry}</p>
+//               </div>
+//             </div>
+//             <div className="flex gap-3 mt-3 md:mt-0">
+//               <AiOutlineDelete
+//                 size={25}
+//                 className="cursor-pointer text-red-500 hover:text-red-600"
+//               />
+//             </div>
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
