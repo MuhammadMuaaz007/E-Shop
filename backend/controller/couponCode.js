@@ -25,7 +25,7 @@ router.post(
     } catch (error) {
       return next(new ErrorHandler(error, 400));
     }
-  })
+  }),
 );
 
 // get all coupon codes of shop
@@ -44,7 +44,7 @@ router.get(
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
-  })
+  }),
 );
 
 // get single coupon code
@@ -67,7 +67,7 @@ router.get(
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
-  })
+  }),
 );
 // update coupon code
 router.put(
@@ -92,7 +92,7 @@ router.put(
       success: true,
       coupon,
     });
-  })
+  }),
 );
 
 // delete coupon code
@@ -115,7 +115,27 @@ router.delete(
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
-  })
+  }),
+);
+// get coupon code value by its name
+router.get(
+  "/get-coupon-value/:name",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const { name } = req.params;
+      const couponCode = await CouponCode.findOne({ name });
+      
+      if (!couponCode) {
+        return next(new ErrorHandler("Coupon Code does not exist!", 404));
+      }
+      res.status(200).json({
+        success: true,
+        couponCode,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }),
 );
 
 module.exports = router;

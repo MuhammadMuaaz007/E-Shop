@@ -1,44 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Country, State } from "country-state-city";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-
-/* ---------------- DUMMY DATA (Frontend Only) ---------------- */
-
-const dummyUser = {
-  name: "John Doe",
-  email: "john@example.com",
-  phoneNumber: "03001234567",
-  addresses: [
-    {
-      addressType: "Home",
-      address1: "Street 1",
-      address2: "Block A",
-      zipCode: "54000",
-      country: "PK",
-      city: "PB",
-    },
-  ],
-};
-
-const dummyCart = [
-  {
-    name: "Product 1",
-    qty: 2,
-    discountPrice: 50,
-  },
-  {
-    name: "Product 2",
-    qty: 1,
-    discountPrice: 100,
-  },
-];
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { server } from "../../server";
 
 /* ---------------- MAIN COMPONENT ---------------- */
 
 const Checkout = () => {
-  const user = dummyUser;
-  const cart = dummyCart;
-
+  const { user } = useSelector((state) => state.user);
+  const { cart } = useSelector((state) => state.cart);
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [userInfo, setUserInfo] = useState(false);
@@ -46,7 +19,9 @@ const Checkout = () => {
   const [address2, setAddress2] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [couponCode, setCouponCode] = useState("");
+  const [couponCodeData, setCouponCodeData] = useState(null);
   const [discountPrice, setDiscountPrice] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -56,54 +31,61 @@ const Checkout = () => {
 
   const subTotalPrice = cart.reduce(
     (acc, item) => acc + item.qty * item.discountPrice,
-    0
+    0,
   );
+  // this is shipping cost calculation
+  const shipping = subTotalPrice * 0.1;
+  const discountPercentage = couponCodeData ? discountPrice : "";
 
-  const shipping = subTotalPrice * 0.02;
-  const totalPrice = (subTotalPrice + shipping - discountPrice).toFixed(2);
+  const totalPrice = couponCodeData
+    ? (subTotalPrice + shipping - discountPercentage).toFixed(2)
+    : (subTotalPrice + shipping).toFixed(2);
 
   /* ---------------- COUPON (Frontend Mock) ---------------- */
 
-  const handleCouponSubmit = (e) => {
+  const handleCouponSubmit = async (e) => {
     e.preventDefault();
 
-    if (couponCode === "DISCOUNT10") {
-      setDiscountPrice(subTotalPrice * 0.1);
-      setCouponCode("");
-      alert("Coupon Applied!");
-    } else {
-      alert("Invalid Coupon Code");
-      setCouponCode("");
+    try {
+      const res = await axios
+        .get(`${server}/coupon/get-coupon-value/${couponCode}`)
+        .then((res) => {
+          const shopId = res.data.couponCode?.shop._id;
+          const couponCodeValue = res.data.couponCode?.value;
+          if (res.data.couponCode !== null) {
+            const isCouponValid =
+              cart && cart.filter((item) => item.shopId === shopId);
+            if (isCouponValid.length === 0) {
+              toast.error("Coupon Code is not valid for this shop!");
+              setCouponCode("");
+            } else {
+              const eligiblePrice = isCouponValid.reduce(
+                (acc, item) => acc + item.qty * item.discountPrice,
+                0,
+              );
+              console.log(eligiblePrice);
+              const discountPrice =
+                (eligiblePrice * Number(couponCodeValue)) / 100;
+              setDiscountPrice(discountPrice);
+              setCouponCodeData(res.data.couponCode);
+              setCouponCode("");
+            }
+          }
+        });
+
+      setCouponCodeData(res.data.couponCode);
+    } catch (error) {
+      toast.error(error.response?.data?.message);
     }
   };
 
-  /* ---------------- PAYMENT BUTTON ---------------- */
-
   const paymentSubmit = () => {
-    if (!address1 || !address2 || !zipCode || !country || !city) {
-      alert("Please fill shipping address");
-      return;
-    }
-
-    const orderData = {
-      cart,
-      user,
-      address1,
-      address2,
-      zipCode,
-      country,
-      city,
-      totalPrice,
-    };
-
-    localStorage.setItem("latestOrder", JSON.stringify(orderData));
-    alert("Order saved locally. Ready for payment page.");
+    navigate("/payment");
   };
 
   return (
     <div className="w-full flex flex-col items-center py-8">
       <div className="w-[90%] lg:w-[70%] block md:flex gap-6">
-
         <ShippingInfo
           user={user}
           country={country}
@@ -127,13 +109,14 @@ const Checkout = () => {
           couponCode={couponCode}
           setCouponCode={setCouponCode}
           discountPrice={discountPrice}
+          discountPercentage={discountPercentage}
           handleCouponSubmit={handleCouponSubmit}
         />
       </div>
 
       <button
         onClick={paymentSubmit}
-        className="bg-red-500 text-white px-10 py-3 rounded mt-10"
+        className=" mt-3 py-2 px-8 text-white bg-purple-700 border border-purple-700 rounded-lg shadow-md hover:bg-purple-800 hover:shadow-lg transition-all duration-300 font-semibold"
       >
         Go to Payment
       </button>
@@ -162,9 +145,21 @@ const ShippingInfo = ({
     <div className="w-full md:w-[65%] bg-white p-5 rounded">
       <h3 className="text-lg font-semibold mb-4">Shipping Address</h3>
 
-      <input value={user.name} readOnly className="border w-full mb-3 p-2" />
-      <input value={user.email} readOnly className="border w-full mb-3 p-2" />
-      <input value={user.phoneNumber} readOnly className="border w-full mb-3 p-2" />
+      <input
+        value={user && user.name}
+        readOnly
+        className="border w-full mb-3 p-2"
+      />
+      <input
+        value={user && user.email}
+        readOnly
+        className="border w-full mb-3 p-2"
+      />
+      <input
+        value={user && user.phoneNumber}
+        readOnly
+        className="border w-full mb-3 p-2"
+      />
 
       <input
         placeholder="Zip Code"
@@ -249,14 +244,18 @@ const CartData = ({
   totalPrice,
   couponCode,
   setCouponCode,
-  discountPrice,
+
+  discountPercentage,
   handleCouponSubmit,
 }) => {
   return (
     <div className="w-full md:w-[35%] bg-white p-5 rounded">
       <p>Subtotal: ${subTotalPrice}</p>
-      <p>Shipping: ${shipping.toFixed(2)}</p>
-      <p>Discount: -${discountPrice.toFixed(2)}</p>
+      <p>Shipping: ${shipping}</p>
+      <p>
+        Discount: -
+        {discountPercentage ? "$" + discountPercentage.toString() : null}
+      </p>
 
       <h3 className="text-lg font-bold mt-3">Total: ${totalPrice}</h3>
 
@@ -267,7 +266,10 @@ const CartData = ({
           placeholder="DISCOUNT10"
           className="border w-full p-2"
         />
-        <button className="border w-full mt-3 py-2 text-red-500">
+        <button
+          type="submit"
+          className="w-full mt-3 py-2 text-white bg-purple-700 border border-purple-700 rounded-lg shadow-md hover:bg-purple-800 hover:shadow-lg transition-all duration-300 font-semibold"
+        >
           Apply Coupon
         </button>
       </form>

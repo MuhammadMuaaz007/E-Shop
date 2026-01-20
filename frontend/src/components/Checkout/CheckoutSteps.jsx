@@ -12,7 +12,9 @@ const CheckoutSteps = ({ active = 1 }) => {
         isActive ? activeColor : inactiveColor
       }`}
     >
-      <span className={`text-sm font-medium ${isActive ? activeText : inactiveText}`}>
+      <span
+        className={`text-sm font-medium ${isActive ? activeText : inactiveText}`}
+      >
         {text}
       </span>
     </div>
@@ -29,7 +31,6 @@ const CheckoutSteps = ({ active = 1 }) => {
   return (
     <div className="w-full flex justify-center my-6">
       <div className="w-[90%] md:w-[50%] flex items-center justify-center">
-
         <StepButton text="1. Shipping" isActive={active >= 1} />
         <Line isActive={active > 1} />
 
@@ -37,7 +38,6 @@ const CheckoutSteps = ({ active = 1 }) => {
         <Line isActive={active > 2} />
 
         <StepButton text="3. Success" isActive={active >= 3} />
-
       </div>
     </div>
   );
