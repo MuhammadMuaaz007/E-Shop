@@ -19,7 +19,7 @@ import {
   ShopLoginPage,
 } from "./routes/Routes.js";
 import { ToastContainer } from "react-toastify";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Store from "./redux/store";
 import { loadSeller, loadUser } from "./redux/actions/user";
 import ScrollToTop from "./ScrollToTop.jsx";
@@ -36,12 +36,24 @@ import {
   ShopAllCoupons,
 } from "./routes/ShopRoutes.js";
 import ShopHomePage from "./pages/shop/ShopHomePage.jsx";
+import axios from "axios";
+import { server } from "./server.js";
 
 const App = () => {
+  const [stripeApiKey, setStripeApiKey] = useState("");
+
   useEffect(() => {
     Store.dispatch(loadUser());
     Store.dispatch(loadSeller());
+    getStripeApiKey();
   }, []);
+
+  async function getStripeApiKey() {
+    const { data } = await axios.get(`${server}/payment/stripe-api-key`);
+    setStripeApiKey(data.stripeApiKey);
+  }
+
+  console.log(stripeApiKey);
 
   return (
     <>
@@ -133,7 +145,7 @@ const App = () => {
               </SellerProtectedRoute>
             }
           />
-             <Route
+          <Route
             path="/dashboard-create-event"
             element={
               <SellerProtectedRoute>
@@ -141,7 +153,7 @@ const App = () => {
               </SellerProtectedRoute>
             }
           />
-              <Route
+          <Route
             path="/dashboard-events"
             element={
               <SellerProtectedRoute>
@@ -157,7 +169,7 @@ const App = () => {
               </SellerProtectedRoute>
             }
           />
-             <Route
+          <Route
             path="/dashboard-coupons"
             element={
               <SellerProtectedRoute>

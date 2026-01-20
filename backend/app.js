@@ -26,7 +26,9 @@ const shop = require("./controller/shop");
 const product = require("./controller/product");
 const event = require("./controller/event");
 const coupon = require("./controller/couponCode");
+const payment= require("./controller/payment");
 
+app.use("/api/v2/payment",payment);
 app.use("/api/v2/user", user);
 app.use("/api/v2/shop", shop);
 app.use("/api/v2/product", product);
