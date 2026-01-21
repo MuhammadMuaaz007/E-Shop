@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 // import styles from "../../styles/styles";
 import { RxCross1 } from "react-icons/rx";
-
+import {
+  CardNumberElement,
+  CardCvcElement,
+  CardExpiryElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 const Payment = () => {
   const [orderData, setOrderData] = useState({
     cart: [],
@@ -10,7 +18,11 @@ const Payment = () => {
     discountPrice: 0,
     shipping: 0,
   });
+  const { user } = useSelector((state) => state.user);
   const [open, setOpen] = useState(false);
+  const Navigate = useNavigate();
+  const stripe = useStripe();
+  const elements = useElements();
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("latestOrder")) || {};
@@ -21,17 +33,26 @@ const Payment = () => {
     e.preventDefault();
     alert("Payment submitted (frontend only).");
   };
+  const paymentData = {
+    amount: Math.round(orderData?.totalPrice * 100),
+  };
+  const paypalPaymentHandler = async (paymentInfo) => {};
 
   const cashOnDeliveryHandler = (e) => {
     e.preventDefault();
     alert("Cash on Delivery selected (frontend only).");
   };
+  const onApprove = async (data, actions) => {};
+  const createOrder = async (data, actions) => {};
 
   return (
     <div className="w-full flex flex-col items-center py-10 bg-gray-50">
       <div className="w-[95%] lg:w-[80%] flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-[65%]">
           <PaymentInfo
+            user={user}
+            onApprove={onApprove}
+            createOrder={createOrder}
             open={open}
             setOpen={setOpen}
             paymentHandler={paymentHandler}
@@ -49,7 +70,15 @@ const Payment = () => {
 
 /* ---------------- PAYMENT INFO ---------------- */
 
-const PaymentInfo = ({ open, setOpen, paymentHandler, cashOnDeliveryHandler }) => {
+const PaymentInfo = ({
+  open,
+  setOpen,
+  paymentHandler,
+  cashOnDeliveryHandler,
+  user,
+  onApprove,
+  createOrder,
+}) => {
   const [select, setSelect] = useState(1);
 
   const radioStyle =
@@ -65,8 +94,13 @@ const PaymentInfo = ({ open, setOpen, paymentHandler, cashOnDeliveryHandler }) =
 
       {/* CARD PAYMENT */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelect(1)}>
-          <div className={radioStyle}>{select === 1 && <div className={activeDot} />}</div>
+        <div
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => setSelect(1)}
+        >
+          <div className={radioStyle}>
+            {select === 1 && <div className={activeDot} />}
+          </div>
           <h4 className="font-medium text-gray-700">Debit / Credit Card</h4>
         </div>
 
@@ -75,30 +109,79 @@ const PaymentInfo = ({ open, setOpen, paymentHandler, cashOnDeliveryHandler }) =
             <input
               type="text"
               placeholder="Name on Card"
+              value={user&& user.name}
               required
               className="border rounded-md w-full p-3 focus:ring-2 focus:ring-purple-300"
             />
 
             <div className="flex gap-4">
-              <input
+              <CardNumberElement
                 type="text"
-                placeholder="Card Number"
+                placeholder="Name on Card"
                 required
                 className="border rounded-md w-full p-3 focus:ring-2 focus:ring-purple-300"
+                options={{
+                  style: {
+                    base: {
+                      fontSize: "19px",
+                      lineHeight: 1.5,
+                      color: "#444",
+                    },
+                    empty: {
+                      color: "#3a120a",
+                      backgroundColor: "transparent",
+                      "::placeholder": {
+                        color: "#444",
+                      },
+                    },
+                  },
+                }}
               />
-              <input
+              <CardExpiryElement
                 type="text"
                 placeholder="MM/YY"
                 required
                 className="border rounded-md w-full p-3 focus:ring-2 focus:ring-purple-300"
+                options={{
+                  style: {
+                    base: {
+                      fontSize: "19px",
+                      lineHeight: 1.5,
+                      color: "#444",
+                    },
+                    empty: {
+                      color: "#3a120a",
+                      backgroundColor: "transparent",
+                      "::placeholder": {
+                        color: "#444",
+                      },
+                    },
+                  },
+                }}
               />
             </div>
 
-            <input
+            <CardCvcElement
               type="password"
               placeholder="CVV"
               required
               className="border rounded-md w-full p-3 focus:ring-2 focus:ring-purple-300"
+              options={{
+                style: {
+                  base: {
+                    fontSize: "19px",
+                    lineHeight: 1.5,
+                    color: "#444",
+                  },
+                  empty: {
+                    color: "#3a120a",
+                    backgroundColor: "transparent",
+                    "::placeholder": {
+                      color: "#444",
+                    },
+                  },
+                },
+              }}
             />
 
             <button
@@ -113,8 +196,13 @@ const PaymentInfo = ({ open, setOpen, paymentHandler, cashOnDeliveryHandler }) =
 
       {/* PAYPAL */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelect(2)}>
-          <div className={radioStyle}>{select === 2 && <div className={activeDot} />}</div>
+        <div
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => setSelect(2)}
+        >
+          <div className={radioStyle}>
+            {select === 2 && <div className={activeDot} />}
+          </div>
           <h4 className="font-medium text-gray-700">PayPal</h4>
         </div>
 
@@ -145,8 +233,13 @@ const PaymentInfo = ({ open, setOpen, paymentHandler, cashOnDeliveryHandler }) =
 
       {/* CASH ON DELIVERY */}
       <div>
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelect(3)}>
-          <div className={radioStyle}>{select === 3 && <div className={activeDot} />}</div>
+        <div
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => setSelect(3)}
+        >
+          <div className={radioStyle}>
+            {select === 3 && <div className={activeDot} />}
+          </div>
           <h4 className="font-medium text-gray-700">Cash on Delivery</h4>
         </div>
 

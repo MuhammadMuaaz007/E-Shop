@@ -38,16 +38,18 @@ import {
 import ShopHomePage from "./pages/shop/ShopHomePage.jsx";
 import axios from "axios";
 import { server } from "./server.js";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 
 const App = () => {
   const [stripeApiKey, setStripeApiKey] = useState("");
-
+  
   useEffect(() => {
     Store.dispatch(loadUser());
     Store.dispatch(loadSeller());
     getStripeApiKey();
   }, []);
-
+  
   async function getStripeApiKey() {
     const { data } = await axios.get(`${server}/payment/stripe-api-key`);
     setStripeApiKey(data.stripeApiKey);
@@ -59,6 +61,20 @@ const App = () => {
     <>
       <BrowserRouter>
         <ScrollToTop />
+        {stripeApiKey && (
+          <Elements stripe={loadStripe(stripeApiKey)}>
+            <Routes>
+              <Route
+                path="/payment"
+                element={
+                  <ProtectedRoute>
+                    <PaymentPage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </Elements>
+        )}
         <Routes>
           <Route path="/" element={<HomePage />}></Route>
           <Route path="/login" element={<LoginPage />}></Route>
@@ -93,14 +109,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/payment"
-            element={
-              <ProtectedRoute>
-                <PaymentPage />
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/profile"
             element={

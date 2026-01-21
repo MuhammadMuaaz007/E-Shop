@@ -19,6 +19,7 @@ router.post(
     });
   }),
 );
+
 router.get(
   "/stripe-api-key",
   catchAsyncErrors(async (req, res, next) => {
