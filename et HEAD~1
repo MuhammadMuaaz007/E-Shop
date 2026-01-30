@@ -1,0 +1,193 @@
+[33mcommit 4b6bc6aa70ce965fe41273bb8e2b9fb09f5b9661[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Muhammad Muaaz <MuhammadMuaaz007@users.noreply.github.com>
+Date:   Fri Jan 30 16:55:55 2026 +0500
+
+    make the order success page and the order controller and api and also the stripe implementation
+
+[1mdiff --git a/backend/app.js b/backend/app.js[m
+[1mindex 9d8ca6c..f59be96 100644[m
+[1m--- a/backend/app.js[m
+[1m+++ b/backend/app.js[m
+[36m@@ -27,7 +27,9 @@[m [mconst product = require("./controller/product");[m
+ const event = require("./controller/event");[m
+ const coupon = require("./controller/couponCode");[m
+ const payment= require("./controller/payment");[m
+[32m+[m[32mconst order = require("./controller/order");[m
+ [m
+[32m+[m[32mapp.use("/api/v2/order",order);[m
+ app.use("/api/v2/payment",payment);[m
+ app.use("/api/v2/user", user);[m
+ app.use("/api/v2/shop", shop);[m
+[1mdiff --git a/backend/controller/order.js b/backend/controller/order.js[m
+[1mindex e69de29..d5e0fa8 100644[m
+[1m--- a/backend/controller/order.js[m
+[1m+++ b/backend/controller/order.js[m
+[36m@@ -0,0 +1,48 @@[m
+[32m+[m[32mconst express = require("express");[m
+[32m+[m[32mconst router = express.Router();[m
+[32m+[m[32mconst ErrorHandler = require("../utils/ErrorHandler");[m
+[32m+[m[32mconst catchAsyncErrors = require("../middleware/catchAsyncErrors");[m
+[32m+[m[32mconst { isAuthenticated } = require("../middleware/auth");[m
+[32m+[m[32mconst Order = require("../model/order.js");[m
+[32m+[m
+[32m+[m[32mrouter.post([m
+[32m+[m[32m  "/create-order",[m
+[32m+[m[32m  catchAsyncErrors(async (req, res, next) => {[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      const { cart, shippingAddress, user, totalPrice, paymentInfo } = req.body;[m
+[32m+[m
+[32m+[m[32m      //   group cart items by shopId[m
+[32m+[m[32m      const shopItemsMap = new Map();[m
+[32m+[m
+[32m+[m[32m      for (const item of cart) {[m
+[32m+[m[32m        const shopId = item.shopId;[m
+[32m+[m[32m        if (!shopItemsMap.has(shopId)) {[m
+[32m+[m[32m          shopItemsMap.set(shopId, []);[m
+[32m+[m[32m        }[m
+[32m+[m[32m        shopItemsMap.get(shopId).push(item);[m
+[32m+[m[32m      }[m
+[32m+[m
+[32m+[m[32m      // create an order for each shop[m
+[32m+[m[32m      const orders = [];[m
+[32m+[m
+[32m+[m[32m      for (const [shopId, items] of shopItemsMap) {[m
+[32m+[m[32m        const order = await Order.create({[m
+[32m+[m[32m          cart: items,[m
+[32m+[m[32m          shippingAddress,[m
+[32m+[m[32m          user,[m
+[32m+[m[32m          totalPrice,[m
+[32m+[m[32m          paymentInfo,[m
+[32m+[m[32m        });[m
+[32m+[m[32m        orders.push(order);[m
+[32m+[m[32m      }[m
+[32m+[m
+[32m+[m[32m      res.status(201).json({[m
+[32m+[m[32m        success: true,[m
+[32m+[m[32m        orders,[m
+[32m+[m[32m      });[m
+[32m+[m[32m    } catch (error) {[m
+[32m+[m[32m      return next(new ErrorHandler(error.message, 500));[m
+[32m+[m[32m    }[m
+[32m+[m[32m  })[m
+[32m+[m[32m);[m
+[32m+[m[32mmodule.exports = router;[m
+[1mdiff --git a/backend/controller/payment.js b/backend/controller/payment.js[m
+[1mindex 2396400..1dfaf72 100644[m
+[1m--- a/backend/controller/payment.js[m
+[1m+++ b/backend/controller/payment.js[m
+[36m@@ -4,7 +4,7 @@[m [mconst router = express.Router();[m
+ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);[m
+ [m
+ router.post([m
+[31m-  "/payment/process",[m
+[32m+[m[32m  "/process",[m
+   catchAsyncErrors(async (req, res, next) => {[m
+     const myPayment = await stripe.paymentIntents.create({[m
+       amount: req.body.amount,[m
+[1mdiff --git a/frontend/src/App.jsx b/frontend/src/App.jsx[m
+[1mindex c1babe5..0d02e19 100644[m
+[1m--- a/frontend/src/App.jsx[m
+[1m+++ b/frontend/src/App.jsx[m
+[36m@@ -41,6 +41,7 @@[m [mimport { server } from "./server.js";[m
+ import { Elements } from "@stripe/react-stripe-js";[m
+ import { loadStripe } from "@stripe/stripe-js";[m
+ [m
+[32m+[m
+ const App = () => {[m
+   const [stripeApiKey, setStripeApiKey] = useState("");[m
+   [m
+[36m@@ -109,6 +110,7 @@[m [mconst App = () => {[m
+               </ProtectedRoute>[m
+             }[m
+           />[m
+[32m+[m[32m          <Route path="/order/success" element={<OrderSuccessPage />} />[m
+ [m
+           <Route[m
+             path="/profile"[m
+[1mdiff --git a/frontend/src/components/Payment/Payment.jsx b/frontend/src/components/Payment/Payment.jsx[m
+[1mindex 041610c..176c63a 100644[m
+[1m--- a/frontend/src/components/Payment/Payment.jsx[m
+[1m+++ b/frontend/src/components/Payment/Payment.jsx[m
+[36m@@ -10,6 +10,10 @@[m [mimport {[m
+ } from "@stripe/react-stripe-js";[m
+ import { useSelector } from "react-redux";[m
+ import { useNavigate } from "react-router-dom";[m
+[32m+[m[32mimport axios from "axios";[m
+[32m+[m[32mimport { server } from "../../server";[m
+[32m+[m[32mimport { toast } from "react-toastify";[m
+[32m+[m
+ const Payment = () => {[m
+   const [orderData, setOrderData] = useState({[m
+     cart: [],[m
+[36m@@ -20,19 +24,76 @@[m [mconst Payment = () => {[m
+   });[m
+   const { user } = useSelector((state) => state.user);[m
+   const [open, setOpen] = useState(false);[m
+[31m-  const Navigate = useNavigate();[m
+[32m+[m[32m  const navigate = useNavigate();[m
+   const stripe = useStripe();[m
+   const elements = useElements();[m
+ [m
+[32m+[m
+   useEffect(() => {[m
+     const data = JSON.parse(localStorage.getItem("latestOrder")) || {};[m
+     setOrderData(data);[m
+   }, []);[m
+ [m
+[31m-  const paymentHandler = (e) => {[m
+[32m+[m[32m    const order = {[m
+[32m+[m[32m    cart: orderData?.cart,[m
+[32m+[m[32m    shippingAddress: orderData?.shippingAddress,[m
+[32m+[m[32m    user: user && user,[m
+[32m+[m[32m    totalPrice: orderData?.totalPrice,[m
+[32m+[m[32m  };[m
+[32m+[m
+[32m+[m[32m   const paymentHandler = async (e) => {[m
+     e.preventDefault();[m
+[31m-    alert("Payment submitted (frontend only).");[m
+[32m+[m[32m    try {[m
+[32m+[m[32m      const config = {[m
+[32m+[m[32m        headers: {[m
+[32m+[m[32m          "Content-Type": "application/json",[m
+[32m+[m[32m        },[m
+[32m+[m[32m      };[m
+[32m+[m
+[32m+[m[32m      const { data } = await axios.post([m
+[32m+[m[32m        `${server}/payment/process`,[m
+[32m+[m[32m        paymentData,[m
+[32m+[m[32m        config[m
+[32m+[m[32m      );[m
+[32m+[m
+[32m+[m[32m      const client_secret = data.client_secret;[m
+[32m+[m
+[32m+[m[32m      if (!stripe || !elements) return;[m
+[32m+[m[32m      const result = await stripe.confirmCardPayment(client_secret, {[m
+[32m+[m[32m        payment_method: {[m
+[32m+[m[32m          card: elements.getElement(CardNumberElement),[m
+[32m+[m[32m        },[m
+[32m+[m[32m      });[m
+[32m+[m
+[32m+[m[32m      if (result.error) {[m
+[32m+[m[32m        toast.error(result.error.message);[m
+[32m+[m[32m      } else {[m
+[32m+[m[32m        if (result.paymentIntent.status === "succeeded") {[m
+[32m+[m[32m          order.paymnentInfo = {[m
+[32m+[m[32m            id: result.paymentIntent.id,[m
+[32m+[m[32m            status: result.paymentIntent.status,[m
+[32m+[m[32m            type: "Credit Card",[m
+[32m+[m[32m          };[m
+[32m+[m
+[32m+[m[32m          await axios[m
+[32m+[m[32m            .post(`${server}/order/create-order`, order, config)[m
+[32m+[m[32m            .then((res) => {[m
+[32m+[m[32m              setOpen(false);[m
+[32m+[m[32m              navigate("/order/success");[m
+[32m+[m[32m              toast.success("Order successful!");[m
+[32m+[m[32m              localStorage.setItem("cartItems", JSON.stringify([]));[m
+[32m+[m[32m              localStorage.setItem("latestOrder", JSON.stringify([]));[m
+[32m+[m[32m              window.location.reload();[m
+[32m+[m[32m            });[m
+[32m+[m[32m        }[m
+[32m+[m[32m      }[m
+[32m+[m[32m    } catch (error) {[m
+[32m+[m[32m
