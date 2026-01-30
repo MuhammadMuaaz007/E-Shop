@@ -48,7 +48,6 @@ router.post(
   })
 );
 
-// get all the products of the shop
 
 router.get(
   "/get-all-products-shop/:id",
