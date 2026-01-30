@@ -13,7 +13,6 @@ router.post(
     try {
       const { shopId } = req.body;
 
-      // check shop
       const shop = await Shop.findById(shopId);
       if (!shop) {
         return next(new ErrorHandler("Shop Id is invalid", 400));
@@ -22,7 +21,6 @@ router.post(
       // files coming from multer
       const files = req.files;
 
-      // SAME STRUCTURE AS AVATAR LOGIC
       const imageObjects = files.map((file) => ({
         public_id: file.filename,
         url: `${process.env.SERVER_URL || "http://localhost:8000"}/${
