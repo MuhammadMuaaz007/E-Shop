@@ -41,6 +41,7 @@ import { server } from "./server.js";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
+
 const App = () => {
   const [stripeApiKey, setStripeApiKey] = useState("");
   
@@ -109,6 +110,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="/order/success" element={<OrderSuccessPage />} />
 
           <Route
             path="/profile"

@@ -10,6 +10,10 @@ import {
 } from "@stripe/react-stripe-js";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { server } from "../../server";
+import { toast } from "react-toastify";
+
 const Payment = () => {
   const [orderData, setOrderData] = useState({
     cart: [],
@@ -20,19 +24,76 @@ const Payment = () => {
   });
   const { user } = useSelector((state) => state.user);
   const [open, setOpen] = useState(false);
-  const Navigate = useNavigate();
+  const navigate = useNavigate();
   const stripe = useStripe();
   const elements = useElements();
+
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("latestOrder")) || {};
     setOrderData(data);
   }, []);
 
-  const paymentHandler = (e) => {
-    e.preventDefault();
-    alert("Payment submitted (frontend only).");
+    const order = {
+    cart: orderData?.cart,
+    shippingAddress: orderData?.shippingAddress,
+    user: user && user,
+    totalPrice: orderData?.totalPrice,
   };
+
+   const paymentHandler = async (e) => {
+    e.preventDefault();
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      const { data } = await axios.post(
+        `${server}/payment/process`,
+        paymentData,
+        config
+      );
+
+      const client_secret = data.client_secret;
+
+      if (!stripe || !elements) return;
+      const result = await stripe.confirmCardPayment(client_secret, {
+        payment_method: {
+          card: elements.getElement(CardNumberElement),
+        },
+      });
+
+      if (result.error) {
+        toast.error(result.error.message);
+      } else {
+        if (result.paymentIntent.status === "succeeded") {
+          order.paymnentInfo = {
+            id: result.paymentIntent.id,
+            status: result.paymentIntent.status,
+            type: "Credit Card",
+          };
+
+          await axios
+            .post(`${server}/order/create-order`, order, config)
+            .then((res) => {
+              setOpen(false);
+              navigate("/order/success");
+              toast.success("Order successful!");
+              localStorage.setItem("cartItems", JSON.stringify([]));
+              localStorage.setItem("latestOrder", JSON.stringify([]));
+              window.location.reload();
+            });
+        }
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+  };
+
+
+
   const paymentData = {
     amount: Math.round(orderData?.totalPrice * 100),
   };
