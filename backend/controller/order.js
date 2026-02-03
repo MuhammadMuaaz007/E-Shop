@@ -43,6 +43,25 @@ router.post(
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
-  })
+  }),
+);
+
+// get all orders of a user
+router.get(
+  "/get-all-orders/:userId",
+  isAuthenticated,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const orders = await Order.find({ "user._id": req.params.userId });
+      
+      console.log("Orders fetched for user:", req.params.userId, orders);
+      res.status(200).json({
+        success: true,
+        orders,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }),
 );
 module.exports = router;

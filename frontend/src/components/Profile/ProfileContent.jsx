@@ -20,6 +20,7 @@ import {
 } from "../../redux/reducers/user";
 import { server } from "../../server";
 import axios from "axios";
+import { getAllOrdersUser } from "../../redux/actions/order";
 
 const ProfileContent = ({ active }) => {
   const { user, error, updateAddressSuccessMessage } = useSelector(
@@ -660,26 +661,35 @@ const Address = () => {
 };
 
 const AllOrders = () => {
-  const orders = [
-    {
-      id: "7645gs",
-      items: ["Mobile phone 14 pro max"],
-      total: 350,
-      status: "Processing",
-    },
-  ];
+  const dispatch = useDispatch();
+  const { orders, isLoading, error } = useSelector((state) => state.order);
+  const { user } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    if (user && user._id) {
+      dispatch(getAllOrdersUser(user._id));
+    }
+  }, [user, dispatch]);
+
+  if (isLoading)
+    return <p className="flex justify-center ">Loading orders...</p>;
+  if (error) return <p className="flex justify-center ">Error: {error}</p>;
 
   return (
     <div className="w-full px-5 md:px-10 grid grid-cols-1 md:grid-cols-1 gap-5">
-      {orders.map((order) => (
+      {orders?.map((order) => (
         <div
-          key={order.id}
+          key={order._id}
           className="bg-white shadow-md rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:shadow-lg transition-all"
         >
           <div>
-            <h5 className="font-semibold">Order ID: {order.id}</h5>
-            <p className="text-gray-500">Items: {order.items.join(", ")}</p>
-            <p className="text-gray-400 font-medium">Total: ${order.total}</p>
+            <h5 className="font-semibold">Order ID: {order._id}</h5>
+            <p className="text-gray-500">
+              Items: {order.cart.map((item) => item.name).join(", ")}
+            </p>
+            <p className="text-gray-400 font-medium">
+              Total: ${order.totalPrice}
+            </p>
           </div>
           <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mt-3 md:mt-0">
             <span
@@ -689,7 +699,7 @@ const AllOrders = () => {
             >
               {order.status}
             </span>
-            <Link to={`/user/order/${order.id}`}>
+            <Link to={`/user/order/${order._id}`}>
               <Button variant="contained" color="primary">
                 View
               </Button>
@@ -700,52 +710,3 @@ const AllOrders = () => {
     </div>
   );
 };
-
-// const PaymentMethods = () => {
-//   const payments = [
-//     {
-//       id: 1,
-//       name: "Muhammad Muaaz",
-//       card: "1234 **** **** 5678",
-//       expiry: "25/12/2025",
-//       logo: "https://quickpay.net/images/payment-methods/visa.png",
-//     },
-//   ];
-
-//   return (
-//     <div className="w-full px-5 md:px-10">
-//       <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-//         <h1 className="text-2xl font-semibold text-gray-800">
-//           Payment Methods
-//         </h1>
-//         <button className="bg-purple-600 hover:bg-purple-700 px-5 py-2 rounded-md text-white font-medium mt-2 md:mt-0">
-//           Add New
-//         </button>
-//       </div>
-
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-//         {payments.map((p) => (
-//           <div
-//             key={p.id}
-//             className="bg-white shadow-md rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 hover:shadow-lg transition-all"
-//           >
-//             <div className="flex items-center gap-4">
-//               <img src={p.logo} alt="" className="w-12 h-12 object-contain" />
-//               <div>
-//                 <h5 className="font-semibold">{p.name}</h5>
-//                 <p className="text-gray-500">{p.card}</p>
-//                 <p className="text-gray-400 text-sm">Expiry: {p.expiry}</p>
-//               </div>
-//             </div>
-//             <div className="flex gap-3 mt-3 md:mt-0">
-//               <AiOutlineDelete
-//                 size={25}
-//                 className="cursor-pointer text-red-500 hover:text-red-600"
-//               />
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
