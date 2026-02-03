@@ -42,7 +42,7 @@ const CountDown = ({ endDate }) => {
           </div>
         ))
       ) : (
-        <span className="text-red-500 font-semibold">
+        <span className="text-red-500 font-semibold mb-15 mt-3">
           Time’s up! You are late.
         </span>
       )}

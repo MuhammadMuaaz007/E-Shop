@@ -2,9 +2,38 @@ import { useState } from "react";
 import styles from "../../styles/styles";
 import ProductDetailsCard from "../ProductDetailsCard/ProductDetailsCard";
 import CountDown from "./CountDown";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCartAction } from "../../redux/actions/cart";
+import { toast } from "react-toastify";
 
 const EventCard = ({ data }) => {
   const [open, setOpen] = useState(false);
+  const { cart } = useSelector((state) => state.cart);
+  const dispatch = useDispatch();
+
+  const formatPrice = (price) => {
+    if (!price) return price;
+    if (price >= 1000) {
+      return `${price / 1000}k`;
+    }
+    return price;
+  };
+
+  const addToCartHandler = (id) => {
+    const isItemExist = cart && cart.find((i) => i._id === id);
+
+    if (isItemExist) {
+      toast.error("Item already in cart");
+      return;
+    } else {
+      if (data.stock < 1) {
+        toast.error("Product is out of stock");
+        return;
+      }
+    }
+    dispatch(addToCartAction({ ...data, qty: 1 }));
+    toast.success("Item added to cart");
+  };
 
   return (
     <div
@@ -16,9 +45,8 @@ const EventCard = ({ data }) => {
         <img
           src={data?.images?.[0]?.url}
           alt={data?.name}
-          className="w-[80%] md:w-[90%] lg:w-full h-auto object-contain drop-shadow-md hover:scale-105 transition-transform duration-300"
+          className="w-[80%] md:w-[90%] lg:w-full h-auto object-contain hover:scale-105 transition-transform duration-300"
         />
-
         <span
           className="absolute top-3 left-3 bg-gradient-to-r from-purple-600 to-purple-400
           text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md"
@@ -39,16 +67,33 @@ const EventCard = ({ data }) => {
           {data?.description}
         </p>
 
+       {/* Tags Section */}
+{data?.tags && (
+  <div className="mt-3 flex flex-wrap gap-2">
+    {(Array.isArray(data.tags) ? data.tags : data.tags.split(",")).map(
+      (tag, index) => (
+        <span
+          key={index}
+          className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium"
+        >
+          {tag.trim()}
+        </span>
+      )
+    )}
+  </div>
+)}
+
+
         {/* Price & Sold Info */}
         <div className="flex py-3 justify-between items-center">
           <div className="flex space-x-2 items-center">
             {data?.originalPrice && (
-              <h5 className="font-medium text-[17px] text-gray-400 line-through">
-                ${data?.originalPrice}
+              <h5 className="font-bold text-[22px] text-purple-600 font-roboto">
+                ${formatPrice(data?.discountPrice)}
               </h5>
             )}
-            <h5 className="font-bold text-[22px] text-purple-600 font-roboto">
-              ${data?.discountPrice}
+            <h5 className="font-medium text-[17px] text-gray-400 line-through mb-3">
+              ${formatPrice(data?.originalPrice)}
             </h5>
           </div>
 
@@ -57,12 +102,12 @@ const EventCard = ({ data }) => {
           </span>
         </div>
 
-        {/* Countdown (uses finish_date) */}
+        {/* Countdown */}
         <div className="mt-3">
           <CountDown endDate={data?.finish_date} />
         </div>
 
-        {/* Buttons (UNCHANGED) */}
+        {/* Buttons */}
         <div className="flex gap-4 mt-5">
           <button
             className="w-1/2 py-3 rounded-xl bg-purple-600 text-white font-medium
@@ -75,6 +120,7 @@ const EventCard = ({ data }) => {
           <button
             className="w-1/2 py-3 rounded-xl bg-purple-400 text-white font-medium
             hover:bg-purple-500 transition duration-300 shadow-md"
+            onClick={() => addToCartHandler(data._id)}
           >
             Add to Cart
           </button>

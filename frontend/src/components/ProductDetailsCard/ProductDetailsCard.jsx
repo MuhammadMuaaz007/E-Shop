@@ -73,7 +73,6 @@ const ProductDetailsCard = ({ setOpen, data }) => {
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-black/30 z-50 flex items-center justify-center">
       <div className="w-[90%] md:w-[80%] h-[90vh] md:h-[75vh] bg-white rounded-2xl p-6 shadow-lg relative overflow-y-auto">
-        
         {/* Close */}
         <RxCross1
           size={30}
@@ -82,7 +81,6 @@ const ProductDetailsCard = ({ setOpen, data }) => {
         />
 
         <div className="md:flex gap-6">
-          
           {/* ================= Left ================= */}
           <div className="md:w-1/2">
             <img
@@ -92,7 +90,10 @@ const ProductDetailsCard = ({ setOpen, data }) => {
             />
 
             <div className="flex items-center justify-between mt-4 p-3 bg-gray-50 rounded-lg">
-              <Link to={`/shop/${data.shop._id}`} className="flex items-center gap-3">
+              <Link
+                to={`/shop/${data.shop._id}`}
+                className="flex items-center gap-3"
+              >
                 <img
                   src={data?.shop?.avatar?.url}
                   alt="shop"
@@ -141,9 +142,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
                         onClick={removeFromWishlistHandler}
                       />
                     ) : (
-                      <AiOutlineHeart
-                        onClick={addToWishlistHandler}
-                      />
+                      <AiOutlineHeart onClick={addToWishlistHandler} />
                     )}
                   </div>
                 </div>
@@ -170,15 +169,17 @@ const ProductDetailsCard = ({ setOpen, data }) => {
             {/* Buttons */}
             <div className="mt-6 flex gap-4">
               <button
-                className="flex-1 bg-purple-600 text-white py-3 rounded-lg flex items-center justify-center"
+                className="flex-1 bg-purple-600 text-white py-3 rounded-lg
+  flex items-center justify-center
+  hover:bg-purple-700 transition duration-300"
                 onClick={() => alert("Messaging feature coming soon")}
               >
-                <AiOutlineMessage className="mr-2 text-xl" />
                 Send Message
               </button>
 
               <button
-                className="flex-1 bg-green-600 text-white py-3 rounded-lg"
+                className="flex-1 rounded-xl bg-purple-400 text-white font-medium
+            hover:bg-purple-500 transition duration-300 shadow-md"
                 onClick={() => addToCartHandler(data._id)}
               >
                 Add to Cart

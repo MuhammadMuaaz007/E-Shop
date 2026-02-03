@@ -22,26 +22,26 @@ const Payment = () => {
     discountPrice: 0,
     shipping: 0,
   });
+
   const { user } = useSelector((state) => state.user);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const stripe = useStripe();
   const elements = useElements();
 
-
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("latestOrder")) || {};
     setOrderData(data);
   }, []);
 
-    const order = {
+  const order = {
     cart: orderData?.cart,
     shippingAddress: orderData?.shippingAddress,
     user: user && user,
     totalPrice: orderData?.totalPrice,
   };
 
-   const paymentHandler = async (e) => {
+  const paymentHandler = async (e) => {
     e.preventDefault();
     try {
       const config = {
@@ -53,7 +53,7 @@ const Payment = () => {
       const { data } = await axios.post(
         `${server}/payment/process`,
         paymentData,
-        config
+        config,
       );
 
       const client_secret = data.client_secret;
@@ -69,7 +69,7 @@ const Payment = () => {
         toast.error(result.error.message);
       } else {
         if (result.paymentIntent.status === "succeeded") {
-          order.paymnentInfo = {
+          order.paymentInfo = {
             id: result.paymentIntent.id,
             status: result.paymentIntent.status,
             type: "Credit Card",
@@ -80,10 +80,10 @@ const Payment = () => {
             .then((res) => {
               setOpen(false);
               navigate("/order/success");
-              toast.success("Order successful!");
               localStorage.setItem("cartItems", JSON.stringify([]));
               localStorage.setItem("latestOrder", JSON.stringify([]));
               window.location.reload();
+              // console.log(res)
             });
         }
       }
@@ -92,19 +92,32 @@ const Payment = () => {
     }
   };
 
-
-
   const paymentData = {
     amount: Math.round(orderData?.totalPrice * 100),
   };
-  const paypalPaymentHandler = async (paymentInfo) => {};
+  // const paypalPaymentHandler = async (paymentInfo) => {};
 
-  const cashOnDeliveryHandler = (e) => {
+  const cashOnDeliveryHandler = async (e) => {
+    order.paymentInfo = {
+      type: "Cash on Delivery",
+    };
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
     e.preventDefault();
-    alert("Cash on Delivery selected (frontend only).");
+    await axios
+      .post(`${server}/order/create-order`, order, config)
+      .then((res) => {
+        setOpen(false);
+        navigate("/order/success");
+        localStorage.setItem("cartItems", JSON.stringify([]));
+        localStorage.setItem("latestOrder", JSON.stringify([]));
+        window.location.reload();
+        // console.log(res)
+      });
   };
-  const onApprove = async (data, actions) => {};
-  const createOrder = async (data, actions) => {};
 
   return (
     <div className="w-full flex flex-col items-center py-10 bg-gray-50">
@@ -112,8 +125,6 @@ const Payment = () => {
         <div className="w-full md:w-[65%]">
           <PaymentInfo
             user={user}
-            onApprove={onApprove}
-            createOrder={createOrder}
             open={open}
             setOpen={setOpen}
             paymentHandler={paymentHandler}
@@ -137,8 +148,6 @@ const PaymentInfo = ({
   paymentHandler,
   cashOnDeliveryHandler,
   user,
-  onApprove,
-  createOrder,
 }) => {
   const [select, setSelect] = useState(1);
 
@@ -170,7 +179,7 @@ const PaymentInfo = ({
             <input
               type="text"
               placeholder="Name on Card"
-              value={user&& user.name}
+              value={user && user.name}
               required
               className="border rounded-md w-full p-3 focus:ring-2 focus:ring-purple-300"
             />
