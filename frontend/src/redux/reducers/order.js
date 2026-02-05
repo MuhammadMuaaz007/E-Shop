@@ -22,6 +22,20 @@ export const orderReducer = createSlice({
       state.error = action.payload;
       state.success = false; // same here
     },
+    // get all orders of the seller
+    getAllOrdersSellerRequest: (state) => {
+      state.isLoading = true;
+    },
+    getAllOrdersSellerSuccess: (state, action) => {
+      state.isLoading = false;
+      state.orders = action.payload;
+      state.success = true;
+    },
+    getAllOrdersSellerFail: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+      state.success = false;
+    },
     clearErrors: (state) => {
       state.error = null;
     },
@@ -33,6 +47,9 @@ export const {
   getAllOrdersUserRequest,
   getAllOrdersUserSuccess,
   getAllOrdersUserFail,
+  getAllOrdersSellerRequest,
+  getAllOrdersSellerSuccess,
+  getAllOrdersSellerFail,
 } = orderReducer.actions;
 
 export default orderReducer.reducer;

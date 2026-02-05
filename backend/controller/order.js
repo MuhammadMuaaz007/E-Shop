@@ -54,7 +54,7 @@ router.get(
     try {
       const orders = await Order.find({ "user._id": req.params.userId });
       
-      console.log("Orders fetched for user:", req.params.userId, orders);
+ 
       res.status(200).json({
         success: true,
         orders,
@@ -64,4 +64,34 @@ router.get(
     }
   }),
 );
+
+// get all orders of a shop
+router.get(
+  "/get-seller-all-orders/:shopId",
+  isAuthenticated,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const orders = await Order.find({
+        "cart.shopId": req.params.shopId,
+      });
+
+      const sellerOrders = orders.map((order) => ({
+        ...order._doc,
+        cart: order.cart.filter(
+          (item) => item.shopId === req.params.shopId
+        ),
+      }));
+
+      res.status(200).json({
+        success: true,
+        orders: sellerOrders,
+      });
+
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+
 module.exports = router;
