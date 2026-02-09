@@ -32,6 +32,8 @@ import { logoutUser } from "../../redux/reducers/user";
 
 const Header = ({ activeHeading }) => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
+  const { seller } = useSelector((state) => state.seller);
+  console.log("Seller in Header:", seller);
   const { allProducts } = useSelector((state) => state.product);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,7 +59,7 @@ const Header = ({ activeHeading }) => {
     const filteredProducts =
       allProducts &&
       allProducts.filter((product) =>
-        product.name.toLowerCase().includes(term.toLowerCase())
+        product.name.toLowerCase().includes(term.toLowerCase()),
       );
 
     setSearchData(filteredProducts);
@@ -139,9 +141,10 @@ const Header = ({ activeHeading }) => {
           </div>
 
           <div className={`${styles.button1}`}>
-            <Link to="/shop-create">
+            <Link to="/shop-login">
               <h1 className="text-[#fff] flex items-center">
-                Become Seller <IoIosArrowForward className="ml-1" />
+                {seller ? "Seller Dashboard" : "Become Seller"}{" "}
+                <IoIosArrowForward className="ml-1" />
               </h1>
             </Link>
           </div>

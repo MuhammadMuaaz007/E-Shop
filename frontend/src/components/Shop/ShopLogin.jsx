@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import styles from "../../styles/styles";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
@@ -13,7 +13,7 @@ const ShopLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   // const {seller} = useSelector((state) => state.seller);
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,8 +26,7 @@ const ShopLogin = () => {
       );
       // toast.success("Login Successful!");
       Store.dispatch(loadSeller());
-
-      navigate("/dashboard");
+      // Navigation is handled in ShopLoginPage after isSeller is true
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed!");
     }

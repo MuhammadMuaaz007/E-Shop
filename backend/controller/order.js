@@ -2,9 +2,11 @@ const express = require("express");
 const router = express.Router();
 const ErrorHandler = require("../utils/ErrorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
-const { isAuthenticated } = require("../middleware/auth");
+const { isAuthenticated, isSeller } = require("../middleware/auth");
+const Product = require("../model/product.js");
 const Order = require("../model/order.js");
 
+// create new order
 router.post(
   "/create-order",
   catchAsyncErrors(async (req, res, next) => {
@@ -53,8 +55,7 @@ router.get(
   catchAsyncErrors(async (req, res, next) => {
     try {
       const orders = await Order.find({ "user._id": req.params.userId });
-      
- 
+
       res.status(200).json({
         success: true,
         orders,
@@ -77,21 +78,82 @@ router.get(
 
       const sellerOrders = orders.map((order) => ({
         ...order._doc,
-        cart: order.cart.filter(
-          (item) => item.shopId === req.params.shopId
-        ),
+        cart: order.cart.filter((item) => item.shopId === req.params.shopId),
       }));
 
       res.status(200).json({
         success: true,
         orders: sellerOrders,
       });
-
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
-  })
+  }),
 );
 
+// update order status for seller
+
+router.put(
+  "/update-order-status/:id",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const order = await Order.findById(req.params.id);
+
+      if (!order) {
+        return next(new ErrorHandler("Order not found with this id", 400));
+      }
+      async function updateOrder(id, qty) {
+        const product = await Product.findById(id);
+        if (!product) {
+          console.log(`Product not found for id: ${id}`);
+          return;
+        }
+
+        product.stock -= qty;
+        product.sold_out += qty;
+   
+        
+        try {
+          await product.save({ validateBeforeSave: false });
+          console.log(`Product ${product.name} saved successfully.`);
+        } catch (saveError) {
+          console.log(`Failed to save product ${product.name}:`, saveError);
+        }
+      }
+
+      // Fix: Use productId and proper async loop
+      if (req.body.status === "Transferred to delivery partner") {
+        for (const o of order.cart) {
+          // Update product stock
+          await updateOrder(o.productId || o._id, o.qty);
+          // Update product snapshot in order
+          const product = await Product.findById(o.productId || o._id);
+          if (product) {
+            o.name = product.name;
+            o.discountPrice = product.discountPrice;
+            o.images = product.images;
+            o.description = product.description;
+          }
+        }
+      }
+
+      order.status = req.body.status;
+
+      if (req.body.status === "Delivered") {
+        order.deliveredAt = Date.now();
+        order.paymentInfo.status = "Succeeded";
+      }
+
+      await order.save({ validateBeforeSave: false });
+      res.status(200).json({
+        success: true,
+        order,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }),
+);
 
 module.exports = router;

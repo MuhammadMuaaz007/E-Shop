@@ -6,6 +6,7 @@ const sellerSlice = createSlice({
   name: "seller",
   initialState: {
     isLoading: true,
+    isSeller: false,
   },
   reducers: {
     LoadSellerRequest: (state) => {

@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../styles/styles";
 import { BsFillBagFill } from "react-icons/bs";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllOrdersSeller } from "../../redux/actions/order";
+import { server } from "../../server";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const OrderDetails = () => {
   const { orders } = useSelector((state) => state.order);
   const { seller } = useSelector((state) => state.seller);
   const dispatch = useDispatch();
-  const [status, setStatus] = useState("");
-  // const navigate = useNavigate();
+  const [status, setStatus] = useState();
+  const navigate = useNavigate();
 
   const { id } = useParams();
 
@@ -20,9 +23,31 @@ const OrderDetails = () => {
 
   const data = orders && orders.find((item) => item._id === id);
 
-  const orderUpdateHandler = async () => {};
+  useEffect(() => {
+    if (data?.status) {
+      setStatus(data.status);
+    }
+  }, [data]);
 
-  const refundOrderUpdateHandler = async () => {};
+  const orderUpdateHandler = async () => {
+    try {
+      const res = await axios.put(
+        `${server}/order/update-order-status/${id}`,
+        { status },
+        { withCredentials: true },
+      );
+      toast.success(res.data.message || "Order status updated!");
+      dispatch(getAllOrdersSeller(seller._id));
+      navigate("/dashboard-orders");
+    } catch (error) {
+      console.log("Order update error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update order status!",
+      );
+    }
+  };
 
   return (
     <div className={`py-4 min-h-screen ${styles.section}`}>
@@ -43,6 +68,7 @@ const OrderDetails = () => {
     hover:border-purple-300
     transition-all duration-300
     cursor-pointer
+ 
   "
           >
             Order List
@@ -161,11 +187,7 @@ const OrderDetails = () => {
       ) : null}
 
       <div
-        onClick={
-          data?.status !== "Processing refund"
-            ? orderUpdateHandler
-            : refundOrderUpdateHandler
-        }
+        onClick={orderUpdateHandler}
         className="
     mt-5
     w-[220px] h-[45px]

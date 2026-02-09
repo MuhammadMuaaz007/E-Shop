@@ -33,12 +33,10 @@ const ShopInfo = ({ isOwner }) => {
     axios
       .get(`${server}/shop/get-shop-info/${id}`)
       .then((res) => {
-        console.log(res.data.shop);
         setData(res.data.shop);
         setIsLoading(false);
       })
-      .catch((error) => {
-        console.log(error);
+      .catch(() => {
         setIsLoading(false);
       });
   }, [dispatch, id]);
@@ -52,9 +50,8 @@ const ShopInfo = ({ isOwner }) => {
       toast.success("Logged out successfully");
       navigate("/");
       window.location.reload();
-    } catch (error) {
-      toast.error("Logout failed");
-      console.error("Logout error:", error);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Logout failed");
     }
   };
 
