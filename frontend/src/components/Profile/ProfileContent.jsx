@@ -671,16 +671,49 @@ const AllOrders = () => {
     }
   }, [user, dispatch]);
 
-  if (isLoading)
-    return <p className="flex justify-center ">Loading orders...</p>;
-  if (error) return <p className="flex justify-center ">Error: {error}</p>;
+  if (isLoading) {
+    return (
+      <p className="flex justify-center items-center mt-10 text-gray-500">
+        Loading orders...
+      </p>
+    );
+  }
+
+  if (error) {
+    return (
+      <p className="flex justify-center items-center mt-10 text-red-500">
+        {error}
+      </p>
+    );
+  }
+
+  // ✅ NO ORDERS STATE
+  if (!orders || orders.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center mt-16 text-center">
+        <h2 className="text-xl font-semibold text-gray-700">No Orders Found</h2>
+        <p className="text-gray-500 mt-2">You haven’t placed any orders yet.</p>
+
+        <Link
+          to="/products"
+          className="mt-5 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+        >
+          Start Shopping
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full px-5 md:px-10 grid grid-cols-1 md:grid-cols-1 gap-5">
-      {orders?.map((order) => (
+    <div className="w-full px-5 md:px-10 grid grid-cols-1 gap-5">
+      {orders.map((order) => (
         <div
           key={order._id}
-          className="bg-white shadow-md rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:shadow-lg transition-all"
+          className="bg-white shadow-md rounded-xl p-4
+          flex flex-col md:flex-row
+          items-start md:items-center
+          justify-between gap-4
+          hover:shadow-lg transition-all"
         >
           <div>
             <h5 className="font-semibold">Order ID: {order._id}</h5>
@@ -691,7 +724,8 @@ const AllOrders = () => {
               Total: ${order.totalPrice}
             </p>
           </div>
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mt-3 md:mt-0">
+
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
             <span
               className={`px-3 py-1 rounded-full text-white font-medium ${
                 order.status === "Delivered" ? "bg-green-500" : "bg-yellow-500"
@@ -699,6 +733,7 @@ const AllOrders = () => {
             >
               {order.status}
             </span>
+
             <Link to={`/user/order/${order._id}`}>
               <Button variant="contained" color="primary">
                 View

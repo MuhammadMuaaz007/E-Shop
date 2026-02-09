@@ -20,9 +20,9 @@ const OrderDetails = () => {
 
   const data = orders && orders.find((item) => item._id === id);
 
-  const orderUpdateHandler = async (e) => {};
+  const orderUpdateHandler = async () => {};
 
-  const refundOrderUpdateHandler = async (e) => {};
+  const refundOrderUpdateHandler = async () => {};
 
   return (
     <div className={`py-4 min-h-screen ${styles.section}`}>
@@ -32,8 +32,8 @@ const OrderDetails = () => {
           <h1 className="pl-2 text-[25px]">Order Details</h1>
         </div>
         <Link to="/dashboard-orders">
-       <div
-  className="
+          <div
+            className="
     px-6 h-[45px] flex items-center justify-center
     rounded-md font-semibold text-[16px]
     text-purple-600
@@ -44,10 +44,9 @@ const OrderDetails = () => {
     transition-all duration-300
     cursor-pointer
   "
->
-  Order List
-</div>
-
+          >
+            Order List
+          </div>
         </Link>
       </div>
 
@@ -64,7 +63,7 @@ const OrderDetails = () => {
       <br />
       <br />
       {data &&
-        data?.cart.map((item, index) => (
+        data?.cart.map((item) => (
           <div className="w-full flex items-start mb-5">
             <img
               src={`${item.images[0]?.url}`}

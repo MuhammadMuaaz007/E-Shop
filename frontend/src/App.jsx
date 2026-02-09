@@ -18,7 +18,8 @@ import {
   SellerActivationPage,
   ShopLoginPage,
   ShopAllOrders,
-  ShopOrderDetails 
+  ShopOrderDetails ,
+  OrderDetailsPage
 } from "./routes/Routes.js";
 import { ToastContainer } from "react-toastify";
 import { useEffect, useState } from "react";
@@ -119,6 +120,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/user/order/:id"
+            element={
+              <ProtectedRoute>
+                <OrderDetailsPage />
               </ProtectedRoute>
             }
           />
