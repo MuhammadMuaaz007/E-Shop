@@ -18,6 +18,7 @@ import {
   addToWishlistAction,
   removeFromWishlistAction,
 } from "../../redux/actions/wishlist";
+import Ratings from "../Products/Ratings";
 
 const ProductCard = ({ data }) => {
   const dispatch = useDispatch();
@@ -89,28 +90,18 @@ const ProductCard = ({ data }) => {
 
         {/* Shop Name */}
         <Link to={`/shop/${data.shop._id}`}>
-          <h5 className={`${styles.shop_name} mt-2`}>
-            {data.shop.name}
-          </h5>
+          <h5 className={`${styles.shop_name} mt-2`}>{data.shop.name}</h5>
         </Link>
 
         {/* Product Name */}
         <Link to={`/product/${product_slug}`}>
           <h4 className="pt-1 font-[500] text-[18px] text-gray-800">
-            {data.name.length > 40
-              ? data.name.slice(0, 40) + "..."
-              : data.name}
+            {data.name.length > 40 ? data.name.slice(0, 40) + "..." : data.name}
           </h4>
 
           {/* Rating Stars */}
           <div className="flex mt-1">
-            {[1, 2, 3, 4, 5].map((i) =>
-              i <= rating ? (
-                <AiFillStar key={i} color="#F6BA00" size={20} />
-              ) : (
-                <AiOutlineStar key={i} color="#F6BA00" size={20} />
-              )
-            )}
+            <Ratings rating={rating} />
           </div>
 
           {/* Price & Sold */}
@@ -121,9 +112,7 @@ const ProductCard = ({ data }) => {
               </span>
 
               {data.originalPrice && (
-                <span
-                  className={`${styles.price} line-through text-gray-400`}
-                >
+                <span className={`${styles.price} line-through text-gray-400`}>
                   {formatNumber(data.originalPrice)}$
                 </span>
               )}

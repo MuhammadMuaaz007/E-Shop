@@ -57,7 +57,6 @@ const ProductDetails = ({ data }) => {
   };
   // Convert large numbers to 'k', 'M' format
   const formatPrice = (num) => {
-  
     if (num >= 1000) return (num / 1000).toFixed(1) + "k";
     return num;
   };
@@ -70,6 +69,24 @@ const ProductDetails = ({ data }) => {
       setClick(false);
     }
   }, [wishlist, data._id]);
+  const { products } = useSelector((state) => state.product);
+  const totalReviews =
+    products &&
+    products.reduce(
+      (acc, product) => acc + (product.reviews ? product.reviews.length : 0),
+      0,
+    );
+  const totalRatings =
+    products &&
+    products.reduce(
+      (acc, product) =>
+        acc + product.reviews.reduce((sum, review) => sum + review.rating, 0),
+      0,
+    );
+
+  const avg = totalRatings / totalReviews || 0;
+
+  const averageRating = avg.toFixed(2);
 
   return (
     <div className="bg-gradient-to-br w-full h-full from-purple-50 to-white">
@@ -190,9 +207,9 @@ const ProductDetails = ({ data }) => {
                         <h3 className="text-lg font-semibold cursor-pointer hover:text-purple-600 transition">
                           {data.shop.name}
                         </h3>
-                        <div className="flex items-center bg-green-100 text-sm font-medium px-3 py-1 rounded">
-                          ⭐⭐⭐⭐⭐ {data.shop.ratings}
-                        </div>
+                        <h5 className="pb-3 text-[15px]">
+                          ({averageRating}/5) Ratings
+                        </h5>
                       </div>
                     </div>
                   </Link>
@@ -209,7 +226,11 @@ const ProductDetails = ({ data }) => {
             </div>
           </div>
 
-          <ProductDetailInfo data={data} />
+          <ProductDetailInfo
+            data={data}
+            totalReviews={totalReviews}
+            averageRating={averageRating}
+          />
           <br />
           <br />
         </div>
@@ -221,8 +242,9 @@ const ProductDetails = ({ data }) => {
 export default ProductDetails;
 
 import { getAllProductsShop } from "../../redux/actions/product";
+import Ratings from "./Ratings";
 
-const ProductDetailInfo = ({ data }) => {
+const ProductDetailInfo = ({ data, totalReviews, averageRating }) => {
   const [active, setActive] = useState(1);
   const dispatch = useDispatch();
 
@@ -282,13 +304,33 @@ const ProductDetailInfo = ({ data }) => {
       )}
 
       {/* ---------- REVIEWS TAB ---------- */}
-      {active === 2 && (
-        <div className="w-full flex justify-center items-center min-h-[40vh]">
-          <p className="text-[18px] font-semibold text-gray-600">
-            No reviews yet.
-          </p>
+      {active === 2 ? (
+        <div className="w-full min-h-[40vh] flex flex-col items-center py-3 overflow-y-scroll">
+          {data &&
+            data.reviews.map((item) => (
+              <div className="w-full flex my-2">
+                <img
+                  src={`${item.user.avatar?.url}`}
+                  alt=""
+                  className="w-[50px] h-[50px] rounded-full"
+                />
+                <div className="pl-2 ">
+                  <div className="w-full flex items-center">
+                    <h1 className="font-[500] mr-3">{item.user.name}</h1>
+                    <Ratings rating={data?.ratings} />
+                  </div>
+                  <p>{item.comment}</p>
+                </div>
+              </div>
+            ))}
+
+          <div className="w-full flex justify-center">
+            {data && data.reviews.length === 0 && (
+              <h5 className="mt-27">No Reviews have for this product!</h5>
+            )}
+          </div>
         </div>
-      )}
+      ) : null}
 
       {/* ---------- SELLER INFORMATION TAB ---------- */}
       {active === 3 && (
@@ -307,11 +349,9 @@ const ProductDetailInfo = ({ data }) => {
                   <h3 className="text-xl font-semibold cursor-pointer hover:text-purple-600 transition">
                     {data.shop.name}
                   </h3>
-
-                  <div className="flex items-center gap-2 bg-green-100 px-3 py-[4px] rounded-lg w-fit text-sm">
-                    ⭐⭐⭐⭐⭐
-                    <span className="text-green-800">{data.shop.ratings}</span>
-                  </div>
+                  <h5 className="pb-3 text-[15px]">
+                    ({averageRating}/5) Ratings
+                  </h5>
                 </div>
               </div>
             </Link>
@@ -339,9 +379,7 @@ const ProductDetailInfo = ({ data }) => {
 
             <h5 className="font-semibold">
               Total Reviews:{" "}
-              <span className="font-medium text-gray-700">
-                {data.shop.totalReviews}
-              </span>
+              <span className="font-medium text-gray-700">{totalReviews}</span>
             </h5>
 
             <Link to={`/shop/${data.shop._id}`}>

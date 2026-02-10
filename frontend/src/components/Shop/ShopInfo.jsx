@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import Loader from "../Layout/Loader.jsx";
 import axios from "axios";
@@ -26,7 +26,8 @@ const ShopInfo = ({ isOwner }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { id } = useParams();
   const dispatch = useDispatch();
-
+  const {products} = useSelector((state) => state.product);
+  const totalProducts = products?.length || 0;
   useEffect(() => {
     dispatch(getAllProductsShop(id));
     setIsLoading(true);
@@ -40,6 +41,25 @@ const ShopInfo = ({ isOwner }) => {
         setIsLoading(false);
       });
   }, [dispatch, id]);
+
+
+    const totalReviews =
+    products &&
+    products.reduce(
+      (acc, product) => acc + (product.reviews ? product.reviews.length : 0),
+      0,
+    );
+  const totalRatings =
+    products &&
+    products.reduce(
+      (acc, product) =>
+        acc + product.reviews.reduce((sum, review) => sum + review.rating, 0),
+      0,
+    );
+
+  const avg = totalRatings / totalReviews || 0;
+
+  const averageRating = avg.toFixed(2);
 
   const logoutHandler = async () => {
     try {
@@ -85,8 +105,8 @@ const ShopInfo = ({ isOwner }) => {
       <div className="divide-y divide-gray-200">
         <InfoCard title="Address" value={data.address} />
         <InfoCard title="Phone Number" value={data.phoneNumber} />
-        <InfoCard title="Total Products" value={data.totalProducts || 10} />
-        <InfoCard title="Shop Ratings" value={`${data.ratings || 4}/5`} />
+        <InfoCard title="Total Products" value={totalProducts} />
+        <InfoCard title="Shop Ratings" value={`${averageRating}/5`} />
         <InfoCard title="Joined On" value={data?.createdAt?.slice(0, 10)} />
       </div>
 

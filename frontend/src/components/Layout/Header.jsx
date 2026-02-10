@@ -29,6 +29,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../../redux/reducers/user";
+import { logoutSeller } from "../../redux/reducers/seller";
 
 const Header = ({ activeHeading }) => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
@@ -64,17 +65,25 @@ const Header = ({ activeHeading }) => {
 
     setSearchData(filteredProducts);
   };
-  const logoutHandler = () => {
-    axios
-      .get(`${server}/user/logout`, { withCredentials: true })
-      .then((res) => {
-        toast.success(res.data.message);
-        dispatch(logoutUser());
-        navigate("/login");
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
+  const logoutHandler = async () => {
+    try {
+      await axios.get(`${server}/user/logout`, {
+        withCredentials: true,
       });
+
+      await axios.get(`${server}/shop/logout`, {
+        withCredentials: true,
+      });
+
+      dispatch(logoutUser());
+      dispatch(logoutSeller());
+
+      toast.success("Logged out successfully");
+      navigate("/");
+      window.location.reload();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Logout failed");
+    }
   };
 
   // FIX: Smooth sticky with no jerk
