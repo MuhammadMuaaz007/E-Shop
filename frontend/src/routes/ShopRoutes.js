@@ -4,4 +4,6 @@ import ShopAllProducts from "../pages/shop/ShopAllProducts";
 import ShopCreateEvent from "../pages/shop/ShopCreateEvent";
 import ShopAllEvents from "../pages/shop/ShopAllEvents";
 import ShopAllCoupons from "../pages/shop/ShopAllCoupons";
-export { ShopDashboardPage ,ShopCreateProduct,ShopAllProducts,ShopCreateEvent,ShopAllEvents,ShopAllCoupons};
+import ShopAllRefunds from "../pages/shop/ShopAllRefunds";
+export { ShopDashboardPage ,ShopCreateProduct,ShopAllProducts,ShopCreateEvent,ShopAllEvents,
+  ShopAllRefunds,ShopAllCoupons};

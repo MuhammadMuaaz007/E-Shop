@@ -27,7 +27,7 @@ export const loadUser = () => async (dispatch) => {
     const { data } = await axios.get(`${server}/user/get-user`, {
       withCredentials: true,
     });
-    dispatch(LoadUserSuccess(data.user));
+    dispatch(LoadUserSuccess(data?.user));
   } catch (error) {
     dispatch(LoadUserFail(error.response.data?.message));
   }
@@ -39,7 +39,7 @@ export const loadSeller = () => async (dispatch) => {
     const { data } = await axios.get(`${server}/shop/getSeller`, {
       withCredentials: true,
     });
-    dispatch(LoadSellerSuccess(data.seller));
+    dispatch(LoadSellerSuccess(data?.seller));
   } catch (error) {
     dispatch(LoadSellerFail(error.response.data?.message));
   }

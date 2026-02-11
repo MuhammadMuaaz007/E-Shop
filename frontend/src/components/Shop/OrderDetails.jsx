@@ -49,6 +49,24 @@ const OrderDetails = () => {
     }
   };
 
+  const refundOrderUpdateHandler = async () => {
+    await axios
+      .put(
+        `${server}/order/order-refund-success/${id}`,
+        {
+          status,
+        },
+        { withCredentials: true },
+      )
+      .then(() => {
+        toast.success("Order updated!");
+        dispatch(getAllOrdersSeller(seller._id));
+      })
+      .catch((error) => {
+        toast.error(error.response?.data?.message || error.message || "Failed to update order status!");
+      });
+  };
+
   return (
     <div className={`py-4 min-h-screen ${styles.section}`}>
       <div className="w-full flex items-center justify-between">
@@ -187,7 +205,11 @@ const OrderDetails = () => {
       ) : null}
 
       <div
-        onClick={orderUpdateHandler}
+        onClick={
+          data?.status !== "Processing refund"
+            ? orderUpdateHandler
+            : refundOrderUpdateHandler
+        }
         className="
     mt-5
     w-[220px] h-[45px]
