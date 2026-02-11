@@ -197,7 +197,7 @@ const ProfileContent = ({ active }) => {
 export default ProfileContent;
 
 const TrackOrder = () => {
-const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const { orders, isLoading, error } = useSelector((state) => state.order);
   const { user } = useSelector((state) => state.user);
 
@@ -292,7 +292,11 @@ const AllRefundOrders = () => {
   }, [dispatch, user._id]);
 
   const eligibleOrders =
-    orders && orders.filter((item) => item.status === "Processing refund" || item.status === "Refund Success" );
+    orders &&
+    orders.filter(
+      (item) =>
+        item.status === "Processing refund" || item.status === "Refund Success",
+    );
 
   return (
     <div className="w-full px-5 md:px-10 grid grid-cols-1 md:grid-cols-1 gap-5">
@@ -303,8 +307,12 @@ const AllRefundOrders = () => {
         >
           <div>
             <h5 className="font-semibold">Order ID: {order._id}</h5>
-            <p className="text-gray-500">Items: {order.cart.map(item => item.name).join(", ")}</p>
-            <p className="text-gray-400 font-medium">Total: ${order.totalPrice}</p>
+            <p className="text-gray-500">
+              Items: {order.cart.map((item) => item.name).join(", ")}
+            </p>
+            <p className="text-gray-400 font-medium">
+              Total: ${order.totalPrice}
+            </p>
           </div>
           <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mt-3 md:mt-0">
             <span
@@ -720,7 +728,7 @@ const AllOrders = () => {
   if (isLoading) {
     return (
       <p className="flex justify-center items-center mt-10 text-gray-500">
-        Loading  orders...
+        Loading orders...
       </p>
     );
   }
