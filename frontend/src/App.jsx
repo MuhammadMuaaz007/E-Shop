@@ -39,6 +39,7 @@ import {
   ShopAllEvents,
   ShopAllCoupons,
   ShopAllRefunds,
+  ShopSettingPage,
 } from "./routes/ShopRoutes.js";
 import ShopHomePage from "./pages/shop/ShopHomePage.jsx";
 import axios from "axios";
@@ -158,6 +159,14 @@ const App = () => {
             element={
               <SellerProtectedRoute>
                 <ShopHomePage />
+              </SellerProtectedRoute>
+            }
+          />
+            <Route
+            path="/settings"
+            element={
+              <SellerProtectedRoute>
+                <ShopSettingPage />
               </SellerProtectedRoute>
             }
           />

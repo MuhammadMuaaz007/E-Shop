@@ -54,7 +54,7 @@ router.post("/create-shop", upload.single("file"), async (req, res, next) => {
         phoneNumber: seller.phoneNumber,
       },
       process.env.ACTIVATION_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "1d" },
     );
 
     const encodedToken = encodeURIComponent(activationToken);
@@ -118,13 +118,13 @@ router.post(
         return next(
           new ErrorHandler(
             "Activation token expired. Please request a new activation email.",
-            400
-          )
+            400,
+          ),
         );
       }
       return next(new ErrorHandler(err.message, 400));
     }
-  })
+  }),
 );
 // login shop
 
@@ -143,15 +143,14 @@ router.post(
       const isPasswordValid = await shop.comparePassword(password);
       if (!isPasswordValid) {
         return next(
-          new ErrorHandler("Please Provide correct information!", 400)
+          new ErrorHandler("Please Provide correct information!", 400),
         );
       }
       sendShopToken(shop, 200, res);
- 
     } catch (error) {
       return next(new ErrorHandler("Invalid Email or password!", 400));
     }
-  })
+  }),
 );
 
 // load shop
@@ -168,7 +167,7 @@ router.get(
     } catch (error) {
       return next(new ErrorHandler("Error fetching user data", 500));
     }
-  })
+  }),
 );
 
 //logout shop
@@ -188,7 +187,7 @@ router.get(
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
-  })
+  }),
 );
 
 // get shop info
@@ -204,8 +203,81 @@ router.get(
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
     }
-  })
+  }),
 );
 
+// update shop profile picture
+router.put(
+  "/update-shop-avatar",
+  isSeller,
+  upload.single("image"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const shop = await Shop.findById(req.seller._id);
+
+      // ❌ If no file uploaded
+      if (!req.file) {
+        return next(new ErrorHandler("Please upload an image", 400));
+      }
+
+      // ✅ Extract old avatar filename
+      if (shop.avatar && shop.avatar.url) {
+        const oldAvatar = shop.avatar.url.split("/").pop();
+        const oldAvatarPath = path.join(process.cwd(), "uploads", oldAvatar);
+
+        // ✅ Delete old avatar
+        if (fs.existsSync(oldAvatarPath)) {
+          fs.unlinkSync(oldAvatarPath);
+        }
+      }
+
+      // ✅ Save new avatar
+      shop.avatar = {
+        public_id: req.file.filename,
+        url: `${req.protocol}://${req.get("host")}/uploads/${
+          req.file.filename
+        }`,
+      };
+
+      await shop.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Avatar updated successfully",
+        shop,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }),
+);
+
+// update shop information
+router.put(
+  "/update-shop-info",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    const { name, address, zipCode, phoneNumber, description } = req.body;
+
+    const shop = await Shop.findById(req.seller._id);
+    if (!shop) {
+      return next(new ErrorHandler("Shop not found", 404));
+    }
+
+    shop.name = name || shop.name;
+    shop.address = address || shop.address;
+    shop.zipCode = zipCode || shop.zipCode;
+    shop.phoneNumber = phoneNumber || shop.phoneNumber;
+    shop.description = description || shop.description;
+
+    await shop.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Shop information updated successfully",
+      shop,
+    });
+  }),
+);
 
 module.exports = router;

@@ -61,8 +61,7 @@ const ProfileContent = ({ active }) => {
       dispatch(loadUser());
       toast.success("Avatar updated!");
     } catch (error) {
-      toast.error("Error uploading avatar");
-      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to update avatar");
     }
   };
 

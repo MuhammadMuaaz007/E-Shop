@@ -26,7 +26,7 @@ const ShopInfo = ({ isOwner }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { id } = useParams();
   const dispatch = useDispatch();
-  const {products} = useSelector((state) => state.product);
+  const { products } = useSelector((state) => state.product);
   const totalProducts = products?.length || 0;
   useEffect(() => {
     dispatch(getAllProductsShop(id));
@@ -42,8 +42,7 @@ const ShopInfo = ({ isOwner }) => {
       });
   }, [dispatch, id]);
 
-
-    const totalReviews =
+  const totalReviews =
     products &&
     products.reduce(
       (acc, product) => acc + (product.reviews ? product.reviews.length : 0),
@@ -96,8 +95,7 @@ const ShopInfo = ({ isOwner }) => {
       <div className="text-center px-4 sm:px-6 py-4">
         <h3 className="text-xl sm:text-2xl font-semibold">{data.name}</h3>
         <p className="text-gray-500 mt-2 text-sm sm:text-base">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque quaerat
-          repellat quam eum perferendis, repellendus ex rerum.
+          {data.description ? data.description : null}
         </p>
       </div>
 
