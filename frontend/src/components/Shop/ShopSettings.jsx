@@ -90,17 +90,7 @@ const ShopSettings = () => {
                   type="button"
                   onClick={handleGoBack}
                   className="
-    inline-flex items-center gap-2
-    px-4 py-2
-    rounded-full
-    text-sm font-medium
-    bg-purple-50
-    text-purple-700
-    hover:bg-purple-100
-    hover:text-purple-800
-    active:scale-[0.97]
-    transition-all duration-200
-  "
+                  `inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 hover:text-purple-800 active:scale-[0.97] transition-all duration-200 "
                 >
                   <span className="text-lg leading-none">←</span>
                   Go back
