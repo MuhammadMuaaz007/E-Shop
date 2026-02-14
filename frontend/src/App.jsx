@@ -40,6 +40,7 @@ import {
   ShopAllCoupons,
   ShopAllRefunds,
   ShopSettingPage,
+  ShopWithdrawMoneyPage,
 } from "./routes/ShopRoutes.js";
 import ShopHomePage from "./pages/shop/ShopHomePage.jsx";
 import axios from "axios";
@@ -223,6 +224,14 @@ const App = () => {
             element={
               <SellerProtectedRoute>
                 <ShopAllOrders />
+              </SellerProtectedRoute>
+            }
+          />
+             <Route
+            path="/dashboard-withdraw-money"
+            element={
+              <SellerProtectedRoute>
+                <ShopWithdrawMoneyPage />
               </SellerProtectedRoute>
             }
           />

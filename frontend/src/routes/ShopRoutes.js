@@ -5,6 +5,7 @@ import ShopCreateEvent from "../pages/shop/ShopCreateEvent";
 import ShopAllEvents from "../pages/shop/ShopAllEvents";
 import ShopAllCoupons from "../pages/shop/ShopAllCoupons";
 import ShopAllRefunds from "../pages/shop/ShopAllRefunds";
-import ShopSettingPage from "../pages/shop/ShopSettingPage.jsx";
+import ShopSettingPage from "../pages/shop/ShopSettingPage";
+import ShopWithdrawMoneyPage from "../pages/shop/ShopWithdrawMoneyPage";
 export { ShopDashboardPage ,ShopCreateProduct,ShopAllProducts,ShopCreateEvent,ShopAllEvents,
-  ShopAllRefunds,ShopAllCoupons,ShopSettingPage};
+  ShopAllRefunds,ShopAllCoupons,ShopSettingPage,ShopWithdrawMoneyPage};
