@@ -106,7 +106,7 @@ const ProductCard = ({ data }) => {
 
           {/* Price & Sold */}
           <div className="py-2 flex items-center justify-between">
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-0.5 items-center">
               <span className={styles.productDiscountPrice}>
                 {formatNumber(data.discountPrice)}$
               </span>

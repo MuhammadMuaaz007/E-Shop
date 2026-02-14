@@ -24,7 +24,7 @@ function DashboardHeader() {
       {/* Right Icons */}
       <nav className="flex items-center space-x-6">
         
-        <Link to="/dashboard/cupouns" className="hidden md:block">
+        <Link to="/dashboard-coupons" className="hidden md:block">
           <AiOutlineGift title="Coupons" className="icon" size={30} />
         </Link>
 
