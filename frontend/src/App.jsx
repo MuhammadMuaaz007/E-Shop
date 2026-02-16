@@ -41,6 +41,7 @@ import {
   ShopAllRefunds,
   ShopSettingPage,
   ShopWithdrawMoneyPage,
+  ShopInboxPage,
 } from "./routes/ShopRoutes.js";
 import ShopHomePage from "./pages/shop/ShopHomePage.jsx";
 import axios from "axios";
@@ -208,6 +209,14 @@ const App = () => {
             element={
               <SellerProtectedRoute>
                 <ShopAllEvents />
+              </SellerProtectedRoute>
+            }
+          />
+            <Route
+            path="/dashboard-messages"
+            element={
+              <SellerProtectedRoute>
+                <ShopInboxPage />
               </SellerProtectedRoute>
             }
           />

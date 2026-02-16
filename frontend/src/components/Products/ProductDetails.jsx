@@ -16,6 +16,7 @@ const ProductDetails = ({ data }) => {
   const [click, setClick] = useState(false);
 
   const { cart } = useSelector((state) => state.cart);
+  const { user, isAuthenticated } = useSelector((state) => state.user);
   const { wishlist } = useSelector((state) => state.wishlist);
 
   const dispatch = useDispatch();
@@ -30,8 +31,26 @@ const ProductDetails = ({ data }) => {
 
   const decrement = () => setCount((prev) => (prev > 1 ? prev - 1 : 1));
 
-  const handleMessageSubmit = () => {
-    navigate("/inbox?conversation=5728nsdfiewvureyanfajkt");
+  const handleMessageSubmit = async () => {
+    if (isAuthenticated) {
+      const groupTitle = data._id + user._id;
+      const userId = user._id;
+      const sellerId = data.shop._id;
+      await axios
+        .post(`${server}/conversation/create-new-conversation`, {
+          groupTitle,
+          userId,
+          sellerId,
+        })
+        .then((res) => {
+          navigate(`/inbox?${res.data.conversation._id}`);
+        })
+        .catch((error) => {
+          toast.error(error.response.data.message);
+        });
+    } else {
+      toast.error("Please login to create a conversation");
+    }
   };
 
   const addToWishlistHandler = () => {
@@ -243,6 +262,8 @@ export default ProductDetails;
 
 import { getAllProductsShop } from "../../redux/actions/product";
 import Ratings from "./Ratings";
+import { server } from "../../server";
+import axios from "axios";
 
 const ProductDetailInfo = ({ data, totalReviews, averageRating }) => {
   const [active, setActive] = useState(1);
@@ -357,9 +378,7 @@ const ProductDetailInfo = ({ data, totalReviews, averageRating }) => {
             </Link>
 
             <p className="text-gray-700 leading-7 text-[16px] mt-3">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
-              reprehenderit explicabo doloremque perspiciatis molestiae, ratione
-              maiores corporis amet!
+              {data.shop.description || ""}
             </p>
           </div>
 

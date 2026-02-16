@@ -7,5 +7,6 @@ import ShopAllCoupons from "../pages/shop/ShopAllCoupons";
 import ShopAllRefunds from "../pages/shop/ShopAllRefunds";
 import ShopSettingPage from "../pages/shop/ShopSettingPage";
 import ShopWithdrawMoneyPage from "../pages/shop/ShopWithdrawMoneyPage";
+import ShopInboxPage from "../pages/shop/ShopInboxPage";
 export { ShopDashboardPage ,ShopCreateProduct,ShopAllProducts,ShopCreateEvent,ShopAllEvents,
-  ShopAllRefunds,ShopAllCoupons,ShopSettingPage,ShopWithdrawMoneyPage};
+  ShopAllRefunds,ShopAllCoupons,ShopSettingPage,ShopWithdrawMoneyPage,ShopInboxPage};
