@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
 
 const DashboardMessages = () => {
-  const { seller, isLoading } = useSelector((state) => state.seller);
+  const { seller, } = useSelector((state) => state.seller);
   const [conversations, setConversations] = useState([]);
   // const [messages, setMessages] = useState([]);
   const [open, setOpen] = useState(false);
