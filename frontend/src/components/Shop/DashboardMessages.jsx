@@ -5,12 +5,37 @@ import { server } from "../../server";
 import { TfiGallery } from "react-icons/tfi";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
+const ENDPOINT = "http://localhost:4000";
+const socketId = socketIO(ENDPOINT, {
+  transports: ["websocket"],
+});
+import socketIO from "socket.io-client";
 
 const DashboardMessages = () => {
-  const { seller, } = useSelector((state) => state.seller);
+  const { seller } = useSelector((state) => state.seller);
+
   const [conversations, setConversations] = useState([]);
-  // const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [currentChat, setCurrentChat] = useState(null);
+  const [arrivalMessage, setArrivalMessage] = useState(null);
+
+  const [newMessage, setNewMessage] = useState("");
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    socketId.on("getMessage", (data) => {
+      setArrivalMessage({
+        sender: data.senderId,
+        text: data.text,
+        createdAt: Date.now(),
+      });
+    });
+  });
+  useEffect(() => {
+    arrivalMessage &&
+      currentChat?.members.includes(arrivalMessage.sender) &&
+      setMessages((prev) => [...prev, arrivalMessage]);
+  }, [arrivalMessage, currentChat]);
 
   useEffect(() => {
     const getConversation = async () => {
@@ -29,6 +54,76 @@ const DashboardMessages = () => {
     };
     getConversation();
   }, [seller]);
+  useEffect(() => {
+    const getMessages = async () => {
+      try {
+        if (currentChat) {
+          const response = await axios.get(
+            `${server}/message/get-all-messages/${currentChat._id}`,
+            {
+              withCredentials: true,
+            },
+          );
+          setMessages(response.data.messages);
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+    getMessages();
+  }, [currentChat]);
+
+  const updateLastMessage = async () => {
+    socketId.emit("updateLastMessage", {
+      lastMessage: newMessage,
+      lastMessagesId: seller._id,
+    });
+    axios
+      .put(`${server}/conversation/update-last-message/${currentChat._id}`, {
+        lastMessage: newMessage,
+        lastMessageId: seller._id,
+      })
+      .then((res) => {
+        console.log(res.data.conversation);
+        setNewMessage("");
+      })
+      .catch((error) => {
+        console.error("Error updating last message:", error);
+      });
+  };
+
+  const sendMessageHandler = async (e) => {
+    e.preventDefault();
+    const message = {
+      sender: seller._id,
+      text: newMessage,
+      conversationId: currentChat._id,
+    };
+    const receiverId = currentChat.members.find(
+      (member) => member !== seller._id,
+    );
+    socketId.emit("sendMessage", {
+      senderId: seller._id,
+      receiverId,
+      text: newMessage,
+    });
+
+    try {
+      if (newMessage !== "") {
+        await axios
+          .post(`${server}/message/create-new-message`, message)
+          .then((res) => {
+            setMessages([...messages, res.data.message]);
+            updateLastMessage(res.data.message._id);
+          })
+          .catch((error) => {
+            console.error("Error sending message:", error);
+          });
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
   return (
     <div className="w-[90%] bg-white m-5 h-[85vh] overflow-y-scroll rounded">
       {/* All messages list */}
@@ -44,18 +139,29 @@ const DashboardMessages = () => {
                 key={index}
                 index={index}
                 setOpen={setOpen}
+                setCurrentChat={setCurrentChat}
               />
             ))}
         </>
       )}
-      {open && <SellerInbox setOpen={setOpen} />}
+      {open && (
+        <SellerInbox
+          setOpen={setOpen}
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+          sendMessageHandler={sendMessageHandler}
+          messages={messages}
+          sellerId={seller._id}
+        />
+      )}
     </div>
   );
 };
-const MessageList = ({ data, setOpen }) => {
+const MessageList = ({ data, setOpen, setCurrentChat }) => {
   const navigate = useNavigate();
   const handleClick = (id) => {
     navigate(`?${id}`);
+    setCurrentChat(data);
     setOpen(true);
   };
   return (
@@ -103,11 +209,14 @@ const MessageList = ({ data, setOpen }) => {
   );
 };
 
-const SellerInbox = ({ setOpen }) => {
-  const handleSend = (e) => {
-    e.preventDefault();
-  };
-
+const SellerInbox = ({
+  setOpen,
+  newMessage,
+  setNewMessage,
+  sendMessageHandler,
+  messages,
+  sellerId,
+}) => {
   return (
     <div className="w-full h-full flex flex-col bg-white rounded-lg shadow-md justify-between">
       {/* Header */}
@@ -125,7 +234,6 @@ const SellerInbox = ({ setOpen }) => {
             <p className="text-xs text-green-600">● Active now</p>
           </div>
         </div>
-
         <AiOutlineArrowRight
           size={20}
           className="cursor-pointer text-gray-600 hover:text-black"
@@ -133,32 +241,39 @@ const SellerInbox = ({ setOpen }) => {
           aria-label="Close chat"
         />
       </div>
+      {/* Messages container with scroll */}
+      <div className="px-3 h-[65vh] py-3 overflow-y-scroll flex-1">
+        {messages &&
+          messages.map((item, index) => (
+            <React.Fragment key={index}>
+              {/* Incoming message */}
+              <div
+                className={`flex w-full my-2 ${item.sender === sellerId ? "justify-end" : "justify-start"}`}
+              >
+                {item.sender !== sellerId && (
+                  <img
+                    src="http://localhost:8000/Gemini_Generated_Image_lg3dzmlg3dzmlg3d-1766570146336-152761747.png"
+                    alt="user avatar"
+                    className="w-[40px] h-[40px] rounded-full mr-3"
+                  />
+                )}
 
-      {/* messages container */}
-      <div className="px-3 h-[65vh] py-3 overflow-y-scroll">
-        {/* Incoming message */}
-        <div className="flex w-full my-2">
-          <img
-            src="http://localhost:8000/Gemini_Generated_Image_lg3dzmlg3dzmlg3d-1766570146336-152761747.png"
-            alt="user avatar"
-            className="w-[40px] h-[40px] rounded-full mr-3"
-          />
-          <div className="w-max p-2 rounded bg-[#38c776] text-[#fff] h-min">
-            <p>Hello there!</p>
-          </div>
-        </div>
-
-        {/* Outgoing message */}
-        <div className="flex w-full justify-end my-2">
-          <div className="w-max p-2 rounded bg-[#38c776] text-[#fff] h-min">
-            <p>Hello there!</p>
-          </div>
-        </div>
+                <div className="w-max p-2 rounded bg-[#38c776] text-[#fff] h-min">
+                  <p>{item.text}</p>
+                </div>
+              </div>
+              {/* Outgoing message */}
+              {/* <div className="flex w-full justify-end my-2">
+                <div className="w-max p-2 rounded bg-[#38c776] text-[#fff] h-min">
+                  <p>{item.text}</p>
+                </div>
+              </div> */}
+            </React.Fragment>
+          ))}
       </div>
-
       {/* Input */}
       <form
-        onSubmit={handleSend}
+        onSubmit={sendMessageHandler}
         className="sticky bottom-0 w-full flex items-center gap-2 p-3 border-t bg-white"
       >
         <button
@@ -168,13 +283,13 @@ const SellerInbox = ({ setOpen }) => {
         >
           <TfiGallery size={20} />
         </button>
-
         <input
           type="text"
           placeholder="Type a message..."
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
           className="flex-1 px-4 py-2 text-sm border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
-
         <button
           type="submit"
           className="text-blue-500 hover:text-blue-600"
