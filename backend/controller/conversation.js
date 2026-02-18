@@ -2,7 +2,7 @@ const express = require("express");
 const Conversation = require("../model/conversation");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ErrorHandler = require("../middleware/error");
-const { isSeller } = require("../middleware/auth");
+const { isSeller, isAuthenticated } = require("../middleware/auth");
 const router = express.Router();
 // create a new conversation
 router.post(
@@ -78,6 +78,28 @@ router.put(
       return next(new ErrorHandler(error), 500);
     }
   })
+);
+
+// get user conversations
+router.get(
+  "/get-all-conversation-user/:id",
+  isAuthenticated,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const conversations = await Conversation.find({
+        members: {
+          $in: [req.params.id],
+        },
+      }).sort({ updatedAt: -1, createdAt: -1 });
+
+      res.status(201).json({
+        success: true,
+        conversations,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.response.message, 500));
+    }
+  }),
 );
 
 module.exports = router;

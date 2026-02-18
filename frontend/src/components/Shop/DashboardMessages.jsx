@@ -217,7 +217,7 @@ const MessageList = ({
         });
     };
     getUser();
-  }, [data, me, online, setActiveStatus, setUserData]);
+  }, [data, me, online, setActiveStatus]);
 
   return (
     <div
@@ -247,26 +247,15 @@ const MessageList = ({
               <h1 className="text-[16px] font-semibold text-gray-900 truncate">
                 {userData.name}
               </h1>
-
-              <span className="flex items-center gap-1 text-[12px] mt-6">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    activeStatus ? "bg-green-500" : "bg-gray-400"
-                  }`}
-                />
-                <span
-                  className={activeStatus ? "text-green-600" : "text-gray-500"}
-                >
-                  {activeStatus ? "Active now" : "Offline"}
-                </span>
+              <span className="text-[12px] text-gray-500 mt-6">
+                {activeStatus ? "Active Now" : "Offline"}
               </span>
             </div>
-
             <div className="flex items-center justify-between">
               <p className="text-[14px] text-gray-600 truncate">
                 {data?.lastMessageId === userData._id
                   ? "You: "
-                  : `${userData.name.split(" ")[0]}: `}
+                  : userData.name.split(" ")[0] + ": "}
                 {data?.lastMessage}
               </p>
             </div>

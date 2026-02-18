@@ -18,6 +18,7 @@ import ShopAllOrders from "../pages/shop/ShopAllOrders";
 import ShopOrderDetails from "../pages/shop/ShopOrderDetails";
 import OrderDetailsPage from "../pages/OrderDetailsPage";
 import TrackOrderPage from "../pages/TrackOrderPage";
+import UserInbox from "../pages/UserInbox";
 export {
   LoginPage,
   SignupPage,
@@ -36,7 +37,8 @@ export {
   SellerActivationPage,
   ShopLoginPage,
   ShopAllOrders,
-  ShopOrderDetails ,
+  ShopOrderDetails,
   OrderDetailsPage,
-  TrackOrderPage
+  TrackOrderPage,
+  UserInbox,
 };
