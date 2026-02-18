@@ -5,6 +5,7 @@ import { server } from "../../server";
 import { TfiGallery } from "react-icons/tfi";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
+import { format } from "timeago.js";
 const ENDPOINT = "http://localhost:4000";
 const socketId = socketIO(ENDPOINT, {
   transports: ["websocket"],
@@ -18,7 +19,9 @@ const DashboardMessages = () => {
   const [messages, setMessages] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [arrivalMessage, setArrivalMessage] = useState(null);
-
+  const [userData, setUserData] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [activeStatus, setActiveStatus] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -72,6 +75,22 @@ const DashboardMessages = () => {
     };
     getMessages();
   }, [currentChat]);
+  useEffect(() => {
+    const userId = seller?._id;
+    if (seller) {
+      socketId.emit("addUser", userId);
+      socketId.on("getUsers", (users) => {
+        setOnlineUsers(users);
+      });
+    }
+  }, [seller]);
+
+  const onlineCheck = (chat) => {
+    const chatMembers = chat?.members?.find((member) => member !== seller?._id);
+    const online = onlineUsers?.find((user) => user?.userId === chatMembers);
+
+    return online ? true : false;
+  };
 
   const updateLastMessage = async () => {
     socketId.emit("updateLastMessage", {
@@ -140,6 +159,11 @@ const DashboardMessages = () => {
                 index={index}
                 setOpen={setOpen}
                 setCurrentChat={setCurrentChat}
+                me={seller._id}
+                setUserData={setUserData}
+                userData={userData}
+                online={onlineCheck(item)}
+                setActiveStatus={setActiveStatus}
               />
             ))}
         </>
@@ -152,18 +176,49 @@ const DashboardMessages = () => {
           sendMessageHandler={sendMessageHandler}
           messages={messages}
           sellerId={seller._id}
+          userData={userData}
+          activeStatus={activeStatus}
         />
       )}
     </div>
   );
 };
-const MessageList = ({ data, setOpen, setCurrentChat }) => {
+const MessageList = ({
+  data,
+  setOpen,
+  setCurrentChat,
+  me,
+  setUserData,
+  userData,
+  online,
+  setActiveStatus,
+  activeStatus,
+}) => {
   const navigate = useNavigate();
   const handleClick = (id) => {
     navigate(`?${id}`);
     setCurrentChat(data);
     setOpen(true);
   };
+  useEffect(() => {
+    setActiveStatus(online);
+    const userId = data.members.find((user) => user !== me._id);
+    const getUser = async () => {
+      axios
+        .get(`${server}/user/user-info/${userId}`, {
+          withCredentials: true,
+        })
+        .then((res) => {
+          console.log(res.data.user);
+          setUserData(res.data.user);
+        })
+        .catch((error) => {
+          console.error("Error fetching user info:", error);
+        });
+    };
+    getUser();
+  }, [data, me, online, setActiveStatus, setUserData]);
+
   return (
     <div
       className="w-full flex items-center gap-3 p-3 rounded-xl cursor-pointer transition
@@ -173,37 +228,56 @@ const MessageList = ({ data, setOpen, setCurrentChat }) => {
       {/* Avatar */}
       <div className="relative flex-shrink-0">
         <img
-          src="http://localhost:8000/Gemini_Generated_Image_lg3dzmlg3dzmlg3d-1766570146336-152761747.png"
+          src={userData?.avatar?.url}
           alt="Avatar"
           className="w-[52px] h-[52px] rounded-full object-cover"
         />
 
         {/* Online status */}
-        <span className="absolute bottom-0 right-0 w-[12px] h-[12px] bg-green-400 border-2 border-white rounded-full" />
+        {online && (
+          <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+        )}
       </div>
 
       {/* Text */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <h1 className="text-[16px] font-semibold text-gray-900 truncate">
-            Shahriar Sajeeb
-          </h1>
-          <span className="text-[12px] text-gray-500">2:45 PM</span>
-        </div>
+        {userData ? (
+          <>
+            <div className="flex items-center justify-between">
+              <h1 className="text-[16px] font-semibold text-gray-900 truncate">
+                {userData.name}
+              </h1>
 
-        <div className="flex items-center justify-between">
-          <p className="text-[14px] text-gray-600 truncate">
-            <span className="font-medium">You:</span> Yeah I am good
-          </p>
+              <span className="flex items-center gap-1 text-[12px] mt-6">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    activeStatus ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                />
+                <span
+                  className={activeStatus ? "text-green-600" : "text-gray-500"}
+                >
+                  {activeStatus ? "Active now" : "Offline"}
+                </span>
+              </span>
+            </div>
 
-          {/* Unread badge (optional) */}
-          <span
-            className="ml-2 min-w-[20px] h-[20px] bg-blue-500 text-white text-[12px]
-                           flex items-center justify-center rounded-full"
-          >
-            2
-          </span>
-        </div>
+            <div className="flex items-center justify-between">
+              <p className="text-[14px] text-gray-600 truncate">
+                {data?.lastMessageId === userData._id
+                  ? "You: "
+                  : `${userData.name.split(" ")[0]}: `}
+                {data?.lastMessage}
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-between">
+            <h1 className="text-[16px] font-semibold text-gray-400 truncate">
+              Loading...
+            </h1>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -216,86 +290,89 @@ const SellerInbox = ({
   sendMessageHandler,
   messages,
   sellerId,
+  userData,
+  activeStatus,
 }) => {
   return (
-    <div className="w-full h-full flex flex-col bg-white rounded-lg shadow-md justify-between">
+    <div className="flex flex-col h-full bg-white rounded shadow">
       {/* Header */}
-      <div className="sticky top-0 z-10 flex items-center justify-between p-3 bg-slate-100 border-b">
-        <div className="flex items-center gap-3">
-          <img
-            src="http://localhost:8000/Gemini_Generated_Image_lg3dzmlg3dzmlg3d-1766570146336-152761747.png"
-            alt="Seller avatar"
-            className="w-12 h-12 rounded-full object-cover"
-          />
-          <div>
-            <h1 className="text-sm sm:text-base font-semibold">
-              Shahriar Sajeeb
-            </h1>
-            <p className="text-xs text-green-600">● Active now</p>
-          </div>
+      <div className="flex items-center justify-between p-3 bg-gray-100 border-b">
+        <div className="flex items-center gap-2">
+          {userData ? (
+            <>
+              <img
+                src={userData.avatar?.url}
+                alt="Seller"
+                className="w-10 h-10 rounded-full object-cover"
+              />
+              <div>
+                <p className="text-sm font-semibold">{userData.name}</p>
+                <span
+                  className={`text-xs flex items-center gap-1 ${
+                    activeStatus ? "text-green-600" : "text-gray-500"
+                  }`}
+                >
+                  ● {activeStatus ? "Active" : "Offline"}
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="text-gray-400">Loading...</div>
+          )}
         </div>
+
         <AiOutlineArrowRight
-          size={20}
-          className="cursor-pointer text-gray-600 hover:text-black"
+          size={23}
+          className="cursor-pointer text-gray-600"
           onClick={() => setOpen(false)}
-          aria-label="Close chat"
         />
       </div>
-      {/* Messages container with scroll */}
-      <div className="px-3 h-[65vh] py-3 overflow-y-scroll flex-1">
-        {messages &&
-          messages.map((item, index) => (
-            <React.Fragment key={index}>
-              {/* Incoming message */}
-              <div
-                className={`flex w-full my-2 ${item.sender === sellerId ? "justify-end" : "justify-start"}`}
-              >
-                {item.sender !== sellerId && (
-                  <img
-                    src="http://localhost:8000/Gemini_Generated_Image_lg3dzmlg3dzmlg3d-1766570146336-152761747.png"
-                    alt="user avatar"
-                    className="w-[40px] h-[40px] rounded-full mr-3"
-                  />
-                )}
 
-                <div className="w-max p-2 rounded bg-[#38c776] text-[#fff] h-min">
-                  <p>{item.text}</p>
-                </div>
+      {/* Messages */}
+      <div className="flex-1 p-3 overflow-y-auto">
+        {messages?.map((msg, index) => {
+          const isSeller = msg.sender === sellerId;
+
+          return (
+            <div
+              key={index}
+              className={`flex mb-3 ${
+                isSeller ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div className="max-w-[70%] bg-[#38c776] text-white p-3 rounded-lg">
+                <p className="text-sm">{msg.text}</p>
+                <span className="block text-xs text-white/70 mt-1">
+                  {format(msg.createdAt)}
+                </span>
               </div>
-              {/* Outgoing message */}
-              {/* <div className="flex w-full justify-end my-2">
-                <div className="w-max p-2 rounded bg-[#38c776] text-[#fff] h-min">
-                  <p>{item.text}</p>
-                </div>
-              </div> */}
-            </React.Fragment>
-          ))}
+            </div>
+          );
+        })}
       </div>
-      {/* Input */}
+
+      {/* Message Input */}
       <form
         onSubmit={sendMessageHandler}
-        className="sticky bottom-0 w-full flex items-center gap-2 p-3 border-t bg-white"
+        className="flex items-center gap-3 p-4 bg-white"
       >
-        <button
-          type="button"
-          className="text-gray-500 hover:text-gray-700"
-          aria-label="Upload image"
-        >
-          <TfiGallery size={20} />
+        {/* Gallery Icon */}
+        <button type="button" className="text-gray-500 hover:text-gray-700">
+          <TfiGallery size={23} />
         </button>
+
+        {/* Input */}
         <input
           type="text"
           placeholder="Type a message..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          className="flex-1 px-4 py-2 text-sm border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="flex-1 px-5 py-3 text-sm border rounded-full
+                     bg-transparent focus:outline-none focus:ring-0"
         />
-        <button
-          type="submit"
-          className="text-blue-500 hover:text-blue-600"
-          aria-label="Send message"
-        >
-          <AiOutlineSend size={22} />
+
+        <button type="submit" className="text-blue-500 hover:text-blue-600">
+          <AiOutlineSend size={25} />
         </button>
       </form>
     </div>

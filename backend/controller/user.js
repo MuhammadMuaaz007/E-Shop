@@ -365,29 +365,21 @@ router.put(
   }),
 );
 
-module.exports = router;
+// find user information with the userId
+router.get(
+  "/user-info/:id",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const user = await User.findById(req.params.id);
 
-// try {
-//   const { oldPassword, newPassword, confirmPassword } = req.body;
-//   const user = await User.findById(req.user.id).select("+password");
-//   if (!user) {
-//     return next(new ErrorHandler("User not found", 404));
-//   }
-//   const isPasswordValid = await user.comparePassword(oldPassword);
-//   if (!isPasswordValid) {
-//     return next(new ErrorHandler("Incorrect old password", 400));
-//   }
-//   if (newPassword !== confirmPassword) {
-//     return next(
-//       new ErrorHandler("New password and confirm password do not match", 400),
-//     );
-//   }
-//   user.password = newPassword;
-//   await user.save();
-//   res.status(200).json({
-//     success: true,
-//     message: "Password updated successfully",
-//   });
-// } catch (error) {
-//   return next(new ErrorHandler(error.message, 500));
-// }
+      res.status(201).json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }),
+);
+
+module.exports = router;
