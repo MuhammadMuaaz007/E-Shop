@@ -11,7 +11,15 @@ router.post(
     try {
       const { groupTitle, userId, sellerId } = req.body;
 
-      const isConversationExist = await Conversation.findOne({ groupTitle });
+      // Always use sorted IDs for members array
+      const sortedMembers = [userId, sellerId].sort();
+      // Try to find by groupTitle or by members array (sorted)
+      let isConversationExist = await Conversation.findOne({ groupTitle });
+      if (!isConversationExist) {
+        isConversationExist = await Conversation.findOne({
+          members: sortedMembers,
+        });
+      }
 
       if (isConversationExist) {
         const conversation = isConversationExist;
@@ -21,7 +29,7 @@ router.post(
         });
       } else {
         const conversation = await Conversation.create({
-          members: [userId, sellerId],
+          members: sortedMembers,
           groupTitle: groupTitle,
         });
 
@@ -69,7 +77,7 @@ router.put(
         lastMessage,
         lastMessageId,
       });
-      
+
       res.status(201).json({
         success: true,
         conversation,
@@ -77,7 +85,7 @@ router.put(
     } catch (error) {
       return next(new ErrorHandler(error), 500);
     }
-  })
+  }),
 );
 
 // get user conversations

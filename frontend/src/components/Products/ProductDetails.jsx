@@ -33,9 +33,11 @@ const ProductDetails = ({ data }) => {
 
   const handleMessageSubmit = async () => {
     if (isAuthenticated) {
-      const groupTitle = data._id + user._id;
+      // Always use sorted IDs for groupTitle to prevent duplicates
       const userId = user._id;
       const sellerId = data.shop._id;
+      const sortedIds = [userId, sellerId].sort();
+      const groupTitle = `${sortedIds[0]}_${sortedIds[1]}`;
       await axios
         .post(`${server}/conversation/create-new-conversation`, {
           groupTitle,

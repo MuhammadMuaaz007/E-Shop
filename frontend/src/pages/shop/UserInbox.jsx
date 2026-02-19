@@ -10,13 +10,12 @@ import { TfiGallery } from "react-icons/tfi";
 import socketIO from "socket.io-client";
 import { format } from "timeago.js";
 import Header from "../components/Layout/Header";
-import oppo from "../assets/oppo.jpeg"
-const ENDPOINT = "http://localhost:4000/";
+import oppo from "../assets/oppo.jpeg";
+const ENDPOINT = "https://socket-ecommerce-tu68.onrender.com/";
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
-
 const UserInboxMessages = () => {
-  const { user,loading } = useSelector((state) => state.user);
+  const { user, loading } = useSelector((state) => state.user);
   const [conversations, setConversations] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const [currentChat, setCurrentChat] = useState();
@@ -49,12 +48,11 @@ const UserInboxMessages = () => {
     const getConversation = async () => {
       try {
         const resonse = await axios.get(
-          `${server}/api/conversation/getAllConversationUser/${user?._id}`,
+          `${server}/conversation/get-all-conversation-user/${user?._id}`,
           {
             withCredentials: true,
-          }
+          },
         );
-
         setConversations(resonse.data.conversations);
       } catch (error) {
         // console.log(error);
@@ -85,7 +83,7 @@ const UserInboxMessages = () => {
     const getMessage = async () => {
       try {
         const response = await axios.get(
-          `${server}/api/message/getAllMessages/${currentChat?._id}`
+          `${server}/message/get-all-messages/${currentChat?._id}`,
         );
         setMessages(response.data.messages);
       } catch (error) {
@@ -105,7 +103,7 @@ const UserInboxMessages = () => {
       conversationId: currentChat._id,
     };
     const receiverId = currentChat.members.find(
-      (member) => member !== user?._id
+      (member) => member !== user?._id,
     );
 
     socketId.emit("sendMessage", {
@@ -117,7 +115,7 @@ const UserInboxMessages = () => {
     try {
       if (newMessage !== "") {
         await axios
-          .post(`${server}/api/message/createNewMessage`, message)
+          .post(`${server}/message/create-new-message`, message)
           .then((res) => {
             setMessages([...messages, res.data.message]);
             updateLastMessage();
@@ -138,7 +136,7 @@ const UserInboxMessages = () => {
     });
 
     await axios
-      .put(`${server}/api/conversation/updateLastMessage/${currentChat._id}`, {
+      .put(`${server}/conversation/update-last-message/${currentChat._id}`, {
         lastMessage: newMessage,
         lastMessageId: user._id,
       })
@@ -164,9 +162,8 @@ const UserInboxMessages = () => {
   };
 
   const imageSendingHandler = async (e) => {
-
     const receiverId = currentChat.members.find(
-      (member) => member !== user._id
+      (member) => member !== user._id,
     );
 
     socketId.emit("sendMessage", {
@@ -177,15 +174,12 @@ const UserInboxMessages = () => {
 
     try {
       await axios
-        .post(
-          `${server}/api/message/createNewMessage`,
-          {
-            images: e,
-            sender: user._id,
-            text: newMessage,
-            conversationId: currentChat._id,
-          }
-        )
+        .post(`${server}/message/create-new-message`, {
+          images: e,
+          sender: user._id,
+          text: newMessage,
+          conversationId: currentChat._id,
+        })
         .then((res) => {
           setImages();
           setMessages([...messages, res.data.message]);
@@ -198,11 +192,11 @@ const UserInboxMessages = () => {
 
   const updateLastMessageForImage = async () => {
     await axios.put(
-      `${server}/api/conversation/updateLastMessage/${currentChat._id}`,
+      `${server}/conversation/update-last-message/${currentChat._id}`,
       {
         lastMessage: "Photo",
         lastMessageId: user._id,
-      }
+      },
     );
   };
 
@@ -266,7 +260,7 @@ const MessageList = ({
   userData,
   online,
   setActiveStatus,
-  loading
+  loading,
 }) => {
   const [active, setActive] = useState(0);
   const [user, setUser] = useState([]);
@@ -281,7 +275,9 @@ const MessageList = ({
     const userId = data.members.find((user) => user !== me);
     const getUser = async () => {
       try {
-        const res = await axios.get(`${server}/api/shop/get-shop-info/${userId}`);
+        const res = await axios.get(
+          `${server}/api/shop/get-shop-info/${userId}`,
+        );
         setUser(res.data.shop);
       } catch (error) {
         console.log(error);
@@ -307,10 +303,10 @@ const MessageList = ({
         <img
           src={`${user?.avatar?.url}`}
           alt=""
-                                      onError={(e)=>{
-                                        e.target.onerror=null;
-                                        e.target.src=oppo
-                                      }}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = oppo;
+          }}
           className="w-[50px] h-[50px] rounded-full"
         />
         {online ? (
@@ -352,10 +348,10 @@ const SellerInbox = ({
           <img
             src={`${userData?.avatar?.url}`}
             alt=""
-                                                  onError={(e)=>{
-                                        e.target.onerror=null;
-                                        e.target.src=oppo
-                                      }}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = oppo;
+            }}
             className="w-[60px] h-[60px] rounded-full"
           />
           <div className="pl-3">
@@ -384,20 +380,20 @@ const SellerInbox = ({
                 <img
                   src={`${userData?.avatar?.url}`}
                   className="w-[40px] h-[40px] rounded-full mr-3"
-                                                        onError={(e)=>{
-                                        e.target.onerror=null;
-                                        e.target.src=oppo
-                                      }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = oppo;
+                  }}
                   alt=""
                 />
               )}
               {item.images && (
                 <img
                   src={`${item.images?.url}`}
-                                                        onError={(e)=>{
-                                        e.target.onerror=null;
-                                        e.target.src=oppo
-                                      }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = oppo;
+                  }}
                   className="w-[300px] h-[300px] object-cover rounded-[10px] ml-2 mb-2"
                 />
               )}
