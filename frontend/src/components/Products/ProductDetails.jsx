@@ -18,6 +18,17 @@ const ProductDetails = ({ data }) => {
   const { cart } = useSelector((state) => state.cart);
   const { user, isAuthenticated } = useSelector((state) => state.user);
   const { wishlist } = useSelector((state) => state.wishlist);
+  const { seller } = useSelector((state) => state.seller);
+   const shopAvatarUrl =
+    seller &&
+    data.shop &&
+    data.shop._id === seller._id &&
+    seller.avatar &&
+    seller.avatar.url
+      ? seller.avatar.url
+      : data.shop && data.shop.avatar && data.shop.avatar.url
+        ? data.shop.avatar.url
+        : "";
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -28,7 +39,7 @@ const ProductDetails = ({ data }) => {
       toast.info(`Only ${data.stock} items in stock`);
     }
   };
-
+ 
   const decrement = () => setCount((prev) => (prev > 1 ? prev - 1 : 1));
 
   const handleMessageSubmit = async () => {
@@ -220,7 +231,7 @@ const ProductDetails = ({ data }) => {
                   <Link to={`/shop/${data.shop._id}`}>
                     <div className="flex items-center space-x-2">
                       <img
-                        src={data.shop.avatar.url}
+                        src={shopAvatarUrl}
                         alt="shop avatar"
                         className="h-12 w-12 rounded-full"
                       />
@@ -251,6 +262,9 @@ const ProductDetails = ({ data }) => {
             data={data}
             totalReviews={totalReviews}
             averageRating={averageRating}
+            seller={seller}
+            shopAvatarUrl={shopAvatarUrl}
+
           />
           <br />
           <br />
@@ -267,7 +281,7 @@ import Ratings from "./Ratings";
 import { server } from "../../server";
 import axios from "axios";
 
-const ProductDetailInfo = ({ data, totalReviews, averageRating }) => {
+const ProductDetailInfo = ({ data, totalReviews, averageRating,  shopAvatarUrl }) => {
   const [active, setActive] = useState(1);
   const dispatch = useDispatch();
 
@@ -333,7 +347,7 @@ const ProductDetailInfo = ({ data, totalReviews, averageRating }) => {
             data.reviews.map((item) => (
               <div className="w-full flex my-2">
                 <img
-                  src={`${item.user.avatar?.url}`}
+                  src={`${item.user.avatar?.url || shopAvatarUrl}`}
                   alt=""
                   className="w-[50px] h-[50px] rounded-full"
                 />
@@ -363,11 +377,10 @@ const ProductDetailInfo = ({ data, totalReviews, averageRating }) => {
             <Link to={`/shop/${data.shop._id}`}>
               <div className="flex items-center gap-4">
                 <img
-                  src={data.shop.avatar.url}
+                  src={shopAvatarUrl}
                   alt="shop avatar"
                   className="h-16 w-16 rounded-full border shadow-sm "
                 />
-
                 <div>
                   <h3 className="text-xl font-semibold cursor-pointer hover:text-purple-600 transition">
                     {data.shop.name}
