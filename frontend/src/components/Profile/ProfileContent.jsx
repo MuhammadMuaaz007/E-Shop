@@ -167,11 +167,6 @@ const ProfileContent = ({ active }) => {
           <AllRefundOrders />
         </div>
       )}
-      {active === 4 && (
-        <div className="text-xl ml-5 flex justify-center items-center mt-5">
-          No message!
-        </div>
-      )}
       {active === 5 && (
         <div>
           <TrackOrder />
@@ -299,36 +294,47 @@ const AllRefundOrders = () => {
 
   return (
     <div className="w-full px-5 md:px-10 grid grid-cols-1 md:grid-cols-1 gap-5">
-      {eligibleOrders.map((order) => (
-        <div
-          key={order._id}
-          className="bg-white shadow-md rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:shadow-lg transition-all"
-        >
-          <div>
-            <h5 className="font-semibold">Order ID: {order._id}</h5>
-            <p className="text-gray-500">
-              Items: {order.cart.map((item) => item.name).join(", ")}
-            </p>
-            <p className="text-gray-400 font-medium">
-              Total: ${order.totalPrice}
-            </p>
-          </div>
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mt-3 md:mt-0">
-            <span
-              className={`px-3 py-1 rounded-full text-white font-medium ${
-                order.status === "Delivered" ? "bg-green-500" : "bg-yellow-500"
-              }`}
-            >
-              {order.status}
-            </span>
-            <Link to={`/user/order/${order._id}`}>
-              <Button variant="contained" color="primary">
-                View
-              </Button>
-            </Link>
-          </div>
+      {eligibleOrders.length === 0 ? (
+        <div className="flex flex-col items-center justify-center mt-16 text-center">
+          <h2 className="text-xl font-semibold text-gray-700">
+            No Refund Orders Found
+          </h2>
+          <p className="text-gray-500 mt-2">You have no refund orders yet.</p>
         </div>
-      ))}
+      ) : (
+        eligibleOrders.map((order) => (
+          <div
+            key={order._id}
+            className="bg-white shadow-md rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:shadow-lg transition-all"
+          >
+            <div>
+              <h5 className="font-semibold">Order ID: {order._id}</h5>
+              <p className="text-gray-500">
+                Items: {order.cart.map((item) => item.name).join(", ")}
+              </p>
+              <p className="text-gray-400 font-medium">
+                Total: ${order.totalPrice}
+              </p>
+            </div>
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-3 mt-3 md:mt-0">
+              <span
+                className={`px-3 py-1 rounded-full text-white font-medium ${
+                  order.status === "Delivered"
+                    ? "bg-green-500"
+                    : "bg-yellow-500"
+                }`}
+              >
+                {order.status}
+              </span>
+              <Link to={`/user/order/${order._id}`}>
+                <Button variant="contained" color="primary">
+                  View
+                </Button>
+              </Link>
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 };

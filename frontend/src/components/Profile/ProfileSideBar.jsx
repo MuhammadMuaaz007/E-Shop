@@ -18,7 +18,6 @@ const menuItems = [
   { id: 1, name: "Profile", icon: <AiOutlineUser size={18} /> },
   { id: 2, name: "Orders", icon: <AiOutlineShopping size={18} /> },
   { id: 3, name: "ReFunds", icon: <BiMoneyWithdraw size={18} /> },
-  { id: 4, name: "Inbox", icon: <AiOutlineMessage size={18} /> },
   { id: 5, name: "Track", icon: <MdOutlineTrackChanges size={18} /> },
   { id: 6, name: "Password", icon: <RiLockPasswordLine size={18} /> },
   { id: 7, name: "Address", icon: <CiLocationOn size={18} /> },
