@@ -27,7 +27,7 @@ Order Management: View and update order statuses.
 
 User Management: Control user accounts and access levels.
 
-Technology Stack
+Technology Stack (MERN)
 
 Frontend: React.js, Redux, Tailwind CSS / Bootstrap
 
@@ -35,7 +35,7 @@ Backend: Node.js, Express.js
 
 Database: MongoDB with Mongoose
 
-Authentication: JWT for secure login
+Authentication: JWT for secure login 
 
 Payments: Stripe or PayPal integration
 
