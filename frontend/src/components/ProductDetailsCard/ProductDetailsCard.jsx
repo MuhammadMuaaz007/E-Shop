@@ -18,6 +18,15 @@ const ProductDetailsCard = ({ setOpen, data }) => {
 
   const { cart } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);
+  const { seller } = useSelector((state) => state.seller);
+  const timestamp = data?.shop?.updatedAt || Date.now();
+
+  const shopAvatarUrl =
+    seller && data.shop && data.shop._id === seller._id && seller.avatar?.url
+      ? `${seller.avatar.url}?t=${timestamp}`
+      : data.shop?.avatar?.url
+        ? `${data.shop.avatar.url}?t=${timestamp}`
+        : "";
 
   /* ================= Quantity ================= */
   const increment = () => {
@@ -69,6 +78,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
       setClick(false);
     }
   }, [wishlist, data._id]);
+  console.log(data);
 
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-black/30 z-50 flex items-center justify-center">
@@ -95,7 +105,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
                 className="flex items-center gap-3"
               >
                 <img
-                  src={data?.shop?.avatar?.url}
+                  src={shopAvatarUrl}
                   alt="shop"
                   className="h-12 w-12 rounded-full object-cover"
                 />
