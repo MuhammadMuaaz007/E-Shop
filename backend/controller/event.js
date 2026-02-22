@@ -42,7 +42,7 @@ router.post(
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
-  })
+  }),
 );
 
 router.get(
@@ -60,7 +60,7 @@ router.get(
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
-  })
+  }),
 );
 
 // delete event product
@@ -97,7 +97,7 @@ router.delete(
       success: true,
       message: "Event and images deleted successfully",
     });
-  })
+  }),
 );
 
 // get all events
@@ -116,7 +116,7 @@ router.get(
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
-  })
+  }),
 );
 
 module.exports = router;
