@@ -91,7 +91,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
         />
 
         <div className="md:flex gap-6">
-          {/* ================= Left ================= */}
+       
           <div className="md:w-1/2">
             <img
               src={data?.images?.[0]?.url}
