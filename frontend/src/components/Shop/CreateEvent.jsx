@@ -27,6 +27,8 @@ const CreateEvent = () => {
 
   const [stock, setStock] = useState("");
   useEffect(() => {
+    console.log("Event Creation State:", { error, createSuccess });
+    
     if (error) {
       toast.error(error);
     }

@@ -1,4 +1,6 @@
 const express = require("express");
+const cloudinary = require("cloudinary");
+// import cloudinary from 'cloudinary'
 const router = express.Router();
 const Product = require("../model/product");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
@@ -13,23 +15,46 @@ router.post(
   upload.array("images"),
   catchAsyncErrors(async (req, res, next) => {
     try {
+      console.log("Received Event Creation Request:",req.files);
       const { shopId } = req.body;
 
       const shop = await Shop.findById(shopId);
       if (!shop) {
         return next(new ErrorHandler("Shop Id is invalid", 400));
       }
-      const files = req.files;
-      const imageObjects = files.map((file) => ({
-        public_id: file.filename,
-        url: `${process.env.SERVER_URL || "http://localhost:8000"}/${
-          file.filename
-        }`,
-      }));
+      // const files = req.files;
+      // const imageObjects = files.map((file) => ({
+      //   public_id: file.filename,
+      //   url: `${process.env.SERVER_URL || "http://localhost:8000"}/${
+      //     file.filename
+      //   }`,
+      // }));
+      const uploadedImages = [];
+
+      for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+          const myCloud = cloudinary.v2.uploader.upload_stream(
+            {
+              folder: "events",
+            },
+            (error, myCloud) => {
+              if (error) reject(error);
+              else resolve(myCloud);
+            },
+          );
+
+          myCloud.end(file.buffer);
+        });
+        uploadedImages.push({
+          public_id: result.public_id,
+          url: result.secure_url,
+        });
+      }
+      console.log(uploadedImages);
 
       const eventData = {
         ...req.body,
-        images: imageObjects,
+        images: uploadedImages,
         shop: shop,
       };
 
@@ -40,6 +65,8 @@ router.post(
         event,
       });
     } catch (error) {
+      console.log("afdafdsfdas")
+      console.error(error);
       return next(new ErrorHandler(error.message, 400));
     }
   }),
