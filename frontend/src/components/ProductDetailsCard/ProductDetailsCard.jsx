@@ -10,7 +10,7 @@ import {
   removeFromWishlistAction,
 } from "../../redux/actions/wishlist";
 
-const ProductDetailsCard = ({ setOpen, data }) => {
+const ProductDetailsCard = ({ setOpen, data, averageRating }) => {
   const dispatch = useDispatch();
 
   const [count, setCount] = useState(1);
@@ -91,7 +91,6 @@ const ProductDetailsCard = ({ setOpen, data }) => {
         />
 
         <div className="md:flex gap-6">
-       
           <div className="md:w-1/2">
             <img
               src={data?.images?.[0]?.url}
@@ -113,11 +112,11 @@ const ProductDetailsCard = ({ setOpen, data }) => {
               </Link>
 
               <span className="bg-green-100 text-green-800 px-3 py-1 rounded text-sm">
-                ⭐ {data.shop.ratings}
+                ⭐ {averageRating}
               </span>
             </div>
           </div>
-
+            
           {/* ================= Right ================= */}
           <div className="md:w-1/2 flex flex-col justify-between">
             <div>
