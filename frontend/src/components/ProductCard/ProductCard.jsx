@@ -3,169 +3,176 @@ import { Link } from "react-router-dom";
 import styles from "../../styles/styles";
 import {
   AiFillHeart,
-  AiFillStar,
-  AiOutlineEye,
   AiOutlineHeart,
+  AiOutlineEye,
   AiOutlineShoppingCart,
-  AiOutlineStar,
 } from "react-icons/ai";
-
 import ProductDetailsCard from "../ProductDetailsCard/ProductDetailsCard";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCartAction } from "../../redux/actions/cart";
-import { toast } from "react-toastify";
 import {
   addToWishlistAction,
   removeFromWishlistAction,
 } from "../../redux/actions/wishlist";
+import { toast } from "react-toastify";
 import Ratings from "../Products/Ratings";
 
 const ProductCard = ({ data }) => {
   const dispatch = useDispatch();
-
   const { cart } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);
 
   const [open, setOpen] = useState(false);
   const [click, setClick] = useState(false);
 
-  // 👉 Create SEO-friendly slug
   const product_slug = `${data._id}`;
 
-  // 👉 Format numbers (1000 → 1k)
   const formatNumber = (num) => {
     if (!num) return 0;
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k";
-    }
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k";
     return num;
   };
 
-  // 👉 Wishlist handlers
-  const addToWishlistHandler = () => {
+  const addToWishlistHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     dispatch(addToWishlistAction(data));
     toast.success("Added to wishlist");
   };
 
-  const removeFromWishlistHandler = () => {
+  const removeFromWishlistHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     dispatch(removeFromWishlistAction(data));
     toast.info("Removed from wishlist");
   };
 
-  // 👉 Add to cart handler
-  const addToCartHandler = (id) => {
+  const addToCartHandler = (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
     const isItemExist = cart?.some((i) => i._id === id);
-
-    if (isItemExist) {
-      toast.error("Item already in cart");
-      return;
-    }
-
+    if (isItemExist) return toast.error("Item already in cart");
     dispatch(addToCartAction({ ...data, qty: 1 }));
     toast.success("Item added to cart");
+  };
+
+  const handleQuickView = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(true);
   };
 
   useEffect(() => {
     setClick(wishlist?.some((i) => i._id === data._id));
   }, [wishlist, data._id]);
 
-  // 👉 Rating logic
   const rating = Math.round(data?.ratings || 0);
 
   return (
     <>
-      <div
-        className="w-full h-[380px] bg-white rounded-2xl relative p-4 shadow-md cursor-pointer 
-        hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300"
-      >
-        {/* Product Image */}
-        <Link to={`/product/${product_slug}`}>
-          <img
-            src={data?.images?.[0]?.url || "/placeholder.png"}
-            alt={data.name}
-            className="w-full h-[160px] object-contain rounded-xl drop-shadow-sm 
-            transition-transform duration-300 hover:scale-105"
-          />
-        </Link>
+      <div className="w-full bg-white rounded-2xl shadow-md hover:shadow-xl transition-transform duration-300 hover:-translate-y-1 flex flex-col overflow-hidden">
+        {/* Image */}
+        <div className="relative group">
+          <Link to={`/product/${product_slug}`}>
+            <img
+              src={data?.images?.[0]?.url || "/placeholder.png"}
+              alt={data.name}
+              className="w-full h-48 object-contain transition-transform duration-300 group-hover:scale-105"
+            />
+          </Link>
 
-        {/* Shop Name */}
-        <Link to={`/shop/${data.shop._id}`}>
-          <h5 className={`${styles.shop_name} mt-2`}>{data.shop.name}</h5>
-        </Link>
+          {/* Floating Buttons */}
+          <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
+            {click ? (
+              <AiFillHeart
+                size={24}
+                className="p-1 bg-white rounded-full shadow-md cursor-pointer hover:bg-red-100"
+                color="red"
+                onClick={removeFromWishlistHandler}
+              />
+            ) : (
+              <AiOutlineHeart
+                size={24}
+                className="p-1 bg-white rounded-full shadow-md cursor-pointer hover:bg-red-100"
+                color="#555"
+                onClick={addToWishlistHandler}
+              />
+            )}
 
-        {/* Product Name */}
-        <Link to={`/product/${product_slug}`}>
-          <h4 className="pt-1 font-[500] text-[18px] text-gray-800">
-            {data.name.length > 40 ? data.name.slice(0, 40) + "..." : data.name}
-          </h4>
+            <AiOutlineEye
+              size={24}
+              className="p-1 bg-white rounded-full shadow-md cursor-pointer hover:bg-blue-100"
+              onClick={handleQuickView}
+            />
 
-          {/* Rating Stars */}
-          <div className="flex mt-1">
+            <AiOutlineShoppingCart
+              size={24}
+              className="p-1 bg-white rounded-full shadow-md cursor-pointer hover:bg-green-100"
+              onClick={(e) => addToCartHandler(e, data._id)}
+            />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 flex-1 flex flex-col">
+          <Link to={`/shop/${data.shop._id}`}>
+            <h5 className={`${styles.shop_name} text-sm text-gray-500 mb-1`}>
+              {data.shop.name}
+            </h5>
+          </Link>
+
+          <Link to={`/product/${product_slug}`} className="block mb-2">
+            <h4 className="font-medium text-gray-800 text-[16px] line-clamp-2">
+              {data.name}
+            </h4>
+          </Link>
+
+          {/* Rating */}
+          <div className="flex items-center mb-2">
             <Ratings rating={rating} />
           </div>
 
-          {/* Price & Sold */}
-          <div className="py-2 flex items-center justify-between">
-            <div className="flex gap-0.5 items-center">
-              <span className={styles.productDiscountPrice}>
+          {/* Price */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold text-gray-800">
                 {formatNumber(data.discountPrice)}$
               </span>
-
               {data.originalPrice && (
-                <span className={`${styles.price} line-through text-gray-400`}>
+                <span className="text-gray-400 line-through">
                   {formatNumber(data.originalPrice)}$
                 </span>
               )}
             </div>
-
-            <span className="font-[400] text-[15px] text-green-600">
+            <span className="text-green-600 text-sm">
               {formatNumber(data.sold_out)} sold
             </span>
           </div>
-        </Link>
 
-        {/* Floating Buttons */}
-        <div>
-          {/* Wishlist */}
-          {click ? (
-            <AiFillHeart
-              size={23}
-              className="cursor-pointer absolute right-3 top-4 rounded-full h-[32px] w-[32px] p-1 
-              bg-white shadow-md hover:bg-red-100 transition"
-              onClick={removeFromWishlistHandler}
-              color="red"
-            />
-          ) : (
-            <AiOutlineHeart
-              size={23}
-              className="cursor-pointer absolute right-3 top-4 rounded-full h-[32px] w-[32px] p-1 
-              bg-white shadow-md hover:bg-red-100 transition"
-              onClick={addToWishlistHandler}
-              color="#555"
-            />
-          )}
-
-          {/* Quick View */}
-          <AiOutlineEye
-            size={23}
-            className="cursor-pointer absolute right-3 top-14 rounded-full h-[32px] w-[32px] p-1 
-            bg-white shadow-md hover:bg-blue-100 transition"
-            onClick={() => setOpen(true)}
-            color="#333"
-          />
-
-          {/* Add to Cart */}
-          <AiOutlineShoppingCart
-            size={23}
-            className="cursor-pointer absolute right-3 top-24 rounded-full h-[32px] w-[32px] p-1 
-            bg-white shadow-md hover:bg-green-100 transition"
-            onClick={() => addToCartHandler(data._id)}
-            color="#444"
-          />
+          {/* Tags */}
+          <div className="mt-auto flex flex-wrap gap-1">
+            {data.tags &&
+              data.tags
+                .split(" ")
+                .slice(0, 3)
+                .map((tag, index) => (
+                  <span
+                    key={index}
+                    className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-full"
+                  >
+                    {tag.length > 6 ? tag.slice(0, 6) + "..." : tag}
+                  </span>
+                ))}
+            {data.tags && data.tags.split(" ").length > 3 && (
+              <span className="text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded-full">
+                +{data.tags.split(" ").length - 3}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Product Quick View */}
+      {/* Quick View */}
       {open && <ProductDetailsCard setOpen={setOpen} data={data} />}
     </>
   );
