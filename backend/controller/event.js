@@ -15,7 +15,6 @@ router.post(
   upload.array("images"),
   catchAsyncErrors(async (req, res, next) => {
     try {
-      console.log("Received Event Creation Request:",req.files);
       const { shopId } = req.body;
 
       const shop = await Shop.findById(shopId);
@@ -50,7 +49,6 @@ router.post(
           url: result.secure_url,
         });
       }
-      console.log(uploadedImages);
 
       const eventData = {
         ...req.body,
@@ -65,7 +63,6 @@ router.post(
         event,
       });
     } catch (error) {
-      console.log("afdafdsfdas")
       console.error(error);
       return next(new ErrorHandler(error.message, 400));
     }
@@ -94,38 +91,28 @@ router.get(
 const fs = require("fs");
 const path = require("path");
 
-router.delete(
-  "/delete-shop-event/:id",
-  catchAsyncErrors(async (req, res, next) => {
-    const eventId = req.params.id;
+router.delete("/delete-shop-event/:id", async (req, res) => {
+  try {
+    console.log("Route hit");
+    const event = await Event.findById(req.params.id);
+    console.log("Event:", event);
 
-    // 1️⃣ Find event first
-    const event = await Event.findById(eventId);
-
-    if (!event) {
-      return next(new ErrorHandler("Event not found", 404));
-    }
-
-    // 2️⃣ Delete event images from uploads folder
     if (event.images && event.images.length > 0) {
-      event.images.forEach((img) => {
-        const imagePath = path.join(process.cwd(), "uploads", img.public_id);
-
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
+      for (const img of event.images) {
+        if (img.public_id) {
+          const result = await cloudinary.v2.uploader.destroy(img.public_id);
+          console.log("Deleted:", img.public_id, result);
         }
-      });
+      }
     }
 
-    // 3️⃣ Delete event from DB
-    await Event.findByIdAndDelete(eventId);
-
-    res.status(200).json({
-      success: true,
-      message: "Event and images deleted successfully",
-    });
-  }),
-);
+    await Event.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: "Deleted" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // get all events
 router.get(
