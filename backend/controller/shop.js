@@ -11,6 +11,7 @@ const sendMail = require("../utils/SendMail");
 const sendToken = require("../utils/JwtToken");
 const { isAuthenticated, isSeller } = require("../middleware/auth");
 const sendShopToken = require("../utils/ShopToken");
+const cloudinary = require("cloudinary");
 
 // Create Shop
 router.post("/create-shop", upload.single("file"), async (req, res, next) => {
@@ -19,59 +20,59 @@ router.post("/create-shop", upload.single("file"), async (req, res, next) => {
     const sellerEmail = await Shop.findOne({ email });
 
     if (sellerEmail) {
-      const filename = req.file?.filename;
-      if (filename) {
-        const filePath = path.join(process.cwd(), "uploads", filename);
-        fs.unlink(filePath, (err) => {
-          if (err) console.log("Error deleting duplicate file:", err);
-        });
-      }
       return next(new ErrorHandler("User already exists", 400));
     }
-    const filename = req.file ? req.file.filename : null;
-    const avatarObj = {
-      public_id: filename,
-      url: `${process.env.SERVER_URL || "http://localhost:8000"}/${filename}`,
-    };
-    const seller = {
-      name: req.body.name,
-      email,
-      password: req.body.password,
-      address: req.body.address,
-      phoneNumber: req.body.phoneNumber,
-      zipCode: req.body.zipCode,
-      avatar: avatarObj, // ✅ important
-    };
 
-    const activationToken = jwt.sign(
-      {
-        name: seller.name,
-        email: seller.email,
-        password: seller.password,
-        avatar: seller.avatar,
-        address: seller.address,
-        zipCode: seller.zipCode,
-        phoneNumber: seller.phoneNumber,
+    const myCloud = cloudinary.v2.uploader.upload_stream(
+      { folder: "shopAvatars" },
+      async (error, myCloud) => {
+        if (error) return next(new ErrorHandler(error.message, 500));
+
+        const seller = {
+          name: req.body.name,
+          email,
+          password: req.body.password,
+          address: req.body.address,
+          phoneNumber: req.body.phoneNumber,
+          zipCode: req.body.zipCode,
+          avatar: {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+          }, // ✅ important
+        };
+
+        const activationToken = jwt.sign(
+          {
+            name: seller.name,
+            email: seller.email,
+            password: seller.password,
+            avatar: seller.avatar,
+            address: seller.address,
+            zipCode: seller.zipCode,
+            phoneNumber: seller.phoneNumber,
+          },
+          process.env.ACTIVATION_SECRET,
+          { expiresIn: "1d" },
+        );
+
+        const encodedToken = encodeURIComponent(activationToken);
+        const activationUrl = `${
+          process.env.FRONTEND_URL || "http://localhost:5173"
+        }/seller/activate/${encodedToken}`;
+
+        await sendMail({
+          email: seller.email,
+          subject: "Activate your shop",
+          message: `Hello ${seller.name}, please click on the link to activate your account: ${activationUrl}`,
+        });
+
+        res.status(201).json({
+          success: true,
+          message: `Please check your email: ${seller.email} to activate your account!`,
+        });
       },
-      process.env.ACTIVATION_SECRET,
-      { expiresIn: "1d" },
     );
-
-    const encodedToken = encodeURIComponent(activationToken);
-    const activationUrl = `${
-      process.env.FRONTEND_URL || "http://localhost:5173"
-    }/seller/activate/${encodedToken}`;
-
-    await sendMail({
-      email: seller.email,
-      subject: "Activate your shop",
-      message: `Hello ${seller.name}, please click on the link to activate your account: ${activationUrl}`,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: `Please check your email: ${seller.email} to activate your account!`,
-    });
+    myCloud.end(req.file.buffer);
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
   }
@@ -206,7 +207,6 @@ router.get(
   }),
 );
 
-// update shop profile picture
 router.put(
   "/update-shop-avatar",
   isSeller,
@@ -214,37 +214,44 @@ router.put(
   catchAsyncErrors(async (req, res, next) => {
     try {
       const shop = await Shop.findById(req.seller._id);
-
-      // ❌ If no file uploaded
+      console.log("Shop found for avatar update:", !!shop);
+      console.log("File received for avatar update:", !!req.file);
       if (!req.file) {
         return next(new ErrorHandler("Please upload an image", 400));
       }
 
-      // ✅ Extract old avatar filename
-      if (shop.avatar && shop.avatar.url) {
-        const oldAvatar = shop.avatar.url.split("/").pop();
-        const oldAvatarPath = path.join(process.cwd(), "uploads", oldAvatar);
-
-        // ✅ Delete old avatar
-        if (fs.existsSync(oldAvatarPath)) {
-          fs.unlinkSync(oldAvatarPath);
-        }
+      // Delete old avatar if exists
+      if (shop.avatar?.public_id) {
+        await cloudinary.v2.uploader.destroy(shop.avatar.public_id);
       }
 
-      // ✅ Save new avatar
+      // Helper function to upload buffer
+      const uploadBufferToCloudinary = (buffer) => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.v2.uploader.upload_stream(
+            { folder: "shopAvatars" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            },
+          );
+          stream.end(buffer);
+        });
+      };
+
+      const result = await uploadBufferToCloudinary(req.file.buffer);
+
       shop.avatar = {
-        public_id: req.file.filename,
-        url: `${req.protocol}://${req.get("host")}/uploads/${
-          req.file.filename
-        }`,
+        public_id: result.public_id,
+        url: result.secure_url,
       };
 
       await shop.save();
 
-      res.status(200).json({
+      res.status(201).json({
         success: true,
-        message: "Avatar updated successfully",
-        shop,
+        message: "Image uploaded successfully",
+        avatar: shop.avatar,
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
