@@ -6,14 +6,15 @@ import { categoriesData } from "../../static/data";
 import { toast } from "react-toastify";
 import { createProduct } from "../../redux/actions/product";
 import { resetCreateProduct } from "../../redux/reducers/product";
+import { ClearErrors } from "../../redux/reducers/user";
 
 const CreateProduct = () => {
   const { seller } = useSelector((state) => state.seller);
   const { error, createSuccess } = useSelector((state) => state.product);
-
+  
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  
   const [images, setImages] = useState([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -31,9 +32,10 @@ const CreateProduct = () => {
       toast.success("Product Created Successfully");
       dispatch(resetCreateProduct());
       navigate("/dashboard");
+      dispatch(ClearErrors());
     }
   }, [dispatch, error, navigate, createSuccess]);
-
+  
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     setImages((prev) => [...prev, ...files]);

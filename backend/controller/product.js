@@ -6,7 +6,7 @@ const ErrorHandler = require("../utils/ErrorHandler");
 const Shop = require("../model/shop");
 const upload = require("../multer");
 const Order = require("../model/order");
-
+const cloudinary = require("cloudinary");
 router.post(
   "/create-product",
   upload.array("images"),
@@ -15,25 +15,46 @@ router.post(
       const { shopId } = req.body;
 
       const shop = await Shop.findById(shopId);
+
       if (!shop) {
         return next(new ErrorHandler("Shop Id is invalid", 400));
       }
-
       // files coming from multer
-      const files = req.files;
+      // const files = req.files;
 
-      const imageObjects = files.map((file) => ({
-        public_id: file.filename,
-        url: `${process.env.SERVER_URL || "http://localhost:8000"}/${
-          file.filename
-        }`,
-      }));
+      // const imageObjects = files.map((file) => ({
+      //   public_id: file.filename,
+      //   url: `${process.env.SERVER_URL || "http://localhost:8000"}/${
+      //     file.filename
+      //   }`,
+      // }));
+      const uploadedImages = [];
+
+      for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+          const myCloud = cloudinary.v2.uploader.upload_stream(
+            {
+              folder: "products",
+            },
+            (error, myCloud) => {
+              if (error) reject(error);
+              else resolve(myCloud);
+            },
+          );
+
+          myCloud.end(file.buffer);
+        });
+        uploadedImages.push({
+          public_id: result.public_id,
+          url: result.secure_url,
+        });
+      }
 
       // create product data
       const productData = {
         ...req.body,
-        images: imageObjects, // <---- HERE
-        shop: shop, // <---- HERE // shop:shop
+        images: uploadedImages,
+        shop: shop,
       };
 
       // create product
@@ -83,21 +104,20 @@ router.delete(
     }
 
     if (product.images && product.images.length > 0) {
-      product.images.forEach((img) => {
-        const imagePath = path.join(
-          __dirname,
-          "..",
-          "..",
-          "uploads",
-          img.public_id,
-        );
-
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-        } else {
-          console.log("File not found:", imagePath);
+      for (const img of product.images) {
+        if (img.public_id) {
+          try {
+            await cloudinary.v2.uploader.destroy(img.public_id, {
+              resource_type: "image",
+            });
+          } catch (err) {
+            console.error(
+              `Failed to delete image  ${img.public_id} from cloud:`,
+              err,
+            );
+          }
         }
-      });
+      }
     }
 
     await Product.findByIdAndDelete(productId);
@@ -140,7 +160,7 @@ router.put(
 
       // 2️⃣ Check if user already reviewed
       const isReviewed = product.reviews.find(
-        (rev) => rev.user._id.toString() === req.user._id.toString()
+        (rev) => rev.user._id.toString() === req.user._id.toString(),
       );
 
       if (isReviewed) {
@@ -167,7 +187,10 @@ router.put(
       }
 
       // 3️⃣ Recalculate average rating
-      const totalRating = product.reviews.reduce((acc, rev) => acc + rev.rating, 0);
+      const totalRating = product.reviews.reduce(
+        (acc, rev) => acc + rev.rating,
+        0,
+      );
       product.ratings = totalRating / product.reviews.length;
 
       await product.save({ validateBeforeSave: false });
@@ -179,7 +202,7 @@ router.put(
         {
           arrayFilters: [{ "elem._id": productId }],
           new: true,
-        }
+        },
       );
 
       res.status(200).json({
@@ -187,10 +210,11 @@ router.put(
         message: "Reviewed successfully!",
       });
     } catch (error) {
-      return next(new ErrorHandler(error.message || "Something went wrong", 400));
+      return next(
+        new ErrorHandler(error.message || "Something went wrong", 400),
+      );
     }
-  })
+  }),
 );
-
 
 module.exports = router;

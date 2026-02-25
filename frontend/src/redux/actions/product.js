@@ -26,11 +26,12 @@ export const createProduct = (newForm) => async (dispatch) => {
     const { data } = await axios.post(
       `${server}/product/create-product`,
       newForm,
-      config
+      config,
     );
     dispatch(productCreateSuccess(data));
   } catch (error) {
     dispatch(productCreateFail(error.response.data.message));
+
   }
 };
 
@@ -40,7 +41,7 @@ export const getAllProductsShop = (id) => async (dispatch) => {
   try {
     dispatch(getAllProductsShopRequest());
     const { data } = await axios.get(
-      `${server}/product/get-all-products-shop/${id}`
+      `${server}/product/get-all-products-shop/${id}`,
     );
     dispatch(getAllProductsShopSuccess(data.products));
   } catch (error) {
