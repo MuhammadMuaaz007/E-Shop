@@ -34,7 +34,7 @@ import { logoutSeller } from "../../redux/reducers/seller";
 const Header = ({ activeHeading }) => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { seller } = useSelector((state) => state.seller);
-  console.log("Seller in Header:", seller);
+
   const { allProducts } = useSelector((state) => state.product);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");

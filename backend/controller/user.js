@@ -10,77 +10,78 @@ const sendMail = require("../utils/SendMail");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const sendToken = require("../utils/JwtToken");
 const { isAuthenticated } = require("../middleware/auth");
+const cloudinary = require("cloudinary");
 
 router.post("/create-user", upload.single("file"), async (req, res, next) => {
   const { email, password, name } = req.body;
-  const userEmail = await User.findOne({ email: email });
-  if (userEmail) {
-    if (req.file) {
-      // safely delete uploaded file if user already exists
-      const filePath = path.join(process.cwd(), "uploads", req.file.filename);
-
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.error("Error deleting duplicate file:", err);
-        } else {
-          console.log("Deleted duplicate uploaded file:", filePath);
-        }
-      });
-    }
-
-    return next(new ErrorHandler("User already exists", 400));
-  }
 
   if (!email || !password || !name || !req.file) {
     return next(new ErrorHandler("Please enter all fields", 400));
   }
 
-  const filename = req.file ? req.file.filename : null;
-  const avatarObj = {
-    public_id: filename,
-    url: `${process.env.SERVER_URL || "http://localhost:8000"}/${filename}`,
-  };
-
-  const user = {
-    name,
-    email,
-    password,
-    avatar: avatarObj,
-  };
-
-  function createActivationToken(user) {
-    const payload = {
-      name: user.name,
-      email: user.email,
-      password: user.password,
-      avatar: user.avatar,
-    };
-    return jwt.sign(payload, process.env.ACTIVATION_SECRET, {
-      expiresIn: "1d",
-    });
+  const userEmail = await User.findOne({ email });
+  if (userEmail) {
+    return next(new ErrorHandler("User already exists", 400));
   }
 
-  const activationToken = createActivationToken(user);
-  const encodedToken = encodeURIComponent(activationToken);
-  const activationUrl = `${
-    process.env.FRONTEND_URL || "http://localhost:5173"
-  }/activate/${encodedToken}`;
-
   try {
+    const streamUpload = (fileBuffer) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.v2.uploader.upload_stream(
+          { folder: "UserAvatars" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          },
+        );
+        stream.end(fileBuffer);
+      });
+    };
+
+    const myCloud = await streamUpload(req.file.buffer);
+
+    const user = {
+      name,
+      email,
+      password,
+      avatar: {
+        public_id: myCloud.public_id,
+        url: myCloud.secure_url,
+      },
+    };
+
+    const createActivationToken = (user) => {
+      const payload = {
+        name: user.name,
+        email: user.email,
+        password: user.password,
+        avatar: user.avatar,
+      };
+      return jwt.sign(payload, process.env.ACTIVATION_SECRET, {
+        expiresIn: "1d",
+      });
+    };
+
+    const activationToken = createActivationToken(user);
+    const encodedToken = encodeURIComponent(activationToken);
+    const activationUrl = `${
+      process.env.FRONTEND_URL || "http://localhost:5173"
+    }/activate/${encodedToken}`;
+
     await sendMail({
       email: user.email,
       subject: "Activate your account!",
       message: `Hello ${user.name}, please click on the link to activate your account: ${activationUrl}`,
     });
+
     res.status(201).json({
       success: true,
-      message: `Please check your email:- ${user.email} to activate your account!`,
+      message: `Please check your email: ${user.email} to activate your account!`,
     });
   } catch (error) {
-    return next(ErrorHandler(err.message, 500));
+    return next(new ErrorHandler(error.message, 500));
   }
 });
-
 router.post(
   "/activate",
   catchAsyncErrors(async (req, res, next) => {
@@ -205,48 +206,58 @@ router.put(
 );
 
 // update user avatar
+
 router.put(
   "/update-avatar",
   isAuthenticated,
   upload.single("image"),
   catchAsyncErrors(async (req, res, next) => {
-    try {
-      const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id);
 
-      // ❌ If no file uploaded
-      if (!req.file) {
-        return next(new ErrorHandler("Please upload an image", 400));
-      }
-
-      // ✅ Extract old avatar filename
-      if (user.avatar && user.avatar.url) {
-        const oldAvatar = user.avatar.url.split("/").pop();
-        const oldAvatarPath = path.join(process.cwd(), "uploads", oldAvatar);
-
-        // ✅ Delete old avatar
-        if (fs.existsSync(oldAvatarPath)) {
-          fs.unlinkSync(oldAvatarPath);
-        }
-      }
-
-      // ✅ Save new avatar
-      user.avatar = {
-        public_id: req.file.filename,
-        url: `${req.protocol}://${req.get("host")}/uploads/${
-          req.file.filename
-        }`,
-      };
-
-      await user.save();
-
-      res.status(200).json({
-        success: true,
-        message: "Avatar updated successfully",
-        user,
-      });
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
+    if (!req.file) {
+      return next(new ErrorHandler("Please upload an image", 400));
     }
+
+    let oldPublicId = null;
+
+    // Delete old avatar from Cloudinary if it exists
+    if (user.avatar && user.avatar.public_id) {
+      oldPublicId = user.avatar.public_id;
+      try {
+        await cloudinary.v2.uploader.destroy(oldPublicId);
+      } catch (err) {
+        console.log(
+          "Failed to delete old avatar from Cloudinary:",
+          err.message,
+        );
+      }
+    }
+
+    // Upload new avatar to Cloudinary
+    const uploadedImage = await new Promise((resolve, reject) => {
+      const stream = cloudinary.v2.uploader.upload_stream(
+        { folder: "UserAvatars" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        },
+      );
+      stream.end(req.file.buffer);
+    });
+
+    // Save new avatar info
+    user.avatar = {
+      public_id: uploadedImage.public_id,
+      url: uploadedImage.secure_url,
+    };
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Avatar updated successfully",
+      user,
+    });
   }),
 );
 

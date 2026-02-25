@@ -162,11 +162,11 @@ router.get(
     try {
       const seller = await Shop.findById(req.seller._id);
       if (!seller) {
-        return next(new ErrorHandler("User not found", 404));
+        return next(new ErrorHandler("Seller not found", 404));
       }
       res.status(200).json({ success: true, seller });
     } catch (error) {
-      return next(new ErrorHandler("Error fetching user data", 500));
+      return next(new ErrorHandler("Error fetching seller data", 500));
     }
   }),
 );
@@ -214,8 +214,6 @@ router.put(
   catchAsyncErrors(async (req, res, next) => {
     try {
       const shop = await Shop.findById(req.seller._id);
-      console.log("Shop found for avatar update:", !!shop);
-      console.log("File received for avatar update:", !!req.file);
       if (!req.file) {
         return next(new ErrorHandler("Please upload an image", 400));
       }
