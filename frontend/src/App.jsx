@@ -65,7 +65,6 @@ const App = () => {
     setStripeApiKey(data.stripeApiKey);
   }
 
-  console.log(stripeApiKey);
 
   return (
     <>

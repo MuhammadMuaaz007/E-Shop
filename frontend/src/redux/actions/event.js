@@ -24,13 +24,11 @@ export const createEvent = (newForm) => async (dispatch) => {
         "Content-Type": "multipart/form-data",
       },
     };
-    console.log("Creating Event with Data:", newForm);
     const { data } = await axios.post(
       `${server}/event/create-event`,
       newForm,
       config,
     );
-    console.log("Event Created:", data);
     dispatch(eventCreateSuccess(data));
   } catch (error) {
     dispatch(eventCreateFail(error.response.data.message));
@@ -43,7 +41,7 @@ export const getAllEventsShop = (id) => async (dispatch) => {
     const { data } = await axios.get(
       `${server}/event/get-all-events-shop/${id}`,
     );
-    console.log("Fetched Events Data:", data);
+
     dispatch(getAllEventsShopSuccess(data.events));
   } catch (error) {
     dispatch(getAllEventsShopFail(error.response.data.message));

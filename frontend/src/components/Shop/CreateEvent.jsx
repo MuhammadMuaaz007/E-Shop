@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { categoriesData } from "../../static/data";
 import { toast } from "react-toastify";
 
-import { resetCreateEvent } from "../../redux/reducers/event";
+import { resetCreateEvent, clearErrors } from "../../redux/reducers/event";
 import { createEvent } from "../../redux/actions/event";
 
 const CreateEvent = () => {
@@ -27,10 +27,14 @@ const CreateEvent = () => {
 
   const [stock, setStock] = useState("");
   useEffect(() => {
-    console.log("Event Creation State:", { error, createSuccess });
-    
+    // Clear any stale errors when component mounts
+    dispatch(clearErrors());
+  }, []); // Run only once when component mounts
+
+  useEffect(() => {
     if (error) {
       toast.error(error);
+      dispatch(clearErrors()); // Clear error after showing it
     }
     if (createSuccess) {
       toast.success("Event Created Successfully");
@@ -69,7 +73,6 @@ const CreateEvent = () => {
       dispatch(createEvent(newForm));
     } catch (error) {
       toast.error("Failed to create event");
-      console.log(error);
     }
   };
   const handleStartDateChange = (e) => {
