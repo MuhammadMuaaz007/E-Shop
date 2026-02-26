@@ -102,7 +102,7 @@ const Header = ({ activeHeading }) => {
 
   return (
     <>
-      <div className="w-full mx-auto bg-gray-100">
+      <div className="w-full mx-auto">
         {/* TOP HEADER BAR */}
         <div className="mx-5 hidden md:h-[50px] md:my-[10px] md:flex items-center justify-between ">
           <div className="w-[50px] md:w-[90px] flex items-center ">
@@ -256,7 +256,9 @@ const Header = ({ activeHeading }) => {
       </div>
       {/* MOBILE HEADER */}
 
-      <div className="w-full h-[60px] fixed bg-white z-50 top-0 left-0 shadow-md flex items-center justify-between px-4 md:hidden">
+      <div className={`w-full h-[60px] fixed top-0 left-0 shadow-md flex items-center justify-between px-4 md:hidden z-50 transition-all duration-300 ${
+        openCart || openWishlist ? 'bg-purple-50' : 'bg-white'
+      }`}>
         {/* Menu Button */}
         <div
           className="flex items-center justify-center p-2 rounded-md hover:bg-gray-200 cursor-pointer"
@@ -282,12 +284,51 @@ const Header = ({ activeHeading }) => {
           </Link>
         </div>
 
-        {/* Cart */}
-        <div className="relative cursor-pointer p-2 rounded-md hover:bg-gray-200">
-          <AiOutlineShoppingCart size={28} className="text-black" />
-          <span className="absolute top-1 right-1 rounded-full bg-[#3bc177] w-4 h-4 text-white text-[12px] flex items-center justify-center">
-            {cart && cart.length ? cart.length : 0}
-          </span>
+        {/* Icons Container */}
+        <div className="flex items-center space-x-1">
+          {/* Wishlist */}
+          <div
+            className={`relative cursor-pointer p-3 rounded-full transition-all duration-200 ${
+              openWishlist 
+                ? 'bg-purple-100 shadow-lg scale-105' 
+                : 'hover:bg-purple-50 active:bg-purple-100 active:scale-95'
+            }`}
+            onClick={() => setOpenWishlist(!openWishlist)}
+          >
+            <AiOutlineHeart 
+              size={22} 
+              className={`transition-colors duration-200 ${
+                openWishlist ? 'text-purple-600' : 'text-gray-700'
+              }`} 
+            />
+            {wishlist && wishlist.length > 0 && (
+              <span className="absolute -top-1 -right-1 rounded-full bg-red-500 min-w-[18px] h-[18px] text-white text-[10px] font-semibold flex items-center justify-center px-1 shadow-md animate-pulse">
+                {wishlist.length > 99 ? '99+' : wishlist.length}
+              </span>
+            )}
+          </div>
+
+          {/* Cart */}
+          <div
+            className={`relative cursor-pointer p-3 rounded-full transition-all duration-200 ${
+              openCart 
+                ? 'bg-purple-100 shadow-lg scale-105' 
+                : 'hover:bg-purple-50 active:bg-purple-100 active:scale-95'
+            }`}
+            onClick={() => setOpenCart(!openCart)}
+          >
+            <AiOutlineShoppingCart 
+              size={24} 
+              className={`transition-colors duration-200 ${
+                openCart ? 'text-purple-600' : 'text-gray-700'
+              }`} 
+            />
+            {cart && cart.length > 0 && (
+              <span className="absolute -top-1 -right-1 rounded-full bg-green-500 min-w-[18px] h-[18px] text-white text-[10px] font-semibold flex items-center justify-center px-1 shadow-md animate-pulse">
+                {cart.length > 99 ? '99+' : cart.length}
+              </span>
+            )}
+          </div>
         </div>
         {open && (
           <div
@@ -339,7 +380,7 @@ const Header = ({ activeHeading }) => {
 
                 {/* Search */}
 
-                <div className="relative w-[35%]">
+                <div className="relative w-[100%]">
                   <input
                     type="text"
                     placeholder="Search Product..."
@@ -492,6 +533,10 @@ const Header = ({ activeHeading }) => {
             </div>
           </div>
         )}
+
+        {/* Mobile Cart & Wishlist Popups */}
+        {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
+        {openWishlist ? <Wishlist setOpenWishlist={setOpenWishlist} /> : null}
       </div>
       <div className="h-[60px] md:hidden"></div>
     </>

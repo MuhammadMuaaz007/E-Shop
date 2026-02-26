@@ -22,8 +22,14 @@ const Wishlist = ({ setOpenWishlist }) => {
   };
 
   return (
-    <div className="fixed top-0 right-0 w-full h-screen z-10 bg-black/30">
-      <div className="fixed top-0 right-0 min-h-full bg-white w-[30%] shadow-2xl flex flex-col">
+    <div
+      className="fixed inset-0 z-50 bg-black/30"
+      onClick={() => setOpenWishlist(false)}
+    >
+      <div
+        className="fixed top-0 right-0 min-h-full bg-white w-full sm:w-[400px] md:w-[450px] lg:w-[30%] shadow-2xl flex flex-col animate-slide-in-right"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="p-4 flex justify-between items-center border-b">
           <div className="flex items-center gap-2">
@@ -39,11 +45,15 @@ const Wishlist = ({ setOpenWishlist }) => {
         </div>
 
         {/* Wishlist Items */}
-        <div className="flex-1 overflow-y-auto max-h-[calc(100vh-80px)]">
+        <div className="flex-1 overflow-y-auto px-4 py-2">
           {wishlist?.length === 0 ? (
-            <h1 className="text-center w-full py-10 text-gray-600">
-              Your wishlist is empty
-            </h1>
+            <div className="flex flex-col items-center justify-center h-full text-center px-6 mt-[48%]">
+              <AiOutlineHeart size={80} className="text-gray-300 mb-4" />
+              <p className="text-lg font-medium text-gray-500 mb-2">
+                Your wishlist is empty
+              </p>
+              <p className="text-sm text-gray-400">Save items you love!</p>
+            </div>
           ) : (
             wishlist.map((item) => (
               <WishlistItem
@@ -65,7 +75,11 @@ export default Wishlist;
 // -------------------------
 // Single Wishlist Item
 // -------------------------
-const WishlistItem = ({ data, removeFromWishlistHandler, addToCartHandler }) => {
+const WishlistItem = ({
+  data,
+  removeFromWishlistHandler,
+  addToCartHandler,
+}) => {
   // Helper function to format big numbers
   const formatNumber = (num) => {
     if (!num) return 0;
@@ -78,48 +92,69 @@ const WishlistItem = ({ data, removeFromWishlistHandler, addToCartHandler }) => 
   const price = formatNumber(data.discountPrice || data.originalPrice);
 
   return (
-    <div className="border-b border-gray-200 p-4 flex relative">
-      {/* Product Image */}
-      <img
-        src={data.images?.[0]?.url || "/placeholder.png"}
-        alt={data.name}
-        className="w-20 h-20 object-cover rounded flex-shrink-0"
-      />
+    <div className="border-b border-gray-200 p-4 relative">
+      {/* Mobile Remove Button - Top Right Corner */}
+      <button
+        onClick={() => removeFromWishlistHandler(data)}
+        className="absolute top-2 right-2 sm:hidden w-6 h-6 flex items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition shadow-md z-10"
+      >
+        <AiOutlineClose size={12} />
+      </button>
 
-      {/* Product Info */}
-      <div className="flex-1 flex flex-col justify-between ml-4">
-        {/* Name & Description */}
-        <div className="overflow-hidden">
-          <h1 className="font-semibold text-[16px] line-clamp-2">{data.name}</h1>
-          <p className="text-gray-500 text-sm line-clamp-3 mt-1">
-            {data.description || "No description available"}
-          </p>
+      <div className="flex flex-col sm:flex-row">
+        {/* Product Image */}
+        <img
+          src={data.images?.[0]?.url || "/placeholder.png"}
+          alt={data.name}
+          className="w-20 h-20 object-cover rounded flex-shrink-0"
+        />
+
+        {/* Product Info */}
+        <div className="flex-1 flex flex-col justify-between ml-0 sm:ml-4 pr-8 sm:pr-0">
+          {/* Name & Description */}
+          <div className="overflow-hidden">
+            <h1 className="font-semibold text-[16px] line-clamp-2">
+              {data.name}
+            </h1>
+            <p className="text-gray-500 text-sm line-clamp-3 mt-1">
+              {data.description || "No description available"}
+            </p>
+          </div>
+
+          {/* Price */}
+          <span className="bg-purple-500 text-white px-2 py-1 rounded font-semibold text-sm mt-2 w-fit">
+            ${price} each
+          </span>
         </div>
 
-        {/* Price */}
-        <span className="bg-purple-500 text-white px-2 py-1 rounded font-semibold text-sm mt-2 w-fit">
-          ${price} each
-        </span>
+        {/* Desktop Buttons Column */}
+        <div className="hidden sm:flex flex-col items-center justify-between ml-4">
+          <button
+            onClick={() => removeFromWishlistHandler(data)}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 border border-gray-400 text-gray-600 hover:bg-red-500 hover:text-white transition"
+          >
+            <AiOutlineClose size={16} />
+          </button>
+
+          <button
+            onClick={() => addToCartHandler(data)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 border border-gray-400 text-gray-600 hover:bg-green-500 hover:text-white transition mt-2"
+          >
+            <IoBagHandleOutline size={20} />
+          </button>
+        </div>
       </div>
 
-      {/* Buttons Column (exact same location as before) */}
-      <div className="flex flex-col items-center justify-between ml-4">
-        <button
-          onClick={() => removeFromWishlistHandler(data)}
-          className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 border border-gray-400 text-gray-600 hover:bg-red-500 hover:text-white transition"
-        >
-          <AiOutlineClose size={16} />
-        </button>
-
+      {/* Mobile Add to Cart Button */}
+      <div className="flex sm:hidden justify-center mt-3">
         <button
           onClick={() => addToCartHandler(data)}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 border border-gray-400 text-gray-600 hover:bg-green-500 hover:text-white transition mt-2"
+          className="flex items-center justify-center space-x-2 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition shadow-md"
         >
-          <IoBagHandleOutline size={20} />
+          <IoBagHandleOutline size={16} />
+          <span className="text-sm font-medium">Add to Cart</span>
         </button>
       </div>
     </div>
   );
 };
-
-

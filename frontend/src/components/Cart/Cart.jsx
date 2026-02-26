@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AiOutlineClose } from "react-icons/ai";
+import { AiOutlineClose, AiOutlineShoppingCart } from "react-icons/ai";
 import { HiPlus, HiMinus } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,8 +29,14 @@ const Cart = ({ setOpenCart }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex justify-end">
-      <div className="bg-white w-full sm:w-[400px] md:w-[450px] lg:w-[30%] h-full flex flex-col shadow-2xl relative">
+    <div
+      className="fixed inset-0 z-50 bg-black/30"
+      onClick={() => setOpenCart(false)}
+    >
+      <div
+        className="bg-white w-full sm:w-[400px] md:w-[450px] lg:w-[30%] h-full flex flex-col shadow-2xl relative ml-auto animate-slide-in-right"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b">
           <h5 className="text-lg sm:text-xl font-semibold">
@@ -45,9 +51,13 @@ const Cart = ({ setOpenCart }) => {
         {/* Cart Items */}
         <div className="flex-1 overflow-y-auto px-4 py-2">
           {cart.length === 0 ? (
-            <p className="text-center text-gray-500 mt-10">
-              Your cart is empty
-            </p>
+            <div className="flex flex-col items-center justify-center h-full text-center px-6">
+              <AiOutlineShoppingCart size={80} className="text-gray-300 mb-4" />
+              <p className="text-lg font-medium text-gray-500 mb-2">
+                Your cart is empty
+              </p>
+              <p className="text-sm text-gray-400">Add items to get started!</p>
+            </div>
           ) : (
             cart.map((item) => (
               <SingleCart
@@ -118,6 +128,14 @@ const SingleCart = ({ data, removeFromCartHandler, quantityChangeHandler }) => {
 
   return (
     <div className="flex flex-col sm:flex-row items-center border-b border-gray-300 py-3 relative">
+      {/* Mobile Remove Button - Top Right Corner */}
+      <button
+        onClick={() => removeFromCartHandler(data)}
+        className="absolute top-2 right-2 sm:hidden w-6 h-6 flex items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition shadow-md z-10"
+      >
+        <AiOutlineClose size={12} />
+      </button>
+
       {/* Product Image */}
       <img
         src={data.images?.[0]?.url || "/placeholder.png"}
@@ -126,7 +144,7 @@ const SingleCart = ({ data, removeFromCartHandler, quantityChangeHandler }) => {
       />
 
       {/* Product Info */}
-      <div className="flex-1 flex flex-col justify-between ml-4">
+      <div className="flex-1 flex flex-col justify-between ml-4 pr-8 sm:pr-0">
         <div className="overflow-hidden">
           <h1 className="font-semibold text-[16px] line-clamp-2">
             {data.name}
@@ -147,8 +165,29 @@ const SingleCart = ({ data, removeFromCartHandler, quantityChangeHandler }) => {
         </div>
       </div>
 
-      {/* Quantity & Remove Buttons */}
-      <div className="flex flex-col items-center justify-between ml-4">
+      {/* Mobile Layout - Horizontal Quantity Controls Only */}
+      <div className="flex sm:hidden justify-center mt-3 w-full">
+        <div className="flex items-center space-x-2 bg-gray-50 rounded-full px-3 py-2 shadow-sm">
+          <button
+            onClick={decrement}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600 transition shadow-sm"
+          >
+            <HiMinus size={12} />
+          </button>
+          <span className="font-bold text-lg min-w-[24px] text-center px-2">
+            {value}
+          </span>
+          <button
+            onClick={increment}
+            className="w-7 h-7 flex items-center justify-center rounded-full bg-green-500 text-white hover:bg-green-600 transition shadow-sm"
+          >
+            <HiPlus size={12} />
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Layout - Vertical Controls */}
+      <div className="hidden sm:flex flex-col items-center justify-between ml-4">
         <button
           onClick={() => removeFromCartHandler(data)}
           className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-200 border border-gray-400 text-gray-600 hover:bg-red-500 hover:text-white transition"
