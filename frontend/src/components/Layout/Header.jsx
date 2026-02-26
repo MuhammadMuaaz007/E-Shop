@@ -14,7 +14,6 @@ import {
 import { RxCross1 } from "react-icons/rx";
 import { CgProfile } from "react-icons/cg";
 import { BiMenuAltLeft } from "react-icons/bi";
-import shop from "../../assets/shop-final.jpg";
 import styles from "../../styles/styles";
 import DropDown from "./DropDown";
 import Navbar from "./Navbar";
@@ -104,15 +103,16 @@ const Header = ({ activeHeading }) => {
     <>
       <div className="w-full mx-auto">
         {/* TOP HEADER BAR */}
-        <div className="mx-5 hidden md:h-[50px] md:my-[10px] md:flex items-center justify-between ">
-          <div className="w-[50px] md:w-[90px] flex items-center ">
-            <Link to="/">
-              <img src={shop} alt="" className="w-12 bg-white rounded-full" />
+        <div className="mx-5 hidden md:h-[60px] md:my-[10px] md:flex items-center justify-between bg-white text-gray-900 rounded-2xl px-6">
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mr-3">
+                <span className="font-bold text-xl text-gray-900">M</span>
+              </div>
+              <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                Muaaz's Mart
+              </h3>
             </Link>
-            <div className="w-1 flex">
-              <h1 className="font-bold text-md mr-2 ml-3">Muaaz's</h1>
-              <h1 className="font-bold text-md text-purple-500">Mart</h1>
-            </div>
           </div>
 
           {/* SEARCH BOX */}
@@ -122,11 +122,11 @@ const Header = ({ activeHeading }) => {
               placeholder="Search Product..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="h-[40px] px-2 w-full border-[#7e22ce] border-[2px] rounded-md outline-none"
+              className="h-[40px] px-2 w-full border-purple-400 border-[2px] rounded-md outline-none text-gray-800 focus:ring-2 focus:ring-purple-400"
             />
             <AiOutlineSearch
               size={30}
-              className="absolute right-2 cursor-pointer top-1.5 "
+              className="absolute right-2 cursor-pointer top-1.5 text-gray-600"
             />
 
             {searchData.length > 0 && (
@@ -149,9 +149,9 @@ const Header = ({ activeHeading }) => {
             )}
           </div>
 
-          <div className={`${styles.button1}`}>
+          <div className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-xl font-semibold transition duration-300 shadow-lg">
             <Link to="/shop-login">
-              <h1 className="text-[#fff] flex items-center">
+              <h1 className="flex items-center">
                 {seller ? "Seller Dashboard" : "Become Seller"}{" "}
                 <IoIosArrowForward className="ml-1" />
               </h1>
@@ -162,8 +162,8 @@ const Header = ({ activeHeading }) => {
         {/* MAIN NAVBAR */}
         <div
           className={`${
-            active ? "shadow-sm fixed top-0 left-0 z-10" : ""
-          } hidden md:flex items-center justify-between w-full bg-[#4C1D95] h-[70px] transition`}
+            active ? "shadow-xl fixed top-0 left-0 z-10" : ""
+          } hidden md:flex items-center justify-between w-full bg-gradient-to-br from-[#4C1D95] via-purple-900 to-indigo-900 h-[70px] transition`}
         >
           <div
             className={`${styles.section} relative ${styles.normalFlex} justify-between`}
@@ -256,12 +256,20 @@ const Header = ({ activeHeading }) => {
       </div>
       {/* MOBILE HEADER */}
 
-      <div className={`w-full h-[60px] fixed top-0 left-0 shadow-md flex items-center justify-between px-4 md:hidden z-50 transition-all duration-300 ${
-        openCart || openWishlist ? 'bg-purple-50' : 'bg-white'
-      }`}>
+      <div
+        className={`w-full h-[60px] fixed top-0 left-0 shadow-xl flex items-center justify-between px-4 md:hidden z-50 transition-all duration-300 ${
+          openCart || openWishlist
+            ? "bg-gradient-to-r from-purple-200 to-indigo-200"
+            : "bg-gradient-to-br from-[#4C1D95] via-purple-900 to-indigo-900"
+        }`}
+      >
         {/* Menu Button */}
         <div
-          className="flex items-center justify-center p-2 rounded-md hover:bg-gray-200 cursor-pointer"
+          className={`flex items-center justify-center p-2 rounded-md cursor-pointer transition-colors ${
+            openCart || openWishlist
+              ? "text-purple-700 hover:bg-purple-100"
+              : "text-white hover:bg-white/10"
+          }`}
           onClick={() => setOpen(true)}
         >
           <BiMenuAltLeft size={28} />
@@ -271,15 +279,18 @@ const Header = ({ activeHeading }) => {
         <div className="flex items-center justify-center">
           <Link to="/">
             <div className="flex items-center">
-              <img
-                src={shop}
-                alt="Logo"
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <div className="ml-2 flex flex-col leading-none">
-                <span className="font-bold text-sm">Muaaz's</span>
-                <span className="font-bold text-sm">Mart</span>
+              <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mr-2">
+                <span className="font-bold text-lg text-gray-900">M</span>
               </div>
+              <h3
+                className={`text-lg font-bold ${
+                  openCart || openWishlist
+                    ? "text-purple-700"
+                    : "bg-gradient-to-r from-yellow-400 to-orange-300 bg-clip-text text-transparent"
+                }`}
+              >
+                Muaaz's Mart
+              </h3>
             </div>
           </Link>
         </div>
@@ -289,21 +300,21 @@ const Header = ({ activeHeading }) => {
           {/* Wishlist */}
           <div
             className={`relative cursor-pointer p-3 rounded-full transition-all duration-200 ${
-              openWishlist 
-                ? 'bg-purple-100 shadow-lg scale-105' 
-                : 'hover:bg-purple-50 active:bg-purple-100 active:scale-95'
+              openWishlist
+                ? "bg-purple-100 shadow-lg scale-105"
+                : "hover:bg-purple-50 active:bg-purple-100 active:scale-95"
             }`}
             onClick={() => setOpenWishlist(!openWishlist)}
           >
-            <AiOutlineHeart 
-              size={22} 
+            <AiOutlineHeart
+              size={22}
               className={`transition-colors duration-200 ${
-                openWishlist ? 'text-purple-600' : 'text-gray-700'
-              }`} 
+                openWishlist ? "text-purple-600" : "text-gray-700"
+              }`}
             />
             {wishlist && wishlist.length > 0 && (
               <span className="absolute -top-1 -right-1 rounded-full bg-red-500 min-w-[18px] h-[18px] text-white text-[10px] font-semibold flex items-center justify-center px-1 shadow-md animate-pulse">
-                {wishlist.length > 99 ? '99+' : wishlist.length}
+                {wishlist.length > 99 ? "99+" : wishlist.length}
               </span>
             )}
           </div>
@@ -311,21 +322,21 @@ const Header = ({ activeHeading }) => {
           {/* Cart */}
           <div
             className={`relative cursor-pointer p-3 rounded-full transition-all duration-200 ${
-              openCart 
-                ? 'bg-purple-100 shadow-lg scale-105' 
-                : 'hover:bg-purple-50 active:bg-purple-100 active:scale-95'
+              openCart
+                ? "bg-purple-100 shadow-lg scale-105"
+                : "hover:bg-purple-50 active:bg-purple-100 active:scale-95"
             }`}
             onClick={() => setOpenCart(!openCart)}
           >
-            <AiOutlineShoppingCart 
-              size={24} 
+            <AiOutlineShoppingCart
+              size={24}
               className={`transition-colors duration-200 ${
-                openCart ? 'text-purple-600' : 'text-gray-700'
-              }`} 
+                openCart ? "text-purple-600" : "text-gray-700"
+              }`}
             />
             {cart && cart.length > 0 && (
               <span className="absolute -top-1 -right-1 rounded-full bg-green-500 min-w-[18px] h-[18px] text-white text-[10px] font-semibold flex items-center justify-center px-1 shadow-md animate-pulse">
-                {cart.length > 99 ? '99+' : cart.length}
+                {cart.length > 99 ? "99+" : cart.length}
               </span>
             )}
           </div>
@@ -386,7 +397,7 @@ const Header = ({ activeHeading }) => {
                     placeholder="Search Product..."
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    className="h-[40px] px-2 w-full border-[#7e22ce] border-[2px] rounded-md outline-none"
+                    className="h-[40px] px-2 w-full border-purple-400 border-[2px] rounded-md outline-none text-gray-800 focus:ring-2 focus:ring-purple-400"
                   />
                   <AiOutlineSearch
                     size={30}
