@@ -30,7 +30,12 @@ const payment = require("./controller/payment");
 const order = require("./controller/order");
 const conversation = require("./controller/conversation");
 const message = require("./controller/message");
-
+app.use("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy",
+  });
+});
 app.use("/api/v2/conversation", conversation);
 app.use("/api/v2/message", message);
 app.use("/api/v2/order", order);

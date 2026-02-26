@@ -1,7 +1,6 @@
 const app = require("./app");
 const connectDatabase = require("./db/Database");
 
-
 connectDatabase();
 
 process.on("uncaughtException", (err) => {
@@ -21,7 +20,6 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
 
 const server = app.listen(process.env.PORT, () => {
   console.log(`Server is running on http://localhost:${process.env.PORT}`);
