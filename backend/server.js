@@ -1,8 +1,6 @@
 const app = require("./app");
 const connectDatabase = require("./db/Database");
 
-connectDatabase();
-
 process.on("uncaughtException", (err) => {
   console.log(`Error: ${err.message}`);
   console.log(`shutting down the server for handling uncaught exception`);
@@ -21,9 +19,16 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const server = app.listen(process.env.PORT, () => {
-  console.log(`Server is running on http://localhost:${process.env.PORT}`);
-});
+connectDatabase()
+  .then(() => {
+    app.listen(process.env.PORT, () => {
+      console.log(`Server is running on http://localhost:${process.env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log(`Error connecting to the database: ${err.message}`);
+    process.exit(1);
+  });
 
 process.on("unhandledRejection", (err) => {
   console.log(`Shutting down the server for ${err.message}`);
