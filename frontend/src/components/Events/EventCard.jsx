@@ -41,11 +41,11 @@ const EventCard = ({ data }) => {
       hover:shadow-xl transition-shadow duration-300`}
     >
       {/* Image Section */}
-      <div className="w-full lg:w-1/2 flex justify-center items-center relative">
+      <div className="w-full lg:w-1/2 flex justify-center items-center relative bg-gray-50 rounded-lg">
         <img
           src={data?.images?.[0]?.url}
           alt={data?.name}
-          className="w-[80%] md:w-[90%] lg:w-full h-auto object-contain hover:scale-105 transition-transform duration-300"
+          className="max-w-full max-h-[250px] md:max-h-[300px] lg:max-h-[350px] object-contain hover:scale-105 transition-transform duration-300"
         />
         <span
           className="absolute top-3 left-3 bg-gradient-to-r from-purple-600 to-purple-400
@@ -67,22 +67,21 @@ const EventCard = ({ data }) => {
           {data?.description}
         </p>
 
-       {/* Tags Section */}
-{data?.tags && (
-  <div className="mt-3 flex flex-wrap gap-2">
-    {(Array.isArray(data.tags) ? data.tags : data.tags.split(",")).map(
-      (tag, index) => (
-        <span
-          key={index}
-          className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium"
-        >
-          {tag.trim()}
-        </span>
-      )
-    )}
-  </div>
-)}
-
+        {/* Tags Section */}
+        {data?.tags && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {(Array.isArray(data.tags) ? data.tags : data.tags.split(",")).map(
+              (tag, index) => (
+                <span
+                  key={index}
+                  className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium"
+                >
+                  {tag.trim()}
+                </span>
+              ),
+            )}
+          </div>
+        )}
 
         {/* Price & Sold Info */}
         <div className="flex py-3 justify-between items-center">

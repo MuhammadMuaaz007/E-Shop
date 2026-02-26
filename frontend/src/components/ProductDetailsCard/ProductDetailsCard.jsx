@@ -9,8 +9,9 @@ import {
   addToWishlistAction,
   removeFromWishlistAction,
 } from "../../redux/actions/wishlist";
+import { getAllProductsShop } from "../../redux/actions/product";
 
-const ProductDetailsCard = ({ setOpen, data, averageRating }) => {
+const ProductDetailsCard = ({ setOpen, data }) => {
   const dispatch = useDispatch();
 
   const [count, setCount] = useState(1);
@@ -19,7 +20,33 @@ const ProductDetailsCard = ({ setOpen, data, averageRating }) => {
   const { cart } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);
   const { seller } = useSelector((state) => state.seller);
+  const { products } = useSelector((state) => state.product);
   const timestamp = data?.shop?.updatedAt || Date.now();
+
+  // Calculate shop average rating from all products
+  const totalReviews =
+    products &&
+    products.reduce(
+      (acc, product) => acc + (product.reviews ? product.reviews.length : 0),
+      0,
+    );
+  const totalRatings =
+    products &&
+    products.reduce(
+      (acc, product) =>
+        acc + product.reviews.reduce((sum, review) => sum + review.rating, 0),
+      0,
+    );
+
+  const avg = totalRatings / totalReviews || 0;
+  const averageRating = avg.toFixed(2);
+
+  // Fetch shop products when component mounts
+  useEffect(() => {
+    if (data?.shop?._id) {
+      dispatch(getAllProductsShop(data.shop._id));
+    }
+  }, [dispatch, data?.shop?._id]);
 
   const shopAvatarUrl =
     seller && data.shop && data.shop._id === seller._id && seller.avatar?.url
@@ -108,15 +135,23 @@ const ProductDetailsCard = ({ setOpen, data, averageRating }) => {
                   alt="shop"
                   className="h-12 w-12 rounded-full object-cover"
                 />
-                <h3 className="font-semibold text-lg">{data.shop.name}</h3>
+                <div>
+                  <h3 className="font-semibold text-lg">{data.shop.name}</h3>
+                  <p className="text-gray-500 text-sm">View Shop</p>
+                </div>
               </Link>
 
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded text-sm">
-                ⭐ {averageRating}
-              </span>
+              <div className="text-right">
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded text-sm font-medium">
+                  ⭐ {averageRating > 0 ? averageRating : "No ratings yet"}
+                </span>
+                <p className="text-gray-500 text-xs mt-1">
+                  {totalReviews > 0 ? `${totalReviews} Reviews` : "Shop Rating"}
+                </p>
+              </div>
             </div>
           </div>
-            
+
           {/* ================= Right ================= */}
           <div className="md:w-1/2 flex flex-col justify-between">
             <div>

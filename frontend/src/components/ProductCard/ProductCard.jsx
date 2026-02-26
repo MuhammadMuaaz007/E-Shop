@@ -20,20 +20,20 @@ import Ratings from "../Products/Ratings";
 const ProductCard = ({ data }) => {
   const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.cart);
-   const { products } = useSelector((state) => state.product);
+  const { products } = useSelector((state) => state.product);
   const { wishlist } = useSelector((state) => state.wishlist);
 
   const [open, setOpen] = useState(false);
   const [click, setClick] = useState(false);
 
   const product_slug = `${data._id}`;
-  
+
   const formatNumber = (num) => {
     if (!num) return 0;
     if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k";
     return num;
   };
-    const totalReviews =
+  const totalReviews =
     products &&
     products.reduce(
       (acc, product) => acc + (product.reviews ? product.reviews.length : 0),
@@ -191,7 +191,7 @@ const ProductCard = ({ data }) => {
       </div>
 
       {/* Quick View */}
-      {open && <ProductDetailsCard setOpen={setOpen} data={data} averageRating={averageRating}/>}
+      {open && <ProductDetailsCard setOpen={setOpen} data={data} />}
     </>
   );
 };
