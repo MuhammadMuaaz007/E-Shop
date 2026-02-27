@@ -309,7 +309,7 @@ const Header = ({ activeHeading }) => {
             <AiOutlineHeart
               size={22}
               className={`transition-colors duration-200 ${
-                openWishlist ? "text-purple-600" : "text-gray-700"
+                openWishlist ? "text-purple-600" : "text-yellow-500"
               }`}
             />
             {wishlist && wishlist.length > 0 && (
@@ -331,7 +331,7 @@ const Header = ({ activeHeading }) => {
             <AiOutlineShoppingCart
               size={24}
               className={`transition-colors duration-200 ${
-                openCart ? "text-purple-600" : "text-gray-700"
+                openCart ? "text-purple-600" : "text-yellow-500"
               }`}
             />
             {cart && cart.length > 0 && (
