@@ -319,7 +319,7 @@ const Header = ({ activeHeading }) => {
             )}
           </div>
 
-          {/* Cart */}
+       
           <div
             className={`relative cursor-pointer p-3 rounded-full transition-all duration-200 ${
               openCart
