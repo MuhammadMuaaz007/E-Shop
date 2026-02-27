@@ -105,7 +105,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
       setClick(false);
     }
   }, [wishlist, data._id]);
-  console.log(data);
+
 
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-black/30 z-50 flex items-center justify-center">

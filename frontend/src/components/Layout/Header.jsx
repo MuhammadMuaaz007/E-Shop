@@ -265,14 +265,14 @@ const Header = ({ activeHeading }) => {
       >
         {/* Menu Button */}
         <div
-          className={`flex items-center justify-center p-2 rounded-md cursor-pointer transition-colors ${
+          className={`flex items-center justify-center p-2  cursor-pointer transition-colors  rounded-full ${
             openCart || openWishlist
               ? "text-purple-700 hover:bg-purple-100"
               : "text-white hover:bg-white/10"
           }`}
           onClick={() => setOpen(true)}
         >
-          <BiMenuAltLeft size={28} />
+          <BiMenuAltLeft size={28} className="text-yellow-500" />
         </div>
 
         {/* Logo */}
@@ -302,7 +302,7 @@ const Header = ({ activeHeading }) => {
             className={`relative cursor-pointer p-3 rounded-full transition-all duration-200 ${
               openWishlist
                 ? "bg-purple-100 shadow-lg scale-105"
-                : "hover:bg-purple-50 active:bg-purple-100 active:scale-95"
+                : "hover:bg-purple-100 active:bg-purple-100 active:scale-95"
             }`}
             onClick={() => setOpenWishlist(!openWishlist)}
           >
@@ -381,10 +381,13 @@ const Header = ({ activeHeading }) => {
                     <p className="font-semibold">
                       {isAuthenticated ? user.name : "Guest"}
                     </p>
+
                     {!isAuthenticated && (
-                      <p className="text-sm text-purple-600">
-                        Login to your account
-                      </p>
+                      <Link to="/login" onClick={() => setOpen(false)}>
+                        <p className="text-sm text-purple-600 cursor-pointer hover:underline">
+                          Login to your account
+                        </p>
+                      </Link>
                     )}
                   </div>
                 </div>
