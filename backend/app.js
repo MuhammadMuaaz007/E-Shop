@@ -3,6 +3,28 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+<<<<<<< HEAD
+=======
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "http://localhost:8000",
+      // Add your frontend production domain here
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "token"],
+  }),
+);
+app.use("/", express.static("uploads")); // serves at root
+app.use("/uploads", express.static("uploads")); // serves at /uploads
+app.use(bodyParser.urlencoded({ extended: true }));
+>>>>>>> 5a3e86e (Resolved merge conflicts)
 const path = require("path");
 
 const ErrorHandler = require("./middleware/error");
@@ -101,6 +123,7 @@ app.use("/api/v2/shop", shop);
 app.use("/api/v2/product", product);
 app.use("/api/v2/event", event);
 app.use("/api/v2/coupon", coupon);
+<<<<<<< HEAD
 app.use("/api/v2/payment", payment);
 app.use("/api/v2/order", order);
 app.use("/api/v2/conversation", conversation);
@@ -109,6 +132,9 @@ app.use("/api/v2/message", message);
 // --------------------
 // ERROR HANDLER (ALWAYS LAST)
 // --------------------
+=======
+
+>>>>>>> 5a3e86e (Resolved merge conflicts)
 app.use(ErrorHandler);
 
 module.exports = app;

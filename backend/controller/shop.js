@@ -206,24 +206,23 @@ router.get(
     }
   }),
 );
-
 router.put(
   "/update-shop-avatar",
   isSeller,
   upload.single("image"),
   catchAsyncErrors(async (req, res, next) => {
+    if (!req.file) {
+      return next(new ErrorHandler("Please upload an image", 400));
+    }
     try {
       const shop = await Shop.findById(req.seller._id);
-      if (!req.file) {
-        return next(new ErrorHandler("Please upload an image", 400));
-      }
 
       // Delete old avatar if exists
       if (shop.avatar?.public_id) {
         await cloudinary.v2.uploader.destroy(shop.avatar.public_id);
       }
 
-      // Helper function to upload buffer
+      // Helper function to upload buffer to Cloudinary
       const uploadBufferToCloudinary = (buffer) => {
         return new Promise((resolve, reject) => {
           const stream = cloudinary.v2.uploader.upload_stream(
@@ -243,9 +242,8 @@ router.put(
         public_id: result.public_id,
         url: result.secure_url,
       };
-
+      // Save shop (async-safe, no next() in pre-save hooks)
       await shop.save();
-
       res.status(201).json({
         success: true,
         message: "Image uploaded successfully",
@@ -253,8 +251,6 @@ router.put(
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
-
-
     }
   }),
 );

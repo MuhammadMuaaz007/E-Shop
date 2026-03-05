@@ -55,12 +55,10 @@ const shopSchema = new mongoose.Schema({
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });
-shopSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
-    next();
+shopSchema.pre("save", async function () {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 10);
   }
-
-  this.password = await bcrypt.hash(this.password, 10);
 });
 
 shopSchema.methods.getJwtToken = function () {
