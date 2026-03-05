@@ -61,7 +61,7 @@ export const updateUserInformation =
         },
         {
           withCredentials: true,
-        }
+        },
       );
       dispatch(UpdateUserInfoSuccess(data?.user));
     } catch (error) {
@@ -86,7 +86,7 @@ export const updateUserAddresses =
             addressType,
           },
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
       dispatch(UpdateUserAddressSuccess(data?.user));
       toast.success("Address added successfully!");
@@ -103,7 +103,7 @@ export const deleteUserAddress = (id) => async (dispatch) => {
     const { data } = await axios.put(
       `${server}/user/delete-user-address/${id}`,
       {}, // PUT body empty
-      { withCredentials: true }
+      { withCredentials: true },
     );
 
     dispatch(DeleteUserAddressSuccess(data?.user));

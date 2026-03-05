@@ -253,6 +253,8 @@ router.put(
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
+
+
     }
   }),
 );
