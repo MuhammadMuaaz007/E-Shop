@@ -13,6 +13,8 @@ import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../../redux/reducers/user";
 
 const menuItems = [
   { id: 1, name: "Profile", icon: <AiOutlineUser size={18} /> },
@@ -26,18 +28,20 @@ const menuItems = [
 
 const ProfileSideBar = ({ active, setActive }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const logoutHandler = () => {
-    axios
-      .get(`${server}/user/logout`, { withCredentials: true })
-      .then((res) => {
-        toast.success(res.data.message);
-        window.location.reload(true);
-        navigate("/login");
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
+  const logoutHandler = async () => {
+    try {
+      const res = await axios.get(`${server}/user/logout`, {
+        withCredentials: true,
       });
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Logout failed");
+    } finally {
+      dispatch(logoutUser());
+      navigate("/login", { replace: true });
+    }
   };
 
   return (

@@ -64,9 +64,8 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
 
     const activationToken = createActivationToken(user);
     const encodedToken = encodeURIComponent(activationToken);
-    const activationUrl = `${
-      process.env.FRONTEND_URL || "http://localhost:5173"
-    }/activate/${encodedToken}`;
+    const activationUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"
+      }/activate/${encodedToken}`;
 
     await sendMail({
       email: user.email,
@@ -267,9 +266,14 @@ router.get(
   isAuthenticated,
   catchAsyncErrors(async (req, res, next) => {
     try {
+      // Must match the cookie attributes used when setting the cookie;
+      // otherwise browsers may keep the original cookie.
       res.cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
+        secure: true,
+        sameSite: "None",
+        path: "/",
       });
       res.status(200).json({
         success: true,

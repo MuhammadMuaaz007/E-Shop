@@ -56,9 +56,8 @@ router.post("/create-shop", upload.single("file"), async (req, res, next) => {
         );
 
         const encodedToken = encodeURIComponent(activationToken);
-        const activationUrl = `${
-          process.env.FRONTEND_URL || "http://localhost:5173"
-        }/seller/activate/${encodedToken}`;
+        const activationUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"
+          }/seller/activate/${encodedToken}`;
 
         await sendMail({
           email: seller.email,
@@ -180,6 +179,9 @@ router.get(
       res.cookie("seller_token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        path: "/",
       });
       res.status(200).json({
         success: true,

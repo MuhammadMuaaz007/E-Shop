@@ -65,24 +65,25 @@ const Header = ({ activeHeading }) => {
     setSearchData(filteredProducts);
   };
   const logoutHandler = async () => {
-    try {
-      await axios.get(`${server}/user/logout`, {
-        withCredentials: true,
-      });
+    const wasSeller = Boolean(seller);
 
-      await axios.get(`${server}/shop/logout`, {
-        withCredentials: true,
-      });
+    const results = await Promise.allSettled([
+      axios.get(`${server}/user/logout`, { withCredentials: true }),
+      axios.get(`${server}/shop/logout`, { withCredentials: true }),
+    ]);
 
-      dispatch(logoutUser());
-      dispatch(logoutSeller());
+    // Always clear client state so UI updates immediately.
+    dispatch(logoutUser());
+    dispatch(logoutSeller());
 
+    const anySucceeded = results.some((r) => r.status === "fulfilled");
+    if (anySucceeded) {
       toast.success("Logged out successfully");
-      navigate("/");
-      window.location.reload();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Logout failed");
+    } else {
+      toast.error("Logout failed");
     }
+
+    navigate(wasSeller ? "/shop-login" : "/login", { replace: true });
   };
 
   // FIX: Smooth sticky with no jerk
@@ -319,7 +320,6 @@ const Header = ({ activeHeading }) => {
             )}
           </div>
 
-       
           <div
             className={`relative cursor-pointer p-3 rounded-full transition-all duration-200 ${
               openCart
