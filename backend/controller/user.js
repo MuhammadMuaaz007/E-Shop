@@ -12,6 +12,15 @@ const sendToken = require("../utils/JwtToken");
 const { isAuthenticated } = require("../middleware/auth");
 const cloudinary = require("cloudinary");
 
+const getPrimaryFrontendUrl = () => {
+  const urls = (process.env.FRONTEND_URL || "")
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean);
+
+  return urls[0] || "http://localhost:5173";
+};
+
 router.post("/create-user", upload.single("file"), async (req, res, next) => {
   const { email, password, name } = req.body;
 
@@ -64,9 +73,7 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
 
     const activationToken = createActivationToken(user);
     const encodedToken = encodeURIComponent(activationToken);
-    const activationUrl = `${
-      process.env.FRONTEND_URL || "http://localhost:5173"
-    }/activate/${encodedToken}`;
+    const activationUrl = `${getPrimaryFrontendUrl()}/activate/${encodedToken}`;
 
     await sendMail({
       email: user.email,
@@ -85,11 +92,10 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
 router.post(
   "/activate",
   catchAsyncErrors(async (req, res, next) => {
+    const { activationToken } = req.body;
+    const token = activationToken;
+
     try {
-      const { activationToken } = req.body;
-
-      const token = activationToken;
-
       const newUser = jwt.verify(token, process.env.ACTIVATION_SECRET);
 
       if (!newUser) {

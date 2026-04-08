@@ -8,10 +8,18 @@ const path = require("path");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utils/SendMail");
-const sendToken = require("../utils/JwtToken");
 const { isAuthenticated, isSeller } = require("../middleware/auth");
 const sendShopToken = require("../utils/ShopToken");
 const cloudinary = require("cloudinary");
+
+const getPrimaryFrontendUrl = () => {
+  const urls = (process.env.FRONTEND_URL || "")
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean);
+
+  return urls[0] || "http://localhost:5173";
+};
 
 // Create Shop
 router.post("/create-shop", upload.single("file"), async (req, res, next) => {
@@ -56,9 +64,7 @@ router.post("/create-shop", upload.single("file"), async (req, res, next) => {
         );
 
         const encodedToken = encodeURIComponent(activationToken);
-        const activationUrl = `${
-          process.env.FRONTEND_URL || "http://localhost:5173"
-        }/seller/activate/${encodedToken}`;
+        const activationUrl = `${getPrimaryFrontendUrl()}/seller/activate/${encodedToken}`;
 
         await sendMail({
           email: seller.email,
@@ -107,7 +113,7 @@ router.post(
         address,
         phoneNumber,
       });
-      sendToken(createdSeller, 201, res);
+      sendShopToken(createdSeller, 201, res);
     } catch (err) {
       console.error("Activation error:", {
         name: err && err.name,

@@ -19,11 +19,16 @@ const ShopLogin = () => {
     e.preventDefault();
 
     try {
-      await axios.post(
+      const { data } = await axios.post(
         `${server}/shop/login-shop`,
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
+
+      if (data?.token) {
+        localStorage.setItem("auth_token", data.token);
+      }
+
       // toast.success("Login Successful!");
       Store.dispatch(loadSeller());
       // Navigation is handled in ShopLoginPage after isSeller is true

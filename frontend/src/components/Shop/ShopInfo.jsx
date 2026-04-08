@@ -66,6 +66,8 @@ const ShopInfo = ({ isOwner }) => {
         withCredentials: true,
       });
 
+      localStorage.removeItem("auth_token");
+
       toast.success("Logged out successfully");
       navigate("/");
       window.location.reload();

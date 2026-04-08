@@ -23,8 +23,13 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.isSeller = catchAsyncErrors(async (req, res, next) => {
-  // console.log("Cookies:", req.cookies);
-  const { seller_token } = req.cookies;
+  // Support cookie auth and Authorization header fallback.
+  const cookieToken = req.cookies?.seller_token;
+  const authHeader = req.headers.authorization || "";
+  const bearerToken = authHeader.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : null;
+  const seller_token = cookieToken || bearerToken;
 
   if (!seller_token) {
     return next(new ErrorHandler("Please login to access this resource", 401));
