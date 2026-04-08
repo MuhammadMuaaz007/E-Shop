@@ -100,7 +100,7 @@ const ProductCard = ({ data }) => {
           </Link>
 
           {/* Floating Buttons */}
-          <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
+          <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-100 transition-opacity duration-200">
             {click ? (
               <AiFillHeart
                 size={24}

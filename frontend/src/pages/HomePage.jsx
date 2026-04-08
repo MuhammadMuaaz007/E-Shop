@@ -8,15 +8,15 @@ import Sponsored from "../components/Routes/Sponsored/Sponsored";
 import Footer from "../components/Layout/Footer";
 const HomePage = () => {
   return (
-    <div>
+    <div className="w-full overflow-x-hidden">
       <Header activeHeading={1} />
       <Hero />
       <Categories />
       <BestDeals />
       <Events />
       <FeaturedProduct />
-      <Sponsored/>
-      <Footer/>
+      <Sponsored />
+      <Footer />
     </div>
   );
 };

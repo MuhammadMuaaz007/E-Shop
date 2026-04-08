@@ -342,212 +342,216 @@ const Header = ({ activeHeading }) => {
             )}
           </div>
         </div>
-        {open && (
+        <div
+          className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
+            open
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }`}
+          onClick={() => setOpen(false)}
+        >
           <div
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => setOpen(false)}
+            className={`fixed top-0 left-0 w-3/4 sm:w-2/3 h-full bg-white z-50 shadow-lg flex flex-col transform transition-transform duration-300 ease-out ${
+              open ? "translate-x-0" : "-translate-x-full"
+            }`}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="fixed top-0 left-0 w-3/4 sm:w-2/3 h-full bg-white z-50 shadow-lg flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="font-bold text-lg text-purple-700">Menu</h2>
-                <RxCross1
-                  size={28}
-                  className="cursor-pointer"
-                  onClick={() => setOpen(false)}
-                />
-              </div>
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="font-bold text-lg text-purple-700">Menu</h2>
+              <RxCross1
+                size={28}
+                className="cursor-pointer"
+                onClick={() => setOpen(false)}
+              />
+            </div>
 
-              {/* Content (scrollable) */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {/* User */}
-                <div className="flex items-center border-b pb-4">
-                  {isAuthenticated ? (
-                    <Link to="/profile" onClick={() => setOpen(false)}>
-                      <img
-                        src={user?.avatar?.url}
-                        alt="User"
-                        className="w-12 h-12 rounded-full object-cover mr-3 shadow-md"
-                      />
-                    </Link>
-                  ) : (
-                    <Link to="/login" onClick={() => setOpen(false)}>
-                      <CgProfile className="w-12 h-12 text-gray-700" />
-                    </Link>
-                  )}
-                  <div>
-                    <p className="font-semibold">
-                      {isAuthenticated ? user.name : "Guest"}
-                    </p>
-
-                    {!isAuthenticated && (
-                      <Link to="/login" onClick={() => setOpen(false)}>
-                        <p className="text-sm text-purple-600 cursor-pointer hover:underline">
-                          Login to your account
-                        </p>
-                      </Link>
-                    )}
-                  </div>
-                </div>
-
-                {/* Search */}
-
-                <div className="relative w-[100%]">
-                  <input
-                    type="text"
-                    placeholder="Search Product..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    className="h-[40px] px-2 w-full border-purple-400 border-[2px] rounded-md outline-none text-gray-800 focus:ring-2 focus:ring-purple-400"
-                  />
-                  <AiOutlineSearch
-                    size={30}
-                    className="absolute right-2 cursor-pointer top-1.5"
-                  />
-
-                  {/* Suggestions Popup */}
-                  {searchData.length > 0 && (
-                    <div className="absolute left-0 top-full w-full bg-white shadow-md mt-1 z-20 rounded-md max-h-[40vh] overflow-y-auto">
-                      {searchData.map((i, index) => (
-                        <Link to={`/product/${i._id}`} key={index}>
-                          <div className="flex items-center p-2 hover:bg-purple-100 cursor-pointer rounded-md">
-                            <img
-                              src={i.images?.[0]?.url || "/placeholder.png"}
-                              alt={i.name}
-                              className="w-10 h-10 mr-2 rounded-md object-cover"
-                            />
-                            <span className="truncate">{i.name}</span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Nav Links */}
-                <div className="flex flex-col space-y-3 mt-4">
-                  <Link
-                    to="/"
-                    className={`font-medium ${
-                      location.pathname === "/"
-                        ? "text-purple-600"
-                        : "text-gray-700 hover:text-purple-600"
-                    }`}
-                    onClick={() => setOpen(false)}
-                  >
-                    Home
-                  </Link>
-
-                  <Link
-                    to="/best-selling"
-                    className={`font-medium ${
-                      location.pathname === "/best-selling"
-                        ? "text-purple-600"
-                        : "text-gray-700 hover:text-purple-600"
-                    }`}
-                    onClick={() => setOpen(false)}
-                  >
-                    Best Selling
-                  </Link>
-
-                  <Link
-                    to="/products"
-                    className={`font-medium ${
-                      location.pathname === "/products"
-                        ? "text-purple-600"
-                        : "text-gray-700 hover:text-purple-600"
-                    }`}
-                    onClick={() => setOpen(false)}
-                  >
-                    Products
-                  </Link>
-
-                  <Link
-                    to="/events"
-                    className={`font-medium ${
-                      location.pathname === "/events"
-                        ? "text-purple-600"
-                        : "text-gray-700 hover:text-purple-600"
-                    }`}
-                    onClick={() => setOpen(false)}
-                  >
-                    Events
-                  </Link>
-
-                  <Link
-                    to="/faq"
-                    className={`font-medium ${
-                      location.pathname === "/faq"
-                        ? "text-purple-600"
-                        : "text-gray-700 hover:text-purple-600"
-                    }`}
-                    onClick={() => setOpen(false)}
-                  >
-                    FAQ
-                  </Link>
-
-                  <Link
-                    to="/shop-create"
-                    className={`${styles.button1} text-center font-medium ${
-                      location.pathname === "/shop-create"
-                        ? "text-purple-600"
-                        : "text-white"
-                    }`}
-                    onClick={() => setOpen(false)}
-                  >
-                    Become a Seller
-                  </Link>
-                </div>
-              </div>
-
-              {/* Footer (fixed) */}
-              <div className="p-4 border-t bg-white flex justify-around">
+            {/* Content (scrollable) */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {/* User */}
+              <div className="flex items-center border-b pb-4">
                 {isAuthenticated ? (
-                  <div className="flex items-center space-x-3">
-                    {/* Profile */}
-                    <Link
-                      to="/profile"
-                      className="flex flex-col items-center text-gray-700 hover:text-purple-600"
-                      onClick={() => setOpen(false)}
-                    >
-                      <img
-                        src={user?.avatar?.url}
-                        alt={user.name}
-                        className="w-6 h-6 rounded-full object-cover"
-                      />
-                      <span className="text-xs">Profile</span>
-                    </Link>
-
-                    {/* Logout */}
-                    <button
-                      onClick={() => {
-                        logoutHandler();
-                        setOpen(false);
-                      }}
-                      className="flex flex-col items-center text-gray-700 hover:text-purple-600"
-                    >
-                      <RiLogoutCircleRLine size={24} />
-                      {/* You can change icon to Logout icon */}
-                      <span className="text-xs">Logout</span>
-                    </button>
-                  </div>
+                  <Link to="/profile" onClick={() => setOpen(false)}>
+                    <img
+                      src={user?.avatar?.url}
+                      alt="User"
+                      className="w-12 h-12 rounded-full object-cover mr-3 shadow-md"
+                    />
+                  </Link>
                 ) : (
+                  <Link to="/login" onClick={() => setOpen(false)}>
+                    <CgProfile className="w-12 h-12 text-gray-700" />
+                  </Link>
+                )}
+                <div>
+                  <p className="font-semibold">
+                    {isAuthenticated ? user.name : "Guest"}
+                  </p>
+
+                  {!isAuthenticated && (
+                    <Link to="/login" onClick={() => setOpen(false)}>
+                      <p className="text-sm text-purple-600 cursor-pointer hover:underline">
+                        Login to your account
+                      </p>
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              {/* Search */}
+
+              <div className="relative w-[100%]">
+                <input
+                  type="text"
+                  placeholder="Search Product..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="h-[40px] px-2 w-full border-purple-400 border-[2px] rounded-md outline-none text-gray-800 focus:ring-2 focus:ring-purple-400"
+                />
+                <AiOutlineSearch
+                  size={30}
+                  className="absolute right-2 cursor-pointer top-1.5"
+                />
+
+                {/* Suggestions Popup */}
+                {searchData.length > 0 && (
+                  <div className="absolute left-0 top-full w-full bg-white shadow-md mt-1 z-20 rounded-md max-h-[40vh] overflow-y-auto">
+                    {searchData.map((i, index) => (
+                      <Link to={`/product/${i._id}`} key={index}>
+                        <div className="flex items-center p-2 hover:bg-purple-100 cursor-pointer rounded-md">
+                          <img
+                            src={i.images?.[0]?.url || "/placeholder.png"}
+                            alt={i.name}
+                            className="w-10 h-10 mr-2 rounded-md object-cover"
+                          />
+                          <span className="truncate">{i.name}</span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Nav Links */}
+              <div className="flex flex-col space-y-3 mt-4">
+                <Link
+                  to="/"
+                  className={`font-medium ${
+                    location.pathname === "/"
+                      ? "text-purple-600"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                  onClick={() => setOpen(false)}
+                >
+                  Home
+                </Link>
+
+                <Link
+                  to="/best-selling"
+                  className={`font-medium ${
+                    location.pathname === "/best-selling"
+                      ? "text-purple-600"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                  onClick={() => setOpen(false)}
+                >
+                  Best Selling
+                </Link>
+
+                <Link
+                  to="/products"
+                  className={`font-medium ${
+                    location.pathname === "/products"
+                      ? "text-purple-600"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                  onClick={() => setOpen(false)}
+                >
+                  Products
+                </Link>
+
+                <Link
+                  to="/events"
+                  className={`font-medium ${
+                    location.pathname === "/events"
+                      ? "text-purple-600"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                  onClick={() => setOpen(false)}
+                >
+                  Events
+                </Link>
+
+                <Link
+                  to="/faq"
+                  className={`font-medium ${
+                    location.pathname === "/faq"
+                      ? "text-purple-600"
+                      : "text-gray-700 hover:text-purple-600"
+                  }`}
+                  onClick={() => setOpen(false)}
+                >
+                  FAQ
+                </Link>
+
+                <Link
+                  to="/shop-create"
+                  className={`${styles.button1} text-center font-medium ${
+                    location.pathname === "/shop-create"
+                      ? "text-purple-600"
+                      : "text-white"
+                  }`}
+                  onClick={() => setOpen(false)}
+                >
+                  Become a Seller
+                </Link>
+              </div>
+            </div>
+
+            {/* Footer (fixed) */}
+            <div className="p-4 border-t bg-white flex justify-around">
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-3">
+                  {/* Profile */}
                   <Link
-                    to="/login"
+                    to="/profile"
                     className="flex flex-col items-center text-gray-700 hover:text-purple-600"
                     onClick={() => setOpen(false)}
                   >
-                    <CgProfile size={24} />
-                    <span className="text-xs">Login</span>
+                    <img
+                      src={user?.avatar?.url}
+                      alt={user.name}
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                    <span className="text-xs">Profile</span>
                   </Link>
-                )}
-              </div>
+
+                  {/* Logout */}
+                  <button
+                    onClick={() => {
+                      logoutHandler();
+                      setOpen(false);
+                    }}
+                    className="flex flex-col items-center text-gray-700 hover:text-purple-600"
+                  >
+                    <RiLogoutCircleRLine size={24} />
+                    {/* You can change icon to Logout icon */}
+                    <span className="text-xs">Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex flex-col items-center text-gray-700 hover:text-purple-600"
+                  onClick={() => setOpen(false)}
+                >
+                  <CgProfile size={24} />
+                  <span className="text-xs">Login</span>
+                </Link>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Mobile Cart & Wishlist Popups */}
         {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
