@@ -31,6 +31,7 @@ const ProfileSideBar = ({ active, setActive }) => {
     axios
       .get(`${server}/user/logout`, { withCredentials: true })
       .then((res) => {
+        localStorage.removeItem("auth_token");
         toast.success(res.data.message);
         window.location.reload(true);
         navigate("/login");

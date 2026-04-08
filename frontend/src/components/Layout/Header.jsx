@@ -74,6 +74,8 @@ const Header = ({ activeHeading }) => {
         withCredentials: true,
       });
 
+      localStorage.removeItem("auth_token");
+
       dispatch(logoutUser());
       dispatch(logoutSeller());
 
@@ -319,7 +321,6 @@ const Header = ({ activeHeading }) => {
             )}
           </div>
 
-       
           <div
             className={`relative cursor-pointer p-3 rounded-full transition-all duration-200 ${
               openCart

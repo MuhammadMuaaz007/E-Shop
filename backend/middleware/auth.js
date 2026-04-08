@@ -5,8 +5,13 @@ const User = require("../model/user");
 const Shop = require("../model/shop");
 
 exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
- // console.log("Cookies:", req.cookies);
-  const { token } = req.cookies;
+  // Support cookie auth and Authorization header fallback.
+  const cookieToken = req.cookies?.token;
+  const authHeader = req.headers.authorization || "";
+  const bearerToken = authHeader.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : null;
+  const token = cookieToken || bearerToken;
 
   if (!token) {
     return next(new ErrorHandler("Please login to access this resource", 401));
@@ -18,7 +23,7 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
 });
 
 exports.isSeller = catchAsyncErrors(async (req, res, next) => {
- // console.log("Cookies:", req.cookies);
+  // console.log("Cookies:", req.cookies);
   const { seller_token } = req.cookies;
 
   if (!seller_token) {

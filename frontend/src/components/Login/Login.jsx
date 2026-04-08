@@ -17,11 +17,15 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(
+      const { data } = await axios.post(
         `${server}/user/login-user`,
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
+
+      if (data?.token) {
+        localStorage.setItem("auth_token", data.token);
+      }
 
       toast.success("Login Successful!");
       navigate("/");
