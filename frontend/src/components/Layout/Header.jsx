@@ -246,11 +246,12 @@ const Header = ({ activeHeading }) => {
                 </Link>
               )}
               {/* cart popup */}
-              {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
+              <Cart isOpen={openCart} setOpenCart={setOpenCart} />
               {/* wishlist popup */}
-              {openWishlist ? (
-                <Wishlist setOpenWishlist={setOpenWishlist} />
-              ) : null}
+              <Wishlist
+                isOpen={openWishlist}
+                setOpenWishlist={setOpenWishlist}
+              />
             </div>
           </div>
         </div>
@@ -554,8 +555,8 @@ const Header = ({ activeHeading }) => {
         </div>
 
         {/* Mobile Cart & Wishlist Popups */}
-        {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
-        {openWishlist ? <Wishlist setOpenWishlist={setOpenWishlist} /> : null}
+        <Cart isOpen={openCart} setOpenCart={setOpenCart} />
+        <Wishlist isOpen={openWishlist} setOpenWishlist={setOpenWishlist} />
       </div>
       <div className="h-[60px] md:hidden"></div>
     </>

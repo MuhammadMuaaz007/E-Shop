@@ -9,7 +9,7 @@ import {
   removeFromCartAction,
 } from "../../redux/actions/cart";
 
-const Cart = ({ setOpenCart }) => {
+const Cart = ({ isOpen, setOpenCart }) => {
   const { cart } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
 
@@ -30,11 +30,17 @@ const Cart = ({ setOpenCart }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/30"
+      className={`fixed inset-0 z-50 bg-black/30 transition-opacity duration-300 ${
+        isOpen
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 pointer-events-none"
+      }`}
       onClick={() => setOpenCart(false)}
     >
       <div
-        className="bg-white w-full sm:w-[400px] md:w-[450px] lg:w-[30%] h-full flex flex-col shadow-2xl relative ml-auto animate-slide-in-right"
+        className={`bg-white w-full sm:w-[400px] md:w-[450px] lg:w-[30%] h-full flex flex-col shadow-2xl relative ml-auto transform transition-transform duration-300 ease-out ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
