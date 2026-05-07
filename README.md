@@ -19,7 +19,7 @@ Order History & Tracking: Track order statuses and view previous purchases.
 
 Reviews & Ratings: Leave feedback and rate products.
 
-Admin Features:
+#Admin Features:#
 
 Product Management: Add, edit, or remove products, including images and stock info.
 
